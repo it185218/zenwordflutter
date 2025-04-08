@@ -12,6 +12,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     on<GameLetterSelected>(_onLetterSelected);
     on<GameTouchUpdate>(_onTouchUpdate);
     on<GameTouchEnd>(_onTouchEnd);
+    on<GameUndoLastSelection>(_onUndoLastSelection);
   }
 
   Future<void> _onGameStarted(
@@ -46,6 +47,17 @@ class GameBloc extends Bloc<GameEvent, GameState> {
           selectedIndices: [...state.selectedIndices, event.index],
         ),
       );
+    }
+  }
+
+  void _onUndoLastSelection(
+    GameUndoLastSelection event,
+    Emitter<GameState> emit,
+  ) {
+    if (state.selectedIndices.length > 1) {
+      final updated = List<int>.from(state.selectedIndices)
+        ..removeLast(); // Remove the last selected letter
+      emit(state.copyWith(selectedIndices: updated));
     }
   }
 

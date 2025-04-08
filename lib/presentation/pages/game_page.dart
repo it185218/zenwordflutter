@@ -183,9 +183,20 @@ class _GamePageState extends State<GamePage> {
     Offset touchPoint,
     List<Offset> positions,
   ) {
+    final bloc = context.read<GameBloc>();
+    final state = bloc.state;
+    final selected = state.selectedIndices;
+
     for (int i = 0; i < positions.length; i++) {
-      if ((touchPoint - positions[i]).distance < circleSize / 2) {
-        context.read<GameBloc>().add(GameLetterSelected(i));
+      final distance = (touchPoint - positions[i]).distance;
+      final alreadySelected = selected.contains(i);
+
+      if (distance < circleSize / 2) {
+        if (!alreadySelected) {
+          bloc.add(GameLetterSelected(i));
+        } else if (selected.isNotEmpty && i == selected[selected.length - 2]) {
+          bloc.add(GameUndoLastSelection());
+        }
         break;
       }
     }

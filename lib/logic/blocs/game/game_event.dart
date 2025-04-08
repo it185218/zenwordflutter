@@ -14,4 +14,6 @@ class GameTouchUpdate extends GameEvent {
 
 class GameTouchEnd extends GameEvent {}
 
+class GameUndoLastSelection extends GameEvent {}
+
 class GameStarted extends GameEvent {}
