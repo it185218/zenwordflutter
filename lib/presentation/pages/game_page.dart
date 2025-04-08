@@ -194,7 +194,7 @@ class _GamePageState extends State<GamePage> {
       if (distance < circleSize / 2) {
         if (!alreadySelected) {
           bloc.add(GameLetterSelected(i));
-        } else if (selected.isNotEmpty && i == selected[selected.length - 2]) {
+        } else if (selected.length > 1 && i == selected[selected.length - 2]) {
           bloc.add(GameUndoLastSelection());
         }
         break;
