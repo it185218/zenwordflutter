@@ -1,41 +1,37 @@
 import 'package:flutter/material.dart';
 
+import '../widgets/background_scaffold.dart';
 import 'game_page.dart';
 
-class LevelCompletePage extends StatefulWidget {
-  const LevelCompletePage({super.key});
+class LevelCompletePage extends StatelessWidget {
+  final int level;
+  const LevelCompletePage({super.key, required this.level});
 
-  @override
-  State<LevelCompletePage> createState() => _LevelCompleteState();
-}
-
-class _LevelCompleteState extends State<LevelCompletePage> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
+    final nextLevel = level + 1;
+
+    return AppScaffold(
+      child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const SizedBox(height: 20),
-            const Text(
-              'Level Completed',
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            Text(
+              'Level $level Completed',
+              style: const TextStyle(fontSize: 28),
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 16),
+            Text(
+              'Next: Level $nextLevel',
+              style: const TextStyle(fontSize: 20, color: Colors.grey),
+            ),
+            const SizedBox(height: 32),
             ElevatedButton(
               onPressed: () {
-                // Start new level and return to GamePage
                 Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (_) => const GamePage()),
+                  MaterialPageRoute(builder: (_) => GamePage(level: nextLevel)),
                 );
               },
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 32,
-                  vertical: 16,
-                ),
-              ),
               child: const Text('Next Level'),
             ),
           ],

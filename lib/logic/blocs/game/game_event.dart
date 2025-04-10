@@ -16,4 +16,7 @@ class GameTouchEnd extends GameEvent {}
 
 class GameUndoLastSelection extends GameEvent {}
 
-class GameStarted extends GameEvent {}
+class GameStarted extends GameEvent {
+  final int level;
+  GameStarted({required this.level});
+}

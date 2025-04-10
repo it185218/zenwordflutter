@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../core/utils/circular_position.dart';
+import '../../logic/blocs/coin/coin_bloc.dart';
+import '../../logic/blocs/coin/coin_event.dart';
+import '../../logic/blocs/coin/coin_state.dart';
 import '../../logic/blocs/game/game_bloc.dart';
 import '../../logic/blocs/game/game_event.dart';
 import '../../logic/blocs/game/game_state.dart';
+import '../../logic/blocs/level/level_bloc.dart';
+import '../../logic/blocs/level/level_event.dart';
+import '../widgets/background_scaffold.dart';
 import '../widgets/current_word_display.dart';
 import '../widgets/letter_circle.dart';
 import '../widgets/line_painter.dart';
@@ -11,7 +17,9 @@ import '../widgets/word_tile_grid.dart';
 import 'level_complete_page.dart';
 
 class GamePage extends StatefulWidget {
-  const GamePage({super.key});
+  final int level;
+
+  const GamePage({super.key, required this.level});
 
   @override
   State<GamePage> createState() => _GamePageState();
@@ -25,23 +33,49 @@ class _GamePageState extends State<GamePage> {
   void initState() {
     super.initState();
     Future.microtask(() {
-      context.read<GameBloc>().add(GameStarted());
+      context.read<GameBloc>().add(GameStarted(level: widget.level));
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[100],
-      body: BlocListener<GameBloc, GameState>(
+    return AppScaffold(
+      appBar: AppBar(
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('Level ${widget.level}'),
+            BlocBuilder<CoinBloc, CoinState>(
+              builder: (context, state) {
+                return Row(
+                  children: [
+                    const Icon(Icons.monetization_on, color: Colors.amber),
+                    const SizedBox(width: 4),
+                    Text('${state.coins}'),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+        backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
+      ),
+      child: BlocListener<GameBloc, GameState>(
         listenWhen:
             (prev, curr) => prev.foundWords.length != curr.foundWords.length,
         listener: (context, state) {
           if (state.validWords.toSet().difference(state.foundWords).isEmpty) {
-            // All words found 🎉
+            final currentLevel = context.read<LevelBloc>().state.currentLevel;
+
+            context.read<CoinBloc>().add(AddCoins(80));
+            context.read<LevelBloc>().add(CompleteLevel(currentLevel));
+
             Future.delayed(const Duration(milliseconds: 400), () {
               Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (_) => const LevelCompletePage()),
+                MaterialPageRoute(
+                  builder: (_) => LevelCompletePage(level: currentLevel),
+                ),
               );
             });
           }
@@ -55,7 +89,6 @@ class _GamePageState extends State<GamePage> {
 
             return Column(
               children: [
-                // TOP: Word grid
                 Padding(
                   padding: const EdgeInsets.only(top: 80),
                   child: ConstrainedBox(
@@ -68,19 +101,14 @@ class _GamePageState extends State<GamePage> {
                     ),
                   ),
                 ),
-
                 const Spacer(),
-
                 CurrentWordDisplay(
                   currentWord:
                       state.selectedIndices.map((i) => state.letters[i]).join(),
                 ),
-
                 const SizedBox(height: 12),
-
-                // BOTTOM: Circular letter layout inside a large circle
                 Container(
-                  height: 300, // Adjust based on your design
+                  height: 300,
                   alignment: Alignment.center,
                   child: LayoutBuilder(
                     builder: (context, constraints) {
@@ -88,13 +116,11 @@ class _GamePageState extends State<GamePage> {
                         constraints.maxWidth / 2,
                         constraints.maxHeight / 2,
                       );
-
                       final positions = calculateCircularPositions(
                         center: circleCenter,
                         count: letters.length,
                         radius: radius - circleSize / 4,
                       );
-
                       return GestureDetector(
                         onPanStart: (details) {
                           _handleTouch(
@@ -118,7 +144,6 @@ class _GamePageState extends State<GamePage> {
                         },
                         child: Stack(
                           children: [
-                            // Big background circle
                             Center(
                               child: Container(
                                 width: radius * 2 + circleSize,
@@ -135,8 +160,6 @@ class _GamePageState extends State<GamePage> {
                                 ),
                               ),
                             ),
-
-                            // Drawing lines
                             CustomPaint(
                               size: Size.infinite,
                               painter: LinePainter(
@@ -147,8 +170,6 @@ class _GamePageState extends State<GamePage> {
                                 currentTouch: state.currentTouch,
                               ),
                             ),
-
-                            // Letter circles
                             ...List.generate(letters.length, (i) {
                               final pos = positions[i];
                               final isSelected = state.selectedIndices.contains(
