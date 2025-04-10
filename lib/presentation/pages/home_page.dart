@@ -6,6 +6,8 @@ import '../../logic/blocs/coin/coin_state.dart';
 import '../../logic/blocs/level/level_bloc.dart';
 import '../../logic/blocs/level/level_state.dart';
 import '../widgets/background_scaffold.dart';
+import '../widgets/coin_container.dart';
+import '../widgets/level_button.dart';
 import 'game_page.dart';
 
 class HomePage extends StatelessWidget {
@@ -16,17 +18,13 @@ class HomePage extends StatelessWidget {
     return AppScaffold(
       appBar: AppBar(
         title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            const Text('Word Game'),
             BlocBuilder<CoinBloc, CoinState>(
               builder: (context, state) {
                 return Row(
-                  children: [
-                    const Icon(Icons.monetization_on, color: Colors.amber),
-                    const SizedBox(width: 4),
-                    Text('${state.coins}'),
-                  ],
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [CoinContainer(text: '${state.coins}')],
                 );
               },
             ),
@@ -35,27 +33,36 @@ class HomePage extends StatelessWidget {
         backgroundColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
       ),
-      child: Center(
-        child: BlocBuilder<LevelBloc, LevelState>(
-          builder: (context, state) {
-            return ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => GamePage(level: state.currentLevel),
-                  ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            'Puzzle Game',
+            style: TextStyle(
+              fontSize: 42,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 150),
+          Center(
+            child: BlocBuilder<LevelBloc, LevelState>(
+              builder: (context, state) {
+                return LevelButton(
+                  text: 'Level ${state.currentLevel}',
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => GamePage(level: state.currentLevel),
+                      ),
+                    );
+                  },
                 );
               },
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 32,
-                  vertical: 16,
-                ),
-              ),
-              child: Text('Play Level ${state.currentLevel}'),
-            );
-          },
-        ),
+            ),
+          ),
+        ],
       ),
     );
   }
