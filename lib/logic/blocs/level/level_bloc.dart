@@ -15,17 +15,17 @@ class LevelBloc extends Bloc<LevelEvent, LevelState> {
   Future<void> _onLoadLevels(LoadLevels event, Emitter<LevelState> emit) async {
     final levels = await isar.levels.where().sortByNumber().findAll();
 
-    // If fresh install, add level 1
     if (levels.isEmpty) {
       final level1 = Level(number: 1);
       await isar.writeTxn(() => isar.levels.put(level1));
-      emit(LevelState(currentLevel: 1));
+      emit(LevelState(currentLevel: 1, completedCount: 0));
     } else {
       final current = levels.firstWhere(
         (lvl) => !lvl.isCompleted,
         orElse: () => levels.last,
       );
-      emit(LevelState(currentLevel: current.number));
+      final completed = levels.where((lvl) => lvl.isCompleted).length;
+      emit(LevelState(currentLevel: current.number, completedCount: completed));
     }
   }
 
@@ -36,13 +36,12 @@ class LevelBloc extends Bloc<LevelEvent, LevelState> {
     final level =
         await isar.levels.filter().numberEqualTo(event.level).findFirst();
 
-    if (level != null) {
+    if (level != null && !level.isCompleted) {
       await isar.writeTxn(() {
         level.isCompleted = true;
         return isar.levels.put(level);
       });
 
-      // Add next level if not already there
       final next =
           await isar.levels.filter().numberEqualTo(event.level + 1).findFirst();
 
@@ -52,7 +51,12 @@ class LevelBloc extends Bloc<LevelEvent, LevelState> {
         });
       }
 
-      emit(LevelState(currentLevel: event.level + 1));
+      final completed =
+          await isar.levels.filter().isCompletedEqualTo(true).count();
+
+      emit(
+        LevelState(currentLevel: event.level + 1, completedCount: completed),
+      );
     }
   }
 }

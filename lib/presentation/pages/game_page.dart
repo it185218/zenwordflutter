@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../core/utils/circular_position.dart';
 import '../../logic/blocs/coin/coin_bloc.dart';
-import '../../logic/blocs/coin/coin_event.dart';
 import '../../logic/blocs/coin/coin_state.dart';
 import '../../logic/blocs/game/game_bloc.dart';
 import '../../logic/blocs/game/game_event.dart';
@@ -68,7 +67,6 @@ class _GamePageState extends State<GamePage> {
           if (state.validWords.toSet().difference(state.foundWords).isEmpty) {
             final currentLevel = context.read<LevelBloc>().state.currentLevel;
 
-            context.read<CoinBloc>().add(AddCoins(80));
             context.read<LevelBloc>().add(CompleteLevel(currentLevel));
 
             Future.delayed(const Duration(milliseconds: 400), () {
