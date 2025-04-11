@@ -110,13 +110,13 @@ class _GamePageState extends State<GamePage> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            GestureDetector(
+                            HintContainer(
+                              icon: Icons.shuffle_rounded,
                               onTap: () {
                                 context.read<GameBloc>().add(
                                   GameShuffleLetters(),
                                 );
                               },
-                              child: HintContainer(icon: Icons.shuffle_rounded),
                             ),
 
                             HintContainer(icon: Icons.star_outline_rounded),
@@ -223,7 +223,8 @@ class _GamePageState extends State<GamePage> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            GestureDetector(
+                            HintContainer(
+                              icon: Icons.emoji_objects_outlined,
                               onTap: () {
                                 final coinState =
                                     context.read<CoinBloc>().state;
@@ -243,10 +244,6 @@ class _GamePageState extends State<GamePage> {
                                   );
                                 }
                               },
-
-                              child: HintContainer(
-                                icon: Icons.emoji_objects_outlined,
-                              ),
                             ),
                             HintContainer(icon: Icons.card_giftcard_outlined),
                           ],
