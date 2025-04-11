@@ -6,8 +6,8 @@ import '../../logic/blocs/coin/coin_state.dart';
 import '../../logic/blocs/level/level_bloc.dart';
 import '../../logic/blocs/level/level_state.dart';
 import '../widgets/background_scaffold.dart';
-import '../widgets/coin_container.dart';
 import '../widgets/level_button.dart';
+import '../widgets/top_bar.dart';
 import 'game_page.dart';
 
 class HomePage extends StatelessWidget {
@@ -16,29 +16,21 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      appBar: AppBar(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            BlocBuilder<CoinBloc, CoinState>(
-              builder: (context, state) {
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [CoinContainer(text: '${state.coins}')],
-                );
-              },
-            ),
-          ],
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight),
+        child: BlocBuilder<CoinBloc, CoinState>(
+          builder: (context, state) {
+            return TopBar(showBackButton: false, coinText: '${state.coins}');
+          },
         ),
-        backgroundColor: Colors.transparent,
-        surfaceTintColor: Colors.transparent,
       ),
+
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
-            'Puzzle Game',
+            'PUZZLE GAME',
             style: TextStyle(
               fontSize: 42,
               fontWeight: FontWeight.w600,

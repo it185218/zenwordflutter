@@ -17,12 +17,12 @@ class LevelButton extends StatelessWidget {
         foregroundColor: ColorLibrary.buttonText,
         elevation: 2,
         side: const BorderSide(color: ColorLibrary.buttonBorder, width: 2),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-        padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+        padding: const EdgeInsets.symmetric(horizontal: 70, vertical: 14),
       ),
       child: Text(
         text,
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
       ),
     );
   }

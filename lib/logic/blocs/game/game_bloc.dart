@@ -13,6 +13,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     on<GameTouchUpdate>(_onTouchUpdate);
     on<GameTouchEnd>(_onTouchEnd);
     on<GameUndoLastSelection>(_onUndoLastSelection);
+    on<GameShuffleLetters>(_onShuffleLetters);
   }
 
   Future<void> _onGameStarted(
@@ -83,5 +84,10 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     } else {
       emit(state.copyWith(selectedIndices: [], currentTouch: null));
     }
+  }
+
+  void _onShuffleLetters(GameShuffleLetters event, Emitter<GameState> emit) {
+    final shuffled = List<String>.from(state.letters)..shuffle();
+    emit(state.copyWith(letters: shuffled));
   }
 }

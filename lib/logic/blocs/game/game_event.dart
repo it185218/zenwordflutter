@@ -20,3 +20,5 @@ class GameStarted extends GameEvent {
   final int level;
   GameStarted({required this.level});
 }
+
+class GameShuffleLetters extends GameEvent {}
