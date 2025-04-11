@@ -22,6 +22,9 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   ) async {
     _dictionary = await GameHelpers.loadDictionary();
     final baseWord = GameHelpers.pickRandomBaseWord(_dictionary, 5);
+
+    final ids = List.generate(baseWord.length, (i) => i);
+
     final validSubwords = GameHelpers.findValidSubwords(baseWord, _dictionary)
       ..sort((a, b) {
         final lengthCompare = a.length.compareTo(b.length);
@@ -37,6 +40,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         letters: baseWord.split(''),
         validWords: validSubwords,
         selectedIndices: [],
+        letterIds: ids,
       ),
     );
   }
@@ -87,7 +91,20 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   }
 
   void _onShuffleLetters(GameShuffleLetters event, Emitter<GameState> emit) {
-    final shuffled = List<String>.from(state.letters)..shuffle();
-    emit(state.copyWith(letters: shuffled));
+    final shuffled = List<String>.from(state.letters);
+    final shuffledIds = List<int>.from(state.letterIds);
+
+    final zipped = List.generate(
+      shuffled.length,
+      (i) => MapEntry(shuffled[i], shuffledIds[i]),
+    );
+    zipped.shuffle();
+
+    emit(
+      state.copyWith(
+        letters: zipped.map((e) => e.key).toList(),
+        letterIds: zipped.map((e) => e.value).toList(),
+      ),
+    );
   }
 }

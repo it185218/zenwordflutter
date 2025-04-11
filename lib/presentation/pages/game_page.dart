@@ -185,7 +185,14 @@ class _GamePageState extends State<GamePage> {
                                     final pos = positions[i];
                                     final isSelected = state.selectedIndices
                                         .contains(i);
-                                    return Positioned(
+                                    final id = state.letterIds[i];
+
+                                    return AnimatedPositioned(
+                                      key: ValueKey(id),
+                                      duration: const Duration(
+                                        milliseconds: 300,
+                                      ),
+                                      curve: Curves.easeInOut,
                                       left: pos.dx - circleSize / 2,
                                       top: pos.dy - circleSize / 2,
                                       child: LetterCircle(

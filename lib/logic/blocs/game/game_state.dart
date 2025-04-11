@@ -6,6 +6,7 @@ class GameState {
   final List<String> letters;
   final List<String> validWords;
   final Set<String> foundWords;
+  final List<int> letterIds;
 
   GameState({
     this.selectedIndices = const [],
@@ -13,6 +14,7 @@ class GameState {
     this.letters = const [],
     this.validWords = const [],
     this.foundWords = const {},
+    this.letterIds = const [],
   });
 
   GameState copyWith({
@@ -21,6 +23,7 @@ class GameState {
     List<String>? letters,
     List<String>? validWords,
     Set<String>? foundWords,
+    List<int>? letterIds,
   }) {
     return GameState(
       selectedIndices: selectedIndices ?? this.selectedIndices,
@@ -28,6 +31,7 @@ class GameState {
       letters: letters ?? this.letters,
       validWords: validWords ?? this.validWords,
       foundWords: foundWords ?? this.foundWords,
+      letterIds: letterIds ?? this.letterIds,
     );
   }
 }
