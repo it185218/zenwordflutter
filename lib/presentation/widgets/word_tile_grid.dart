@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class WordTileGrid extends StatelessWidget {
   final List<String> validWords;
   final Set<String> foundWords;
+  final Map<String, Set<int>> revealedLetters;
 
   const WordTileGrid({
     super.key,
     required this.validWords,
     required this.foundWords,
+    this.revealedLetters = const {},
   });
 
   @override
@@ -67,9 +69,12 @@ class WordTileGrid extends StatelessWidget {
               children:
                   words.map((word) {
                     final isFound = foundWords.contains(word);
+                    final revealed = revealedLetters[word] ?? {};
                     return Row(
                       mainAxisSize: MainAxisSize.min,
                       children: List.generate(word.length, (i) {
+                        final showLetter = isFound || revealed.contains(i);
+
                         return Container(
                           margin: const EdgeInsets.all(2),
                           width: bestTileSize,
@@ -81,7 +86,7 @@ class WordTileGrid extends StatelessWidget {
                           ),
                           alignment: Alignment.center,
                           child: Text(
-                            isFound ? word[i] : '',
+                            showLetter ? word[i] : '',
                             style: TextStyle(
                               fontSize: fontSize,
                               fontWeight: FontWeight.bold,

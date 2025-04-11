@@ -22,3 +22,5 @@ class GameStarted extends GameEvent {
 }
 
 class GameShuffleLetters extends GameEvent {}
+
+class GameUseHintLetter extends GameEvent {}

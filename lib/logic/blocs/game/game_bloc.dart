@@ -14,6 +14,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     on<GameTouchEnd>(_onTouchEnd);
     on<GameUndoLastSelection>(_onUndoLastSelection);
     on<GameShuffleLetters>(_onShuffleLetters);
+    on<GameUseHintLetter>(_onUseHintLetter);
   }
 
   Future<void> _onGameStarted(
@@ -106,5 +107,36 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         letterIds: zipped.map((e) => e.value).toList(),
       ),
     );
+  }
+
+  void _onUseHintLetter(GameUseHintLetter event, Emitter<GameState> emit) {
+    // Pick a random unfound word
+    final remainingWords =
+        state.validWords
+            .where((word) => !state.foundWords.contains(word))
+            .toList();
+
+    if (remainingWords.isEmpty) return;
+
+    final randomWord = (remainingWords..shuffle()).first;
+
+    // Pick a random unrevealed letter index
+    final revealed = state.revealedLetters[randomWord] ?? <int>{};
+    final unrevealedIndices =
+        List.generate(
+          randomWord.length,
+          (i) => i,
+        ).where((i) => !revealed.contains(i)).toList();
+
+    if (unrevealedIndices.isEmpty) return;
+
+    final letterIndex = (unrevealedIndices..shuffle()).first;
+
+    final updatedRevealed = {
+      ...state.revealedLetters,
+      randomWord: {...revealed, letterIndex},
+    };
+
+    emit(state.copyWith(revealedLetters: updatedRevealed));
   }
 }

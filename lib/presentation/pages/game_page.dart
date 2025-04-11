@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../core/utils/circular_position.dart';
 import '../../logic/blocs/coin/coin_bloc.dart';
+import '../../logic/blocs/coin/coin_event.dart';
 import '../../logic/blocs/coin/coin_state.dart';
 import '../../logic/blocs/game/game_bloc.dart';
 import '../../logic/blocs/game/game_event.dart';
@@ -89,6 +90,7 @@ class _GamePageState extends State<GamePage> {
                     child: WordTileGrid(
                       validWords: state.validWords,
                       foundWords: state.foundWords,
+                      revealedLetters: state.revealedLetters,
                     ),
                   ),
                 ),
@@ -221,7 +223,31 @@ class _GamePageState extends State<GamePage> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            HintContainer(icon: Icons.emoji_objects_outlined),
+                            GestureDetector(
+                              onTap: () {
+                                final coinState =
+                                    context.read<CoinBloc>().state;
+
+                                if (coinState.coins >= 10) {
+                                  context.read<CoinBloc>().add(SpendCoins(10));
+                                  context.read<GameBloc>().add(
+                                    GameUseHintLetter(),
+                                  );
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        "Not enough coins for a hint!",
+                                      ),
+                                    ),
+                                  );
+                                }
+                              },
+
+                              child: HintContainer(
+                                icon: Icons.emoji_objects_outlined,
+                              ),
+                            ),
                             HintContainer(icon: Icons.card_giftcard_outlined),
                           ],
                         ),
