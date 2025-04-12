@@ -6,6 +6,7 @@ class GameState {
   final List<String> letters;
   final List<String> validWords;
   final Set<String> foundWords;
+  final Set<String> additionalWords;
   final List<int> letterIds;
   final Map<String, Set<int>> revealedLetters;
 
@@ -15,6 +16,7 @@ class GameState {
     this.letters = const [],
     this.validWords = const [],
     this.foundWords = const {},
+    this.additionalWords = const {},
     this.letterIds = const [],
     this.revealedLetters = const {},
   });
@@ -25,6 +27,7 @@ class GameState {
     List<String>? letters,
     List<String>? validWords,
     Set<String>? foundWords,
+    Set<String>? additionalWords,
     List<int>? letterIds,
     Map<String, Set<int>>? revealedLetters,
   }) {
@@ -34,6 +37,7 @@ class GameState {
       letters: letters ?? this.letters,
       validWords: validWords ?? this.validWords,
       foundWords: foundWords ?? this.foundWords,
+      additionalWords: additionalWords ?? this.additionalWords,
       letterIds: letterIds ?? this.letterIds,
       revealedLetters: revealedLetters ?? this.revealedLetters,
     );
