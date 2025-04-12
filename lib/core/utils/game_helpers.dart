@@ -56,4 +56,9 @@ class GameHelpers {
     final filtered = dictionary.where((w) => w.length == length).toList();
     return filtered[Random().nextInt(filtered.length)];
   }
+
+  static int scoreWord(String word) {
+    final uniqueLetters = word.split('').toSet().length;
+    return word.length * 10 + uniqueLetters;
+  }
 }

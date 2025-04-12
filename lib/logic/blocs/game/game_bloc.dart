@@ -32,27 +32,54 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
     final skillScore = computeSkillScore(history, sampleSize: 5);
 
+    // 👇 Dynamic grid size based on skill
+    int gridWordCount = (6 + (skillScore * 10)).round(); // range: 6–16
+    gridWordCount = gridWordCount.clamp(6, 12); // Enforce max of 12
+
     final baseWord = GameHelpers.pickAdaptiveBaseWord(_dictionary, skillScore);
-
     final ids = List.generate(baseWord.length, (i) => i);
+    final validSubwords = GameHelpers.findValidSubwords(baseWord, _dictionary);
 
-    final validSubwords = GameHelpers.findValidSubwords(baseWord, _dictionary)
-      ..sort((a, b) {
-        final lengthCompare = a.length.compareTo(b.length);
-        return lengthCompare != 0 ? lengthCompare : a.compareTo(b);
-      });
+    // Step 1: Sort all subwords by score (descending)
+    validSubwords.sort((a, b) {
+      int scoreA = GameHelpers.scoreWord(a);
+      int scoreB = GameHelpers.scoreWord(b);
+      return scoreB.compareTo(scoreA);
+    });
+
+    // Step 2: Take top N - 1, excluding base word for now
+    final topWords =
+        validSubwords
+            .where((word) => word != baseWord)
+            .take(gridWordCount - 1)
+            .toList();
+
+    // Step 3: Add the base word (ensure it's included)
+    topWords.add(baseWord);
+
+    // Step 4: Sort by length, then alphabetically
+    topWords.sort((a, b) {
+      final lenCompare = a.length.compareTo(b.length);
+      return lenCompare != 0 ? lenCompare : a.compareTo(b);
+    });
+
+    final gridWords = topWords;
+    final extras = validSubwords.toSet().difference(gridWords.toSet());
 
     // 🔥 Print here
     print("🔤 Base word: $baseWord");
-    print("🧩 Subwords (${validSubwords.length}): ${validSubwords.join(', ')}");
+    print("🧩 Grid Words (${gridWords.length}): ${gridWords.join(', ')}");
+    print("🔥 Extras (${extras.length}): ${extras.join(', ')}");
+
     print("Skill score: $skillScore");
 
     emit(
       state.copyWith(
         letters: baseWord.split(''),
-        validWords: validSubwords,
+        validWords: gridWords,
         selectedIndices: [],
         letterIds: ids,
+        additionalWords: extras,
       ),
     );
   }
@@ -86,9 +113,10 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     final word = state.selectedIndices.map((i) => state.letters[i]).join();
 
     final isValid = state.validWords.contains(word);
+    final isAdditional = state.additionalWords.contains(word);
     final alreadyFound = state.foundWords.contains(word);
 
-    if (isValid && !alreadyFound) {
+    if ((isValid || isAdditional) && !alreadyFound) {
       final updatedFound = {...state.foundWords, word};
       emit(
         state.copyWith(
