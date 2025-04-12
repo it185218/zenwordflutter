@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:isar/isar.dart';
 import 'package:zenwordflutter/data/model/level.dart';
+import 'package:zenwordflutter/data/model/performance.dart';
 import 'level_event.dart';
 import 'level_state.dart';
 
@@ -37,9 +38,26 @@ class LevelBloc extends Bloc<LevelEvent, LevelState> {
         await isar.levels.filter().numberEqualTo(event.level).findFirst();
 
     if (level != null && !level.isCompleted) {
-      await isar.writeTxn(() {
+      await isar.writeTxn(() async {
         level.isCompleted = true;
-        return isar.levels.put(level);
+        await isar.levels.put(level);
+
+        // Save performance
+        final performance =
+            Performance()
+              ..level = event.level
+              ..totalWords = event.validWords.length
+              ..foundWords = event.foundWords.length
+              ..avgFoundLength =
+                  event.foundWords.isEmpty
+                      ? 0
+                      : (event.foundWords
+                              .map((w) => w.length)
+                              .reduce((a, b) => a + b) ~/
+                          event.foundWords.length)
+              ..durationSeconds = event.durationSeconds;
+
+        await isar.performances.put(performance);
       });
 
       final next =

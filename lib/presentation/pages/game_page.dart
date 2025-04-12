@@ -30,10 +30,14 @@ class GamePage extends StatefulWidget {
 class _GamePageState extends State<GamePage> {
   final double radius = 100.0;
   final double circleSize = 50.0;
+  late Stopwatch stopwatch;
 
   @override
   void initState() {
     super.initState();
+
+    stopwatch = Stopwatch()..start(); // Start timer
+
     Future.microtask(() {
       context.read<GameBloc>().add(GameStarted(level: widget.level));
     });
@@ -58,10 +62,21 @@ class _GamePageState extends State<GamePage> {
         listenWhen:
             (prev, curr) => prev.foundWords.length != curr.foundWords.length,
         listener: (context, state) {
-          if (state.validWords.toSet().difference(state.foundWords).isEmpty) {
+          final allFound =
+              state.validWords.toSet().difference(state.foundWords).isEmpty;
+
+          if (allFound) {
+            stopwatch.stop(); // Stop timer
             final currentLevel = context.read<LevelBloc>().state.currentLevel;
 
-            context.read<LevelBloc>().add(CompleteLevel(currentLevel));
+            context.read<LevelBloc>().add(
+              CompleteLevel(
+                level: currentLevel,
+                durationSeconds: stopwatch.elapsed.inSeconds,
+                foundWords: state.foundWords,
+                validWords: state.validWords,
+              ),
+            );
 
             Future.delayed(const Duration(milliseconds: 400), () {
               Navigator.of(context).pushReplacement(
@@ -72,6 +87,7 @@ class _GamePageState extends State<GamePage> {
             });
           }
         },
+
         child: BlocBuilder<GameBloc, GameState>(
           builder: (context, state) {
             final letters = state.letters;

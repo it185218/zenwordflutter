@@ -4,5 +4,14 @@ class LoadLevels extends LevelEvent {}
 
 class CompleteLevel extends LevelEvent {
   final int level;
-  CompleteLevel(this.level);
+  final int durationSeconds;
+  final Set<String> foundWords;
+  final List<String> validWords;
+
+  CompleteLevel({
+    required this.level,
+    required this.durationSeconds,
+    required this.foundWords,
+    required this.validWords,
+  });
 }

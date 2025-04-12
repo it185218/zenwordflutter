@@ -4,7 +4,7 @@ import 'package:flutter/services.dart' show rootBundle;
 class GameHelpers {
   static Future<List<String>> loadDictionary() async {
     final text = await rootBundle.loadString(
-      'assets/dictionary/greek-dictionary.txt',
+      'assets/dictionary/english-dictionary.txt',
     );
     return text
         .split('\n')
@@ -36,7 +36,23 @@ class GameHelpers {
     return map;
   }
 
-  static String pickRandomBaseWord(List<String> dictionary, int length) {
+  static String pickAdaptiveBaseWord(
+    List<String> dictionary,
+    double skillScore,
+  ) {
+    int length;
+    if (skillScore < 0.4) {
+      length = 3;
+    } else if (skillScore < 0.6) {
+      length = 4;
+    } else if (skillScore < 0.75) {
+      length = 5;
+    } else if (skillScore < 0.85) {
+      length = 6;
+    } else {
+      length = 7;
+    }
+
     final filtered = dictionary.where((w) => w.length == length).toList();
     return filtered[Random().nextInt(filtered.length)];
   }

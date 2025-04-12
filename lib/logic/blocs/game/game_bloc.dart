@@ -1,4 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:isar/isar.dart';
+import 'package:zenwordflutter/data/model/performance.dart';
+import '../../../core/utils/performance_helper.dart';
 import 'game_event.dart';
 import 'game_state.dart';
 
@@ -22,7 +25,14 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     Emitter<GameState> emit,
   ) async {
     _dictionary = await GameHelpers.loadDictionary();
-    final baseWord = GameHelpers.pickRandomBaseWord(_dictionary, 5);
+
+    final isar = Isar.getInstance();
+    final history =
+        await isar!.performances.where().sortByLevelDesc().limit(10).findAll();
+
+    final skillScore = computeSkillScore(history, sampleSize: 5);
+
+    final baseWord = GameHelpers.pickAdaptiveBaseWord(_dictionary, skillScore);
 
     final ids = List.generate(baseWord.length, (i) => i);
 
@@ -35,6 +45,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     // 🔥 Print here
     print("🔤 Base word: $baseWord");
     print("🧩 Subwords (${validSubwords.length}): ${validSubwords.join(', ')}");
+    print("Skill score: $skillScore");
 
     emit(
       state.copyWith(
