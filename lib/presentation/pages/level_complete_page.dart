@@ -110,7 +110,7 @@ class LevelCompletePage extends StatelessWidget {
             LevelButton(
               text: 'Level $nextLevel',
               onPressed: () {
-                Navigator.of(context).push(
+                Navigator.of(context).pushReplacement(
                   MaterialPageRoute(builder: (_) => GamePage(level: nextLevel)),
                 );
               },
