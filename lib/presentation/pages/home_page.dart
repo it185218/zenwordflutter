@@ -30,7 +30,7 @@ class HomePage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
-            'PUZZLE GAME',
+            'Λεξόσφαιρα',
             style: TextStyle(
               fontSize: 42,
               fontWeight: FontWeight.w600,
