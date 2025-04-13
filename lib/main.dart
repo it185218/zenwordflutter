@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'data/model/level.dart';
 import 'data/model/performance.dart';
 import 'data/model/player_data.dart';
+import 'data/model/saved_game.dart';
 import 'logic/blocs/coin/coin_bloc.dart';
 import 'logic/blocs/coin/coin_event.dart';
 import 'logic/blocs/game/game_bloc.dart';
@@ -23,6 +24,7 @@ void main() async {
     LevelSchema,
     PlayerDataSchema,
     PerformanceSchema,
+    SavedGameSchema,
   ], directory: dir.path);
 
   runApp(

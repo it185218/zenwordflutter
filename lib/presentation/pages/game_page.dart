@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:isar/isar.dart';
+import 'package:zenwordflutter/data/model/saved_game.dart';
 import '../../core/utils/circular_position.dart';
 import '../../logic/blocs/coin/coin_bloc.dart';
 import '../../logic/blocs/coin/coin_event.dart';
@@ -68,6 +70,18 @@ class _GamePageState extends State<GamePage> {
           if (allFound) {
             stopwatch.stop(); // Stop timer
             final currentLevel = context.read<LevelBloc>().state.currentLevel;
+
+            final isar = Isar.getInstance();
+            isar!.writeTxn(() async {
+              final saved =
+                  await isar.savedGames
+                      .filter()
+                      .levelEqualTo(currentLevel)
+                      .findFirst();
+              if (saved != null) {
+                await isar.savedGames.delete(saved.id);
+              }
+            });
 
             context.read<LevelBloc>().add(
               CompleteLevel(

@@ -1,7 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:isar/isar.dart';
 import 'package:zenwordflutter/data/model/performance.dart';
+import '../../../core/utils/game_serialization.dart';
 import '../../../core/utils/performance_helper.dart';
+import '../../../data/model/saved_game.dart';
 import 'game_event.dart';
 import 'game_state.dart';
 
@@ -24,40 +26,50 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     GameStarted event,
     Emitter<GameState> emit,
   ) async {
+    final isar = Isar.getInstance();
+    final saved =
+        await isar!.savedGames.filter().levelEqualTo(event.level).findFirst();
+
+    if (saved != null) {
+      // Load saved game
+      emit(
+        state.copyWith(
+          level: event.level,
+          letters: saved.letters,
+          validWords: saved.validWords,
+          foundWords: saved.foundWords.toSet(),
+          additionalWords: saved.additionalWords.toSet(),
+          letterIds: saved.letterIds,
+          revealedLetters: deserializeRevealed(saved.revealedLetters),
+          selectedIndices: [],
+          currentTouch: null,
+        ),
+      );
+      return;
+    }
+
+    // Generate new level
     _dictionary = await GameHelpers.loadDictionary();
 
-    final isar = Isar.getInstance();
     final history =
-        await isar!.performances.where().sortByLevelDesc().limit(10).findAll();
-
+        await isar.performances.where().sortByLevelDesc().limit(10).findAll();
     final skillScore = computeSkillScore(history, sampleSize: 5);
-
-    // 👇 Dynamic grid size based on skill
-    int gridWordCount = (6 + (skillScore * 10)).round(); // range: 6–16
-    gridWordCount = gridWordCount.clamp(6, 12); // Enforce max of 12
+    int gridWordCount = (6 + (skillScore * 10)).round().clamp(6, 12);
 
     final baseWord = GameHelpers.pickAdaptiveBaseWord(_dictionary, skillScore);
     final ids = List.generate(baseWord.length, (i) => i);
     final validSubwords = GameHelpers.findValidSubwords(baseWord, _dictionary);
 
-    // Step 1: Sort all subwords by score (descending)
-    validSubwords.sort((a, b) {
-      int scoreA = GameHelpers.scoreWord(a);
-      int scoreB = GameHelpers.scoreWord(b);
-      return scoreB.compareTo(scoreA);
-    });
-
-    // Step 2: Take top N - 1, excluding base word for now
+    validSubwords.sort(
+      (a, b) => GameHelpers.scoreWord(b).compareTo(GameHelpers.scoreWord(a)),
+    );
     final topWords =
         validSubwords
-            .where((word) => word != baseWord)
+            .where((w) => w != baseWord)
             .take(gridWordCount - 1)
             .toList();
-
-    // Step 3: Add the base word (ensure it's included)
     topWords.add(baseWord);
 
-    // Step 4: Sort by length, then alphabetically
     topWords.sort((a, b) {
       final lenCompare = a.length.compareTo(b.length);
       return lenCompare != 0 ? lenCompare : a.compareTo(b);
@@ -73,15 +85,46 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
     print("Skill score: $skillScore");
 
-    emit(
-      state.copyWith(
-        letters: baseWord.split(''),
-        validWords: gridWords,
-        selectedIndices: [],
-        letterIds: ids,
-        additionalWords: extras,
-      ),
+    final newState = state.copyWith(
+      level: event.level,
+      letters: baseWord.split(''),
+      letterIds: ids,
+      validWords: gridWords,
+      additionalWords: extras,
+      foundWords: {},
+      revealedLetters: {},
+      selectedIndices: [],
+      currentTouch: null,
     );
+
+    emit(newState);
+
+    // Save to Isar
+    final game =
+        SavedGame()
+          ..level = event.level
+          ..baseWord = baseWord
+          ..letters = newState.letters
+          ..letterIds = ids
+          ..validWords = gridWords
+          ..foundWords = []
+          ..additionalWords = extras.toList()
+          ..revealedLetters = '';
+
+    await isar.writeTxn(() => isar.savedGames.put(game));
+  }
+
+  Future<void> _saveGameState(GameState state) async {
+    final isar = Isar.getInstance();
+    final existing =
+        await isar!.savedGames.filter().levelEqualTo(state.level).findFirst();
+
+    if (existing != null) {
+      existing.foundWords = state.foundWords.toList();
+      existing.additionalWords = state.additionalWords.toList();
+      existing.revealedLetters = serializeRevealed(state.revealedLetters);
+      await isar.writeTxn(() => isar.savedGames.put(existing));
+    }
   }
 
   void _onLetterSelected(GameLetterSelected event, Emitter<GameState> emit) {
@@ -109,7 +152,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     emit(state.copyWith(currentTouch: event.offset));
   }
 
-  void _onTouchEnd(GameTouchEnd event, Emitter<GameState> emit) {
+  Future<void> _onTouchEnd(GameTouchEnd event, Emitter<GameState> emit) async {
     final word = state.selectedIndices.map((i) => state.letters[i]).join();
 
     final isValid = state.validWords.contains(word);
@@ -118,13 +161,20 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
     if ((isValid || isAdditional) && !alreadyFound) {
       final updatedFound = {...state.foundWords, word};
-      emit(
-        state.copyWith(
-          selectedIndices: [],
-          currentTouch: null,
-          foundWords: updatedFound,
-        ),
+      final updatedExtras =
+          isAdditional
+              ? {...state.additionalWords, word}
+              : state.additionalWords;
+
+      final newState = state.copyWith(
+        selectedIndices: [],
+        currentTouch: null,
+        foundWords: updatedFound,
+        additionalWords: updatedExtras,
       );
+
+      emit(newState);
+      await _saveGameState(newState);
     } else {
       emit(state.copyWith(selectedIndices: [], currentTouch: null));
     }
@@ -148,7 +198,10 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     );
   }
 
-  void _onUseHintLetter(GameUseHintLetter event, Emitter<GameState> emit) {
+  Future<void> _onUseHintLetter(
+    GameUseHintLetter event,
+    Emitter<GameState> emit,
+  ) async {
     // Pick a random unfound word
     final remainingWords =
         state.validWords
@@ -176,6 +229,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       randomWord: {...revealed, letterIndex},
     };
 
-    emit(state.copyWith(revealedLetters: updatedRevealed));
+    final newState = state.copyWith(revealedLetters: updatedRevealed);
+    emit(newState);
+    await _saveGameState(newState);
   }
 }

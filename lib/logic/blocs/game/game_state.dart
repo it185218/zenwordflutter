@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 class GameState {
+  final int level;
   final List<int> selectedIndices;
   final Offset? currentTouch;
   final List<String> letters;
@@ -11,6 +12,7 @@ class GameState {
   final Map<String, Set<int>> revealedLetters;
 
   GameState({
+    this.level = 0,
     this.selectedIndices = const [],
     this.currentTouch,
     this.letters = const [],
@@ -22,6 +24,7 @@ class GameState {
   });
 
   GameState copyWith({
+    int? level,
     List<int>? selectedIndices,
     Offset? currentTouch,
     List<String>? letters,
@@ -32,6 +35,7 @@ class GameState {
     Map<String, Set<int>>? revealedLetters,
   }) {
     return GameState(
+      level: level ?? this.level,
       selectedIndices: selectedIndices ?? this.selectedIndices,
       currentTouch: currentTouch,
       letters: letters ?? this.letters,
