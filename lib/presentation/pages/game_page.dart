@@ -13,6 +13,7 @@ import '../../logic/blocs/level/level_bloc.dart';
 import '../../logic/blocs/level/level_event.dart';
 import '../widgets/background_scaffold.dart';
 import '../widgets/current_word_display.dart';
+import '../widgets/found_extras_dialog.dart';
 import '../widgets/hint_container.dart';
 import '../widgets/letter_circle.dart';
 import '../widgets/line_painter.dart';
@@ -149,7 +150,22 @@ class _GamePageState extends State<GamePage> {
                               },
                             ),
 
-                            HintContainer(icon: Icons.star_outline_rounded),
+                            HintContainer(
+                              icon: Icons.star_outline_rounded,
+                              onTap: () {
+                                showGeneralDialog(
+                                  context: context,
+                                  barrierDismissible: true,
+                                  barrierLabel: "Extras",
+                                  transitionDuration: const Duration(
+                                    milliseconds: 300,
+                                  ),
+                                  pageBuilder: (_, __, ___) {
+                                    return const FoundExtrasDialog();
+                                  },
+                                );
+                              },
+                            ),
                           ],
                         ),
                       ),

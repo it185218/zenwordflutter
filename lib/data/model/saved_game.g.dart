@@ -27,33 +27,38 @@ const SavedGameSchema = CollectionSchema(
       name: r'baseWord',
       type: IsarType.string,
     ),
-    r'foundWords': PropertySchema(
+    r'foundExtras': PropertySchema(
       id: 2,
+      name: r'foundExtras',
+      type: IsarType.stringList,
+    ),
+    r'foundWords': PropertySchema(
+      id: 3,
       name: r'foundWords',
       type: IsarType.stringList,
     ),
     r'letterIds': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'letterIds',
       type: IsarType.longList,
     ),
     r'letters': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'letters',
       type: IsarType.stringList,
     ),
     r'level': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'level',
       type: IsarType.long,
     ),
     r'revealedLetters': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'revealedLetters',
       type: IsarType.string,
     ),
     r'validWords': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'validWords',
       type: IsarType.stringList,
     )
@@ -86,6 +91,13 @@ int _savedGameEstimateSize(
     }
   }
   bytesCount += 3 + object.baseWord.length * 3;
+  bytesCount += 3 + object.foundExtras.length * 3;
+  {
+    for (var i = 0; i < object.foundExtras.length; i++) {
+      final value = object.foundExtras[i];
+      bytesCount += value.length * 3;
+    }
+  }
   bytesCount += 3 + object.foundWords.length * 3;
   {
     for (var i = 0; i < object.foundWords.length; i++) {
@@ -120,12 +132,13 @@ void _savedGameSerialize(
 ) {
   writer.writeStringList(offsets[0], object.additionalWords);
   writer.writeString(offsets[1], object.baseWord);
-  writer.writeStringList(offsets[2], object.foundWords);
-  writer.writeLongList(offsets[3], object.letterIds);
-  writer.writeStringList(offsets[4], object.letters);
-  writer.writeLong(offsets[5], object.level);
-  writer.writeString(offsets[6], object.revealedLetters);
-  writer.writeStringList(offsets[7], object.validWords);
+  writer.writeStringList(offsets[2], object.foundExtras);
+  writer.writeStringList(offsets[3], object.foundWords);
+  writer.writeLongList(offsets[4], object.letterIds);
+  writer.writeStringList(offsets[5], object.letters);
+  writer.writeLong(offsets[6], object.level);
+  writer.writeString(offsets[7], object.revealedLetters);
+  writer.writeStringList(offsets[8], object.validWords);
 }
 
 SavedGame _savedGameDeserialize(
@@ -137,13 +150,14 @@ SavedGame _savedGameDeserialize(
   final object = SavedGame();
   object.additionalWords = reader.readStringList(offsets[0]) ?? [];
   object.baseWord = reader.readString(offsets[1]);
-  object.foundWords = reader.readStringList(offsets[2]) ?? [];
+  object.foundExtras = reader.readStringList(offsets[2]) ?? [];
+  object.foundWords = reader.readStringList(offsets[3]) ?? [];
   object.id = id;
-  object.letterIds = reader.readLongList(offsets[3]) ?? [];
-  object.letters = reader.readStringList(offsets[4]) ?? [];
-  object.level = reader.readLong(offsets[5]);
-  object.revealedLetters = reader.readString(offsets[6]);
-  object.validWords = reader.readStringList(offsets[7]) ?? [];
+  object.letterIds = reader.readLongList(offsets[4]) ?? [];
+  object.letters = reader.readStringList(offsets[5]) ?? [];
+  object.level = reader.readLong(offsets[6]);
+  object.revealedLetters = reader.readString(offsets[7]);
+  object.validWords = reader.readStringList(offsets[8]) ?? [];
   return object;
 }
 
@@ -161,14 +175,16 @@ P _savedGameDeserializeProp<P>(
     case 2:
       return (reader.readStringList(offset) ?? []) as P;
     case 3:
-      return (reader.readLongList(offset) ?? []) as P;
-    case 4:
       return (reader.readStringList(offset) ?? []) as P;
+    case 4:
+      return (reader.readLongList(offset) ?? []) as P;
     case 5:
-      return (reader.readLong(offset)) as P;
+      return (reader.readStringList(offset) ?? []) as P;
     case 6:
-      return (reader.readString(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 7:
+      return (reader.readString(offset)) as P;
+    case 8:
       return (reader.readStringList(offset) ?? []) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -621,6 +637,231 @@ extension SavedGameQueryFilter
         property: r'baseWord',
         value: '',
       ));
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterFilterCondition>
+      foundExtrasElementEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'foundExtras',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterFilterCondition>
+      foundExtrasElementGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'foundExtras',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterFilterCondition>
+      foundExtrasElementLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'foundExtras',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterFilterCondition>
+      foundExtrasElementBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'foundExtras',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterFilterCondition>
+      foundExtrasElementStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'foundExtras',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterFilterCondition>
+      foundExtrasElementEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'foundExtras',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterFilterCondition>
+      foundExtrasElementContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'foundExtras',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterFilterCondition>
+      foundExtrasElementMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'foundExtras',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterFilterCondition>
+      foundExtrasElementIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'foundExtras',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterFilterCondition>
+      foundExtrasElementIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'foundExtras',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterFilterCondition>
+      foundExtrasLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'foundExtras',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterFilterCondition>
+      foundExtrasIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'foundExtras',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterFilterCondition>
+      foundExtrasIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'foundExtras',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterFilterCondition>
+      foundExtrasLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'foundExtras',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterFilterCondition>
+      foundExtrasLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'foundExtras',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterFilterCondition>
+      foundExtrasLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'foundExtras',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
     });
   }
 
@@ -1795,6 +2036,12 @@ extension SavedGameQueryWhereDistinct
     });
   }
 
+  QueryBuilder<SavedGame, SavedGame, QDistinct> distinctByFoundExtras() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'foundExtras');
+    });
+  }
+
   QueryBuilder<SavedGame, SavedGame, QDistinct> distinctByFoundWords() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'foundWords');
@@ -1852,6 +2099,13 @@ extension SavedGameQueryProperty
   QueryBuilder<SavedGame, String, QQueryOperations> baseWordProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'baseWord');
+    });
+  }
+
+  QueryBuilder<SavedGame, List<String>, QQueryOperations>
+      foundExtrasProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'foundExtras');
     });
   }
 

@@ -12,6 +12,7 @@ class SavedGame {
   late List<int> letterIds;
   late List<String> validWords;
   late List<String> foundWords;
+  List<String> foundExtras = [];
   late List<String> additionalWords;
 
   /// Serialized Map<String, Set<int>>

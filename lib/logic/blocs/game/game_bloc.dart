@@ -38,6 +38,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
           letters: saved.letters,
           validWords: saved.validWords,
           foundWords: saved.foundWords.toSet(),
+          foundExtras: saved.foundExtras.toSet(),
           additionalWords: saved.additionalWords.toSet(),
           letterIds: saved.letterIds,
           revealedLetters: deserializeRevealed(saved.revealedLetters),
@@ -121,6 +122,10 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
     if (existing != null) {
       existing.foundWords = state.foundWords.toList();
+      existing.foundExtras =
+          state.foundWords
+              .where((w) => state.additionalWords.contains(w))
+              .toList(); // ✅ Save only extras that were found
       existing.additionalWords = state.additionalWords.toList();
       existing.revealedLetters = serializeRevealed(state.revealedLetters);
       await isar.writeTxn(() => isar.savedGames.put(existing));
@@ -166,11 +171,15 @@ class GameBloc extends Bloc<GameEvent, GameState> {
               ? {...state.additionalWords, word}
               : state.additionalWords;
 
+      final updatedFoundExtras =
+          isAdditional ? {...state.foundExtras, word} : state.foundExtras;
+
       final newState = state.copyWith(
         selectedIndices: [],
         currentTouch: null,
         foundWords: updatedFound,
         additionalWords: updatedExtras,
+        foundExtras: updatedFoundExtras,
       );
 
       emit(newState);
