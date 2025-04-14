@@ -113,7 +113,10 @@ class _GamePageState extends State<GamePage> {
             return Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(top: 80),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 4,
+                  ),
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
                       maxHeight: MediaQuery.of(context).size.height * 0.4,
