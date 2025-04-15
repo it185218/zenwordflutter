@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../logic/blocs/game/game_bloc.dart';
@@ -9,11 +10,11 @@ class FoundExtrasDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.black.withOpacity(0.3), // translucent background
+      color: Colors.transparent,
       child: Center(
         child: Container(
+          width: math.min(MediaQuery.of(context).size.width * 0.9, 350),
           constraints: BoxConstraints(
-            maxWidth: 300,
             maxHeight: MediaQuery.of(context).size.height * 0.6,
           ),
           padding: const EdgeInsets.all(20),
