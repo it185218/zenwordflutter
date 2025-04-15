@@ -30,6 +30,11 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     final saved =
         await isar!.savedGames.filter().levelEqualTo(event.level).findFirst();
 
+    // Count total found extras across all levels
+    final allSaves = await isar.savedGames.where().findAll();
+    final totalExtras =
+        allSaves.expand((game) => game.foundExtras).toSet().length;
+
     if (saved != null) {
       // Load saved game
       emit(
@@ -44,6 +49,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
           revealedLetters: deserializeRevealed(saved.revealedLetters),
           selectedIndices: [],
           currentTouch: null,
+          totalFoundExtras: totalExtras,
         ),
       );
       return;
@@ -96,6 +102,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       revealedLetters: {},
       selectedIndices: [],
       currentTouch: null,
+      totalFoundExtras: totalExtras,
     );
 
     emit(newState);
@@ -184,6 +191,13 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
       emit(newState);
       await _saveGameState(newState);
+
+      // Recalculate global total after new extra is found
+      final allSaves = await Isar.getInstance()!.savedGames.where().findAll();
+      final updatedTotalExtras =
+          allSaves.expand((g) => g.foundExtras).toSet().length;
+
+      emit(newState.copyWith(totalFoundExtras: updatedTotalExtras));
     } else {
       emit(state.copyWith(selectedIndices: [], currentTouch: null));
     }

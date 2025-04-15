@@ -11,6 +11,7 @@ class GameState {
   final Set<String> additionalWords;
   final List<int> letterIds;
   final Map<String, Set<int>> revealedLetters;
+  final int totalFoundExtras;
 
   GameState({
     this.level = 0,
@@ -23,6 +24,7 @@ class GameState {
     this.additionalWords = const {},
     this.letterIds = const [],
     this.revealedLetters = const {},
+    this.totalFoundExtras = 0,
   });
 
   GameState copyWith({
@@ -36,6 +38,7 @@ class GameState {
     Set<String>? additionalWords,
     List<int>? letterIds,
     Map<String, Set<int>>? revealedLetters,
+    int? totalFoundExtras,
   }) {
     return GameState(
       level: level ?? this.level,
@@ -48,6 +51,7 @@ class GameState {
       additionalWords: additionalWords ?? this.additionalWords,
       letterIds: letterIds ?? this.letterIds,
       revealedLetters: revealedLetters ?? this.revealedLetters,
+      totalFoundExtras: totalFoundExtras ?? this.totalFoundExtras,
     );
   }
 }

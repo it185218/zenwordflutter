@@ -29,56 +29,67 @@ class FoundExtrasDialog extends StatelessWidget {
               ),
             ],
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Extra Words',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              Expanded(
-                child: BlocBuilder<GameBloc, GameState>(
-                  builder: (context, state) {
-                    final foundExtras = state.foundExtras;
-                    if (foundExtras.isEmpty) {
-                      return const Text("No extra words found yet.");
-                    }
-                    return Wrap(
-                      spacing: 12,
-                      runSpacing: 12,
-                      children:
-                          foundExtras
-                              .map(
-                                (word) => Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 8,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.blue.shade100,
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    word,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
+          child: BlocBuilder<GameBloc, GameState>(
+            builder: (context, state) {
+              final foundExtras = state.foundExtras;
+              final totalGlobal = state.totalFoundExtras.clamp(0, 10);
+
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Extra Words',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  LinearProgressIndicator(
+                    value: totalGlobal / 10.0,
+                    backgroundColor: Colors.grey[300],
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                  ),
+                  const SizedBox(height: 8),
+                  Text('$totalGlobal / 10 extra words found'),
+                  const SizedBox(height: 16),
+
+                  foundExtras.isEmpty
+                      ? const Text("No extra words found yet.")
+                      : Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        children:
+                            foundExtras
+                                .map(
+                                  (word) => Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 8,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.blue.shade100,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      word,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
                                   ),
-                                ),
-                              )
-                              .toList(),
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text("Close"),
-              ),
-            ],
+                                )
+                                .toList(),
+                      ),
+
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text("Close"),
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ),
