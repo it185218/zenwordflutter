@@ -291,24 +291,30 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
     final randomWord = (remainingWords..shuffle()).first;
 
-    // Pick a random unrevealed letter index
+    // Pick a random unrevealed letter index from the hint-specific map
     final revealed = state.revealedLetters[randomWord] ?? <int>{};
+    final hintRevealed = state.hintRevealedLetters[randomWord] ?? <int>{};
+
     final unrevealedIndices =
-        List.generate(
-          randomWord.length,
-          (i) => i,
-        ).where((i) => !revealed.contains(i)).toList();
+        List.generate(randomWord.length, (i) => i)
+            .where((i) => !revealed.contains(i) && !hintRevealed.contains(i))
+            .toList();
 
     if (unrevealedIndices.isEmpty) return;
 
-    final letterIndex = (unrevealedIndices..shuffle()).first;
+    // Only reveal 1 letter for hint
+    final letterIndex = unrevealedIndices.first;
 
-    final updatedRevealed = {
-      ...state.revealedLetters,
-      randomWord: {...revealed, letterIndex},
+    final updatedHintRevealed = {
+      ...state.hintRevealedLetters,
+      randomWord: {...hintRevealed, letterIndex},
     };
 
-    final newState = state.copyWith(revealedLetters: updatedRevealed);
+    print('Hint revealed letter $letterIndex in word "$randomWord"');
+    print('Remaining words: $remainingWords');
+    print('Unrevealed indices: $unrevealedIndices');
+
+    final newState = state.copyWith(hintRevealedLetters: updatedHintRevealed);
     emit(newState);
     await _saveGameState(newState);
   }

@@ -11,6 +11,7 @@ class GameState {
   final Set<String> additionalWords;
   final List<int> letterIds;
   final Map<String, Set<int>> revealedLetters;
+  final Map<String, Set<int>> hintRevealedLetters;
   final int totalFoundExtras;
   final int extraWordMilestone;
 
@@ -25,6 +26,7 @@ class GameState {
     this.additionalWords = const {},
     this.letterIds = const [],
     this.revealedLetters = const {},
+    this.hintRevealedLetters = const {},
     this.totalFoundExtras = 0,
     this.extraWordMilestone = 0,
   });
@@ -40,6 +42,7 @@ class GameState {
     Set<String>? additionalWords,
     List<int>? letterIds,
     Map<String, Set<int>>? revealedLetters,
+    Map<String, Set<int>>? hintRevealedLetters,
     int? totalFoundExtras,
     int? extraWordMilestone,
   }) {
@@ -54,6 +57,7 @@ class GameState {
       additionalWords: additionalWords ?? this.additionalWords,
       letterIds: letterIds ?? this.letterIds,
       revealedLetters: revealedLetters ?? this.revealedLetters,
+      hintRevealedLetters: hintRevealedLetters ?? this.hintRevealedLetters,
       totalFoundExtras: totalFoundExtras ?? this.totalFoundExtras,
       extraWordMilestone: extraWordMilestone ?? this.extraWordMilestone,
     );

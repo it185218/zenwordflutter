@@ -125,6 +125,7 @@ class _GamePageState extends State<GamePage> {
                       validWords: state.validWords,
                       foundWords: state.foundWords,
                       revealedLetters: state.revealedLetters,
+                      hintRevealedLetters: state.hintRevealedLetters,
                     ),
                   ),
                 ),
@@ -295,7 +296,12 @@ class _GamePageState extends State<GamePage> {
                                 }
                               },
                             ),
-                            HintContainer(icon: Icons.card_giftcard_outlined),
+                            HintContainer(
+                              icon: Icons.card_giftcard_outlined,
+                              onTap: () {
+                                context.read<CoinBloc>().add(AddCoins(50));
+                              },
+                            ),
                           ],
                         ),
                       ),

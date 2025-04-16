@@ -7,12 +7,14 @@ class WordTileGrid extends StatefulWidget {
   final List<String> validWords;
   final Set<String> foundWords;
   final Map<String, Set<int>> revealedLetters;
+  final Map<String, Set<int>> hintRevealedLetters;
 
   const WordTileGrid({
     super.key,
     required this.validWords,
     required this.foundWords,
     this.revealedLetters = const {},
+    this.hintRevealedLetters = const {},
   });
 
   @override
@@ -104,12 +106,20 @@ class _WordTileGridState extends State<WordTileGrid> {
               children:
                   words.map((word) {
                     final isFound = widget.foundWords.contains(word);
-                    final revealed = widget.revealedLetters[word] ?? {};
+                    final revealed = {
+                      ...?widget.revealedLetters[word],
+                      ...?widget.hintRevealedLetters[word],
+                    };
 
                     return Row(
                       mainAxisSize: MainAxisSize.min,
                       children: List.generate(word.length, (i) {
+                        final revealedSet = widget.revealedLetters[word] ?? {};
+                        final hintSet = widget.hintRevealedLetters[word] ?? {};
                         final showLetter = isFound || revealed.contains(i);
+
+                        final isCoin =
+                            revealedSet.contains(i) && !hintSet.contains(i);
 
                         return Container(
                           margin: const EdgeInsets.all(2),
@@ -130,8 +140,7 @@ class _WordTileGridState extends State<WordTileGrid> {
                                       fontWeight: FontWeight.bold,
                                     ),
                                   )
-                                  : (revealed.isNotEmpty &&
-                                      !revealed.contains(i))
+                                  : isCoin
                                   ? Icon(
                                     Icons.monetization_on,
                                     size: fontSize,
