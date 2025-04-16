@@ -138,7 +138,7 @@ class _GamePageState extends State<GamePage> {
                 Row(
                   children: [
                     SizedBox(
-                      height: 280,
+                      height: 250,
                       child: Container(
                         padding: EdgeInsets.only(left: 16, top: 16, bottom: 16),
                         child: Column(
@@ -263,7 +263,7 @@ class _GamePageState extends State<GamePage> {
                     ),
 
                     SizedBox(
-                      height: 280,
+                      height: 250,
                       child: Container(
                         padding: EdgeInsets.only(
                           right: 16,

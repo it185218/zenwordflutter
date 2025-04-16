@@ -58,8 +58,8 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 32,
-                          vertical: 4,
+                          horizontal: 24,
+                          vertical: 2,
                         ),
                         decoration: BoxDecoration(
                           color: ColorLibrary.coinContainer,
@@ -75,7 +75,7 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
                         child: Text(
                           coinText!,
                           style: const TextStyle(
-                            fontSize: 16,
+                            fontSize: 12,
                             fontWeight: FontWeight.w600,
                             color: ColorLibrary.coinText,
                           ),

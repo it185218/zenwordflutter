@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:zenwordflutter/core/utils/color_library.dart';
 import '../../logic/blocs/game/game_bloc.dart';
 import '../../logic/blocs/game/game_state.dart';
 
@@ -19,7 +20,7 @@ class FoundExtrasDialog extends StatelessWidget {
           ),
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: ColorLibrary.dialogContainer,
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
@@ -44,60 +45,179 @@ class FoundExtrasDialog extends StatelessWidget {
               return Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text(
-                    'Extra Words',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: GestureDetector(
+                      onTap: () => Navigator.of(context).pop(),
+                      child: Container(
+                        padding: EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: ColorLibrary.dialogContainer1,
+                        ),
+                        child: Icon(
+                          Icons.close,
+                          color: ColorLibrary.dialogText,
+                          size: 20,
+                        ),
+                      ),
+                    ),
                   ),
 
-                  const SizedBox(height: 16),
-
-                  // Progress indicator for the current cycle
-                  LinearProgressIndicator(
-                    value: progress,
-                    backgroundColor: Colors.grey[300],
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Show progress to next reward
                   Text(
-                    '$progressToNextReward / 10 extra words found for the next reward',
+                    'Extra Words',
+                    style: TextStyle(
+                      color: ColorLibrary.dialogText,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                  const SizedBox(height: 16),
 
-                  foundExtras.isEmpty
-                      ? const Text("No extra words found yet.")
-                      : Wrap(
-                        spacing: 12,
-                        runSpacing: 12,
-                        children:
-                            foundExtras
-                                .map(
-                                  (word) => Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 8,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.blue.shade100,
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
+                  SizedBox(height: 8),
+
+                  Container(
+                    padding: EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: ColorLibrary.dialogContainer1,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+
+                    child: Column(
+                      children: [
+                        Stack(
+                          children: <Widget>[
+                            SizedBox(
+                              height: 16,
+                              child: LinearProgressIndicator(
+                                value: progress,
+                                minHeight: 12,
+                                backgroundColor:
+                                    ColorLibrary.progressBackground,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  ColorLibrary.progress,
+                                ),
+                                color: ColorLibrary.progress,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            Align(
+                              alignment: Alignment.center,
+                              child: Text(
+                                '$progressToNextReward / 10',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        Align(
+                          alignment: Alignment.center,
+                          child: Text(
+                            'Need ${10 - progressToNextReward} more to launch the paperplane!',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: ColorLibrary.dialogText,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+
+                        Divider(
+                          color: ColorLibrary.progressBackground,
+                          thickness: 0 / 5,
+                          height: 32,
+                        ),
+
+                        Container(
+                          decoration: BoxDecoration(
+                            color: ColorLibrary.dialogContainer2,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Column(
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: ColorLibrary.dialogContainer3,
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(8),
+                                    topRight: Radius.circular(8),
+                                    bottomLeft: Radius.circular(0),
+                                    bottomRight: Radius.circular(0),
+                                  ),
+                                ),
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 4),
+                                  child: Align(
+                                    alignment: Alignment.center,
                                     child: Text(
-                                      word,
+                                      'Found in this level',
                                       style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w500,
+                                        color: ColorLibrary.dialogText,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
                                       ),
                                     ),
                                   ),
-                                )
-                                .toList(),
-                      ),
+                                ),
+                              ),
 
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text("Close"),
+                              foundExtras.isEmpty
+                                  ? const Align(
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      "No extra words found yet.",
+                                      style: TextStyle(
+                                        color: ColorLibrary.dialogText,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  )
+                                  : Container(
+                                    width: double.infinity,
+                                    decoration: BoxDecoration(
+                                      color: ColorLibrary.dialogContainer2,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+
+                                    child: Wrap(
+                                      spacing: 12,
+                                      runSpacing: 12,
+                                      children:
+                                          foundExtras
+                                              .map(
+                                                (word) => Container(
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                        horizontal: 12,
+                                                        vertical: 8,
+                                                      ),
+                                                  child: Text(
+                                                    word,
+                                                    style: const TextStyle(
+                                                      color:
+                                                          ColorLibrary
+                                                              .dialogText,
+                                                      fontSize: 12,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                ),
+                                              )
+                                              .toList(),
+                                    ),
+                                  ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               );

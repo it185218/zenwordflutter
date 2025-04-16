@@ -43,8 +43,8 @@ class _HintContainerState extends State<HintContainer> {
         duration: const Duration(milliseconds: 100),
         curve: Curves.easeInOut,
         child: Container(
-          width: 60,
-          height: 60,
+          width: 50,
+          height: 50,
           decoration: BoxDecoration(
             color: ColorLibrary.button,
             shape: BoxShape.circle,
