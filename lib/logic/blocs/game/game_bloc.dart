@@ -52,6 +52,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
           additionalWords: saved.additionalWords.toSet(),
           letterIds: saved.letterIds,
           revealedLetters: deserializeRevealed(saved.revealedLetters),
+          hintRevealedLetters: deserializeRevealed(saved.hintRevealedLetters),
           selectedIndices: [],
           currentTouch: null,
           totalFoundExtras: totalExtras,
@@ -142,6 +143,9 @@ class GameBloc extends Bloc<GameEvent, GameState> {
               .toList(); // ✅ Save only extras that were found
       existing.additionalWords = state.additionalWords.toList();
       existing.revealedLetters = serializeRevealed(state.revealedLetters);
+      existing.hintRevealedLetters = serializeRevealed(
+        state.hintRevealedLetters,
+      );
       existing.extraWordMilestone = state.extraWordMilestone;
 
       await isar.writeTxn(() => isar.savedGames.put(existing));
@@ -309,10 +313,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       ...state.hintRevealedLetters,
       randomWord: {...hintRevealed, letterIndex},
     };
-
-    print('Hint revealed letter $letterIndex in word "$randomWord"');
-    print('Remaining words: $remainingWords');
-    print('Unrevealed indices: $unrevealedIndices');
 
     final newState = state.copyWith(hintRevealedLetters: updatedHintRevealed);
     emit(newState);

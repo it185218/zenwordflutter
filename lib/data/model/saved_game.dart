@@ -19,4 +19,5 @@ class SavedGame {
   /// Serialized Map<String, Set<int>>
   /// Stored as "word:index1,index2;another:index1"
   late String revealedLetters;
+  late String hintRevealedLetters;
 }

@@ -27,38 +27,48 @@ const SavedGameSchema = CollectionSchema(
       name: r'baseWord',
       type: IsarType.string,
     ),
-    r'foundExtras': PropertySchema(
+    r'extraWordMilestone': PropertySchema(
       id: 2,
+      name: r'extraWordMilestone',
+      type: IsarType.long,
+    ),
+    r'foundExtras': PropertySchema(
+      id: 3,
       name: r'foundExtras',
       type: IsarType.stringList,
     ),
     r'foundWords': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'foundWords',
       type: IsarType.stringList,
     ),
+    r'hintRevealedLetters': PropertySchema(
+      id: 5,
+      name: r'hintRevealedLetters',
+      type: IsarType.string,
+    ),
     r'letterIds': PropertySchema(
-      id: 4,
+      id: 6,
       name: r'letterIds',
       type: IsarType.longList,
     ),
     r'letters': PropertySchema(
-      id: 5,
+      id: 7,
       name: r'letters',
       type: IsarType.stringList,
     ),
     r'level': PropertySchema(
-      id: 6,
+      id: 8,
       name: r'level',
       type: IsarType.long,
     ),
     r'revealedLetters': PropertySchema(
-      id: 7,
+      id: 9,
       name: r'revealedLetters',
       type: IsarType.string,
     ),
     r'validWords': PropertySchema(
-      id: 8,
+      id: 10,
       name: r'validWords',
       type: IsarType.stringList,
     )
@@ -105,6 +115,7 @@ int _savedGameEstimateSize(
       bytesCount += value.length * 3;
     }
   }
+  bytesCount += 3 + object.hintRevealedLetters.length * 3;
   bytesCount += 3 + object.letterIds.length * 8;
   bytesCount += 3 + object.letters.length * 3;
   {
@@ -132,13 +143,15 @@ void _savedGameSerialize(
 ) {
   writer.writeStringList(offsets[0], object.additionalWords);
   writer.writeString(offsets[1], object.baseWord);
-  writer.writeStringList(offsets[2], object.foundExtras);
-  writer.writeStringList(offsets[3], object.foundWords);
-  writer.writeLongList(offsets[4], object.letterIds);
-  writer.writeStringList(offsets[5], object.letters);
-  writer.writeLong(offsets[6], object.level);
-  writer.writeString(offsets[7], object.revealedLetters);
-  writer.writeStringList(offsets[8], object.validWords);
+  writer.writeLong(offsets[2], object.extraWordMilestone);
+  writer.writeStringList(offsets[3], object.foundExtras);
+  writer.writeStringList(offsets[4], object.foundWords);
+  writer.writeString(offsets[5], object.hintRevealedLetters);
+  writer.writeLongList(offsets[6], object.letterIds);
+  writer.writeStringList(offsets[7], object.letters);
+  writer.writeLong(offsets[8], object.level);
+  writer.writeString(offsets[9], object.revealedLetters);
+  writer.writeStringList(offsets[10], object.validWords);
 }
 
 SavedGame _savedGameDeserialize(
@@ -150,14 +163,16 @@ SavedGame _savedGameDeserialize(
   final object = SavedGame();
   object.additionalWords = reader.readStringList(offsets[0]) ?? [];
   object.baseWord = reader.readString(offsets[1]);
-  object.foundExtras = reader.readStringList(offsets[2]) ?? [];
-  object.foundWords = reader.readStringList(offsets[3]) ?? [];
+  object.extraWordMilestone = reader.readLong(offsets[2]);
+  object.foundExtras = reader.readStringList(offsets[3]) ?? [];
+  object.foundWords = reader.readStringList(offsets[4]) ?? [];
+  object.hintRevealedLetters = reader.readString(offsets[5]);
   object.id = id;
-  object.letterIds = reader.readLongList(offsets[4]) ?? [];
-  object.letters = reader.readStringList(offsets[5]) ?? [];
-  object.level = reader.readLong(offsets[6]);
-  object.revealedLetters = reader.readString(offsets[7]);
-  object.validWords = reader.readStringList(offsets[8]) ?? [];
+  object.letterIds = reader.readLongList(offsets[6]) ?? [];
+  object.letters = reader.readStringList(offsets[7]) ?? [];
+  object.level = reader.readLong(offsets[8]);
+  object.revealedLetters = reader.readString(offsets[9]);
+  object.validWords = reader.readStringList(offsets[10]) ?? [];
   return object;
 }
 
@@ -173,18 +188,22 @@ P _savedGameDeserializeProp<P>(
     case 1:
       return (reader.readString(offset)) as P;
     case 2:
-      return (reader.readStringList(offset) ?? []) as P;
+      return (reader.readLong(offset)) as P;
     case 3:
       return (reader.readStringList(offset) ?? []) as P;
     case 4:
-      return (reader.readLongList(offset) ?? []) as P;
-    case 5:
       return (reader.readStringList(offset) ?? []) as P;
-    case 6:
-      return (reader.readLong(offset)) as P;
-    case 7:
+    case 5:
       return (reader.readString(offset)) as P;
+    case 6:
+      return (reader.readLongList(offset) ?? []) as P;
+    case 7:
+      return (reader.readStringList(offset) ?? []) as P;
     case 8:
+      return (reader.readLong(offset)) as P;
+    case 9:
+      return (reader.readString(offset)) as P;
+    case 10:
       return (reader.readStringList(offset) ?? []) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -641,6 +660,62 @@ extension SavedGameQueryFilter
   }
 
   QueryBuilder<SavedGame, SavedGame, QAfterFilterCondition>
+      extraWordMilestoneEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'extraWordMilestone',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterFilterCondition>
+      extraWordMilestoneGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'extraWordMilestone',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterFilterCondition>
+      extraWordMilestoneLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'extraWordMilestone',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterFilterCondition>
+      extraWordMilestoneBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'extraWordMilestone',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterFilterCondition>
       foundExtrasElementEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -1087,6 +1162,142 @@ extension SavedGameQueryFilter
         upper,
         includeUpper,
       );
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterFilterCondition>
+      hintRevealedLettersEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'hintRevealedLetters',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterFilterCondition>
+      hintRevealedLettersGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'hintRevealedLetters',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterFilterCondition>
+      hintRevealedLettersLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'hintRevealedLetters',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterFilterCondition>
+      hintRevealedLettersBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'hintRevealedLetters',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterFilterCondition>
+      hintRevealedLettersStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'hintRevealedLetters',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterFilterCondition>
+      hintRevealedLettersEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'hintRevealedLetters',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterFilterCondition>
+      hintRevealedLettersContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'hintRevealedLetters',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterFilterCondition>
+      hintRevealedLettersMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'hintRevealedLetters',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterFilterCondition>
+      hintRevealedLettersIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'hintRevealedLetters',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterFilterCondition>
+      hintRevealedLettersIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'hintRevealedLetters',
+        value: '',
+      ));
     });
   }
 
@@ -1945,6 +2156,32 @@ extension SavedGameQuerySortBy on QueryBuilder<SavedGame, SavedGame, QSortBy> {
     });
   }
 
+  QueryBuilder<SavedGame, SavedGame, QAfterSortBy> sortByExtraWordMilestone() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'extraWordMilestone', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterSortBy>
+      sortByExtraWordMilestoneDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'extraWordMilestone', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterSortBy> sortByHintRevealedLetters() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hintRevealedLetters', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterSortBy>
+      sortByHintRevealedLettersDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hintRevealedLetters', Sort.desc);
+    });
+  }
+
   QueryBuilder<SavedGame, SavedGame, QAfterSortBy> sortByLevel() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'level', Sort.asc);
@@ -1981,6 +2218,32 @@ extension SavedGameQuerySortThenBy
   QueryBuilder<SavedGame, SavedGame, QAfterSortBy> thenByBaseWordDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'baseWord', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterSortBy> thenByExtraWordMilestone() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'extraWordMilestone', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterSortBy>
+      thenByExtraWordMilestoneDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'extraWordMilestone', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterSortBy> thenByHintRevealedLetters() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hintRevealedLetters', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterSortBy>
+      thenByHintRevealedLettersDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hintRevealedLetters', Sort.desc);
     });
   }
 
@@ -2036,6 +2299,12 @@ extension SavedGameQueryWhereDistinct
     });
   }
 
+  QueryBuilder<SavedGame, SavedGame, QDistinct> distinctByExtraWordMilestone() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'extraWordMilestone');
+    });
+  }
+
   QueryBuilder<SavedGame, SavedGame, QDistinct> distinctByFoundExtras() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'foundExtras');
@@ -2045,6 +2314,14 @@ extension SavedGameQueryWhereDistinct
   QueryBuilder<SavedGame, SavedGame, QDistinct> distinctByFoundWords() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'foundWords');
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QDistinct> distinctByHintRevealedLetters(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'hintRevealedLetters',
+          caseSensitive: caseSensitive);
     });
   }
 
@@ -2102,6 +2379,12 @@ extension SavedGameQueryProperty
     });
   }
 
+  QueryBuilder<SavedGame, int, QQueryOperations> extraWordMilestoneProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'extraWordMilestone');
+    });
+  }
+
   QueryBuilder<SavedGame, List<String>, QQueryOperations>
       foundExtrasProperty() {
     return QueryBuilder.apply(this, (query) {
@@ -2112,6 +2395,13 @@ extension SavedGameQueryProperty
   QueryBuilder<SavedGame, List<String>, QQueryOperations> foundWordsProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'foundWords');
+    });
+  }
+
+  QueryBuilder<SavedGame, String, QQueryOperations>
+      hintRevealedLettersProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'hintRevealedLetters');
     });
   }
 
