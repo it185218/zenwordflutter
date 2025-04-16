@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:isar/isar.dart';
 import 'package:zenwordflutter/data/model/performance.dart';
@@ -198,9 +200,38 @@ class GameBloc extends Bloc<GameEvent, GameState> {
           allSaves.expand((g) => g.foundExtras).toSet().length;
 
       emit(newState.copyWith(totalFoundExtras: updatedTotalExtras));
+
+      // Check if total extra words reached 10, then reveal a word
+      if (updatedTotalExtras >= 10) {
+        _revealRandomWord(newState, emit);
+      }
     } else {
       emit(state.copyWith(selectedIndices: [], currentTouch: null));
     }
+  }
+
+  Future<void> _revealRandomWord(
+    GameState state,
+    Emitter<GameState> emit,
+  ) async {
+    // Select a random word from the grid that hasn't been revealed yet
+    final validWords =
+        state.validWords
+            .where((word) => !state.revealedLetters.containsKey(word))
+            .toList();
+    if (validWords.isEmpty) return;
+
+    final randomWord = validWords[Random().nextInt(validWords.length)];
+
+    // Reveal the first letter and set the rest as coin icons
+    final revealedLetters = Map<String, Set<int>>.from(state.revealedLetters);
+    revealedLetters[randomWord] = {0}; // Reveal first letter
+
+    final newState = state.copyWith(revealedLetters: revealedLetters);
+    emit(newState);
+
+    // Save the updated revealed letters in Isar
+    await _saveGameState(newState);
   }
 
   void _onShuffleLetters(GameShuffleLetters event, Emitter<GameState> emit) {

@@ -16,13 +16,11 @@ class WordTileGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Use fallback height if maxHeight is unbounded
         final maxHeight =
             constraints.hasBoundedHeight
                 ? constraints.maxHeight
-                : MediaQuery.of(context).size.height * 0.6; // fallback
+                : MediaQuery.of(context).size.height * 0.6;
 
-        // Layout tuning constants
         const tileSpacing = 8.0;
         const baseTileSize = 40.0;
         const minTileSize = 28.0;
@@ -39,7 +37,7 @@ class WordTileGrid extends StatelessWidget {
           final tileWithSpacing = tileSize + tileSpacing;
           final wordsPerColumn = (maxHeight / tileWithSpacing).floor();
 
-          if (wordsPerColumn == 0) continue; // skip if can't fit anything
+          if (wordsPerColumn == 0) continue;
 
           final neededColumns = (validWords.length / wordsPerColumn).ceil();
 
@@ -70,6 +68,7 @@ class WordTileGrid extends StatelessWidget {
                   words.map((word) {
                     final isFound = foundWords.contains(word);
                     final revealed = revealedLetters[word] ?? {};
+
                     return Row(
                       mainAxisSize: MainAxisSize.min,
                       children: List.generate(word.length, (i) {
@@ -85,13 +84,23 @@ class WordTileGrid extends StatelessWidget {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           alignment: Alignment.center,
-                          child: Text(
-                            showLetter ? word[i] : '',
-                            style: TextStyle(
-                              fontSize: fontSize,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          child:
+                              showLetter
+                                  ? Text(
+                                    word[i],
+                                    style: TextStyle(
+                                      fontSize: fontSize,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  )
+                                  : (revealed.isNotEmpty &&
+                                      !revealed.contains(i))
+                                  ? Icon(
+                                    Icons.monetization_on,
+                                    size: fontSize,
+                                    color: Colors.amber[700],
+                                  )
+                                  : const SizedBox.shrink(),
                         );
                       }),
                     );
