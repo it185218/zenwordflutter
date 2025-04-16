@@ -184,10 +184,11 @@ class _GamePageState extends State<GamePage> {
                               constraints.maxWidth / 2,
                               constraints.maxHeight / 2,
                             );
+                            final safeRadius = radius - circleSize / 2;
                             final positions = calculateCircularPositions(
                               center: circleCenter,
                               count: letters.length,
-                              radius: radius - circleSize / 4,
+                              radius: safeRadius,
                             );
                             return GestureDetector(
                               onPanStart: (details) {
