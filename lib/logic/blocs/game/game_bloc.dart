@@ -105,6 +105,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       validWords: gridWords,
       additionalWords: extras,
       foundWords: {},
+      foundExtras: {},
       revealedLetters: {},
       selectedIndices: [],
       currentTouch: null,
