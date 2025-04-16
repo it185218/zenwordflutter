@@ -63,6 +63,10 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
                         ),
                         decoration: BoxDecoration(
                           color: ColorLibrary.coinContainer,
+                          border: Border.all(
+                            color: ColorLibrary.coinContainerBorder,
+                            width: 2,
+                          ),
                           borderRadius: const BorderRadius.only(
                             topRight: Radius.circular(25),
                             bottomRight: Radius.circular(25),
@@ -93,11 +97,14 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
                     width: 80,
                     height: 80,
                     decoration: BoxDecoration(
-                      color: ColorLibrary.coin,
+                      color: ColorLibrary.coinFill,
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
+                      border: Border.all(
+                        color: ColorLibrary.coinFillBorder,
+                        width: 2,
+                      ),
                     ),
-                    child: const Center(), // You can add content here if needed
+                    child: const Center(),
                   ),
                 ),
               ),
