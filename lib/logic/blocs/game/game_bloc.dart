@@ -68,7 +68,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     final history =
         await isar.performances.where().sortByLevelDesc().limit(10).findAll();
     final skillScore = computeSkillScore(history, sampleSize: 5);
-    int gridWordCount = (6 + (skillScore * 10)).round().clamp(6, 12);
 
     final baseWord = GameHelpers.pickAdaptiveBaseWord(_dictionary, skillScore);
     final ids = List.generate(baseWord.length, (i) => i);
@@ -77,24 +76,20 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     validSubwords.sort(
       (a, b) => GameHelpers.scoreWord(b).compareTo(GameHelpers.scoreWord(a)),
     );
-    final topWords =
-        validSubwords
-            .where((w) => w != baseWord)
-            .take(gridWordCount - 1)
-            .toList();
-    topWords.add(baseWord);
 
-    topWords.sort((a, b) {
-      final lenCompare = a.length.compareTo(b.length);
-      return lenCompare != 0 ? lenCompare : a.compareTo(b);
-    });
+    final filteredWords = validSubwords.where((w) => w != baseWord).toList();
+    final balancedWords = selectBalancedGridWords(
+      baseWord: baseWord,
+      sortedWords: filteredWords,
+    );
 
-    final gridWords = topWords;
-    final extras = validSubwords.toSet().difference(gridWords.toSet());
+    final extras = validSubwords.toSet().difference(balancedWords.toSet());
 
     // 🔥 Print here
     print("🔤 Base word: $baseWord");
-    print("🧩 Grid Words (${gridWords.length}): ${gridWords.join(', ')}");
+    print(
+      "🧩 Grid Words (${balancedWords.length}): ${balancedWords.join(', ')}",
+    );
     print("🔥 Extras (${extras.length}): ${extras.join(', ')}");
 
     print("Skill score: $skillScore");
@@ -103,7 +98,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       level: event.level,
       letters: baseWord.split(''),
       letterIds: ids,
-      validWords: gridWords,
+      validWords: balancedWords,
       additionalWords: extras,
       foundWords: {},
       foundExtras: {},
@@ -122,12 +117,102 @@ class GameBloc extends Bloc<GameEvent, GameState> {
           ..baseWord = baseWord
           ..letters = newState.letters
           ..letterIds = ids
-          ..validWords = gridWords
+          ..validWords = balancedWords
           ..foundWords = []
           ..additionalWords = extras.toList()
-          ..revealedLetters = '';
+          ..revealedLetters = ''
+          ..hintRevealedLetters = '';
 
     await isar.writeTxn(() => isar.savedGames.put(game));
+  }
+
+  List<String> selectBalancedGridWords({
+    required String baseWord,
+    required List<String> sortedWords,
+    int maxWords = 28,
+    int maxPerColumn = 14,
+    int maxRowLength = 10,
+  }) {
+    final result = <String>[baseWord];
+    final usedWords = <String>{baseWord};
+
+    // Check if the base word is longer than 6 characters
+    final isBaseWordLarge = baseWord.length > 6;
+
+    // If base word is larger than 6, limit the number of words to 14 (including the base word)
+    if (isBaseWordLarge) {
+      maxWords = 14;
+    }
+
+    for (var word in sortedWords) {
+      if (result.length >= maxWords) break;
+      if (usedWords.contains(word)) continue;
+
+      // Try placing the word in combination with existing ones
+      bool added = false;
+
+      for (int i = 0; i <= result.length; i++) {
+        final col1 = result.sublist(0, (result.length / 2).ceil());
+        final col2 = result.sublist((result.length / 2).ceil());
+
+        final minLen = col1.length <= col2.length ? col1.length : col2.length;
+
+        // Construct current row pairs to test placement
+        for (int row = 0; row < minLen; row++) {
+          final left = col1.length > row ? col1[row] : '';
+          final right = col2.length > row ? col2[row] : '';
+
+          // Try adding to column 1
+          if (left.isEmpty && word.length + right.length <= maxRowLength) {
+            result.insert(row, word);
+            usedWords.add(word);
+            added = true;
+            break;
+          }
+
+          // Try adding to column 2
+          if (right.isEmpty && word.length + left.length <= maxRowLength) {
+            result.insert((result.length / 2).ceil() + row, word);
+            usedWords.add(word);
+            added = true;
+            break;
+          }
+        }
+
+        if (added) break;
+      }
+
+      // Fallback: add if space left and word can fit alone
+      if (!added && result.length < maxWords) {
+        result.add(word);
+        usedWords.add(word);
+      }
+    }
+
+    final groupedByLength = <int, List<String>>{};
+
+    for (var word in result) {
+      groupedByLength.putIfAbsent(word.length, () => []).add(word);
+    }
+
+    final sortedByLengthThenScore =
+        groupedByLength.entries.toList()
+          ..sort((a, b) => a.key.compareTo(b.key));
+
+    final finalList =
+        sortedByLengthThenScore
+            .expand((entry) {
+              entry.value.sort(
+                (a, b) => GameHelpers.scoreWord(
+                  b,
+                ).compareTo(GameHelpers.scoreWord(a)),
+              );
+              return entry.value;
+            })
+            .take(maxWords)
+            .toList();
+
+    return finalList;
   }
 
   Future<void> _saveGameState(GameState state) async {

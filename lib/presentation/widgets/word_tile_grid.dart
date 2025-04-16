@@ -51,33 +51,36 @@ class _WordTileGridState extends State<WordTileGrid> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final maxHeight =
-            constraints.hasBoundedHeight
-                ? constraints.maxHeight
-                : MediaQuery.of(context).size.height * 0.6;
-
-        const tileSpacing = 8.0;
         const baseTileSize = 40.0;
         const minTileSize = 26.0;
 
         double bestTileSize = baseTileSize;
+
+        // Determine the maximum height for the tiles based on the available space
+        final availableHeight = constraints.maxHeight;
+        final maxRows = 14;
+        final maxTileHeight = availableHeight / maxRows;
+        bestTileSize =
+            bestTileSize > maxTileHeight ? maxTileHeight : bestTileSize;
+
+        // Shrink to the minimum size if the available height is less than the base size
+        bestTileSize = bestTileSize < minTileSize ? minTileSize : bestTileSize;
+
         int maxWordsPerColumn = 1;
         int columns = 1;
 
+        // Calculate the number of columns based on available width
         for (
-          double tileSize = baseTileSize;
+          double tileSize = bestTileSize;
           tileSize >= minTileSize;
           tileSize -= 2
         ) {
-          final tileWithSpacing = tileSize + tileSpacing;
-          final wordsPerColumn = (maxHeight / tileWithSpacing).floor();
-
-          if (wordsPerColumn == 0) continue;
-
+          const wordsPerColumn = 14;
           final neededColumns =
               (widget.validWords.length / wordsPerColumn).ceil();
 
-          if (neededColumns * (tileSize * 6) <= constraints.maxWidth) {
+          if (neededColumns <= 2 &&
+              neededColumns * (tileSize * 6) <= constraints.maxWidth) {
             bestTileSize = tileSize;
             maxWordsPerColumn = wordsPerColumn;
             columns = neededColumns;
@@ -88,13 +91,17 @@ class _WordTileGridState extends State<WordTileGrid> {
         final fontSize = bestTileSize * 0.5;
 
         final columnWidgets = <Widget>[];
+        final maxValidWords =
+            widget.validWords.length > 14 ? 14 : widget.validWords.length;
+        final wordsToDisplay = widget.validWords.take(maxValidWords).toList();
+
         for (int col = 0; col < columns; col++) {
           final start = col * maxWordsPerColumn;
           final end = (start + maxWordsPerColumn).clamp(
             0,
-            widget.validWords.length,
+            wordsToDisplay.length,
           );
-          final words = widget.validWords.sublist(start, end);
+          final words = wordsToDisplay.sublist(start, end);
 
           columnWidgets.add(
             Column(
