@@ -36,6 +36,9 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     final allSaves = await isar.savedGames.where().findAll();
     final totalExtras =
         allSaves.expand((game) => game.foundExtras).toSet().length;
+    final maxMilestone = allSaves
+        .map((g) => g.extraWordMilestone)
+        .fold(0, (a, b) => a > b ? a : b);
 
     if (saved != null) {
       // Load saved game
@@ -52,6 +55,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
           selectedIndices: [],
           currentTouch: null,
           totalFoundExtras: totalExtras,
+          extraWordMilestone: maxMilestone,
         ),
       );
       return;
@@ -137,6 +141,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
               .toList(); // ✅ Save only extras that were found
       existing.additionalWords = state.additionalWords.toList();
       existing.revealedLetters = serializeRevealed(state.revealedLetters);
+      existing.extraWordMilestone = state.extraWordMilestone;
+
       await isar.writeTxn(() => isar.savedGames.put(existing));
     }
   }
@@ -179,9 +185,14 @@ class GameBloc extends Bloc<GameEvent, GameState> {
           isAdditional
               ? {...state.additionalWords, word}
               : state.additionalWords;
-
       final updatedFoundExtras =
           isAdditional ? {...state.foundExtras, word} : state.foundExtras;
+
+      // Load all saved games and compute new global total of found extra words
+      final allSaves = await Isar.getInstance()!.savedGames.where().findAll();
+      final globalFoundExtras = allSaves.expand((g) => g.foundExtras).toSet();
+      if (isAdditional) globalFoundExtras.add(word); // include this new one
+      final updatedTotalExtras = globalFoundExtras.length;
 
       final newState = state.copyWith(
         selectedIndices: [],
@@ -189,21 +200,27 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         foundWords: updatedFound,
         additionalWords: updatedExtras,
         foundExtras: updatedFoundExtras,
+        totalFoundExtras: updatedTotalExtras,
       );
 
       emit(newState);
       await _saveGameState(newState);
 
-      // Recalculate global total after new extra is found
-      final allSaves = await Isar.getInstance()!.savedGames.where().findAll();
-      final updatedTotalExtras =
-          allSaves.expand((g) => g.foundExtras).toSet().length;
+      // **Fix**: Only reward if the total found extras surpass the next milestone (10, 20, etc.)
+      final rewardThreshold = 10;
+      final currentMilestone = state.extraWordMilestone;
 
-      emit(newState.copyWith(totalFoundExtras: updatedTotalExtras));
+      // Calculate the new milestone (10, 20, 30...)
+      final nextMilestone =
+          (updatedTotalExtras ~/ rewardThreshold) * rewardThreshold;
 
-      // Check if total extra words reached 10, then reveal a word
-      if (updatedTotalExtras >= 10) {
-        _revealRandomWord(newState, emit);
+      if (nextMilestone > currentMilestone) {
+        final rewardedState = newState.copyWith(
+          extraWordMilestone: nextMilestone,
+        );
+        emit(rewardedState);
+        await _saveGameState(rewardedState);
+        await _revealRandomWord(rewardedState, emit);
       }
     } else {
       emit(state.copyWith(selectedIndices: [], currentTouch: null));
@@ -214,7 +231,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     GameState state,
     Emitter<GameState> emit,
   ) async {
-    // Select a random word from the grid that hasn't been revealed yet
     final validWords =
         state.validWords
             .where((word) => !state.revealedLetters.containsKey(word))
@@ -223,14 +239,15 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
     final randomWord = validWords[Random().nextInt(validWords.length)];
 
-    // Reveal the first letter and set the rest as coin icons
     final revealedLetters = Map<String, Set<int>>.from(state.revealedLetters);
     revealedLetters[randomWord] = {0}; // Reveal first letter
 
-    final newState = state.copyWith(revealedLetters: revealedLetters);
-    emit(newState);
+    final newState = state.copyWith(
+      revealedLetters: revealedLetters,
+      // ✅ DO NOT reset totalFoundExtras
+    );
 
-    // Save the updated revealed letters in Isar
+    emit(newState);
     await _saveGameState(newState);
   }
 

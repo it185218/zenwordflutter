@@ -32,7 +32,14 @@ class FoundExtrasDialog extends StatelessWidget {
           child: BlocBuilder<GameBloc, GameState>(
             builder: (context, state) {
               final foundExtras = state.foundExtras;
-              final totalGlobal = state.totalFoundExtras.clamp(0, 10);
+              final totalGlobal = state.totalFoundExtras;
+
+              // Calculate the progress toward the next reward
+              final progressToNextReward =
+                  (totalGlobal % 10); // Progress towards the next set of 10
+
+              // Calculate the fraction of the next milestone (0/10, 1/10, etc.)
+              final progress = progressToNextReward / 10.0;
 
               return Column(
                 mainAxisSize: MainAxisSize.min,
@@ -44,13 +51,18 @@ class FoundExtrasDialog extends StatelessWidget {
 
                   const SizedBox(height: 16),
 
+                  // Progress indicator for the current cycle
                   LinearProgressIndicator(
-                    value: totalGlobal / 10.0,
+                    value: progress,
                     backgroundColor: Colors.grey[300],
                     valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
                   ),
                   const SizedBox(height: 8),
-                  Text('$totalGlobal / 10 extra words found'),
+
+                  // Show progress to next reward
+                  Text(
+                    '$progressToNextReward / 10 extra words found for the next reward',
+                  ),
                   const SizedBox(height: 16),
 
                   foundExtras.isEmpty

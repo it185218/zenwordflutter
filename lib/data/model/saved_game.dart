@@ -14,6 +14,7 @@ class SavedGame {
   late List<String> foundWords;
   List<String> foundExtras = [];
   late List<String> additionalWords;
+  int extraWordMilestone = 0;
 
   /// Serialized Map<String, Set<int>>
   /// Stored as "word:index1,index2;another:index1"
