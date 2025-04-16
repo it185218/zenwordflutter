@@ -180,6 +180,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     final isAdditional = state.additionalWords.contains(word);
     final alreadyFound = state.foundWords.contains(word);
 
+    final newExtraWordFound = isAdditional && !alreadyFound;
+
     if ((isValid || isAdditional) && !alreadyFound) {
       final updatedFound = {...state.foundWords, word};
       final updatedExtras =
@@ -207,7 +209,9 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       emit(newState);
       await _saveGameState(newState);
 
-      await _checkAndRewardMilestone(newState, emit);
+      if (newExtraWordFound) {
+        await _checkAndRewardMilestone(newState, emit);
+      }
     } else {
       emit(state.copyWith(selectedIndices: [], currentTouch: null));
     }

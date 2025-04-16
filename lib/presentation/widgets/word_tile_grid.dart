@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../logic/blocs/coin/coin_bloc.dart';
+import '../../logic/blocs/coin/coin_event.dart';
 
-class WordTileGrid extends StatelessWidget {
+class WordTileGrid extends StatefulWidget {
   final List<String> validWords;
   final Set<String> foundWords;
   final Map<String, Set<int>> revealedLetters;
@@ -11,6 +14,36 @@ class WordTileGrid extends StatelessWidget {
     required this.foundWords,
     this.revealedLetters = const {},
   });
+
+  @override
+  State<WordTileGrid> createState() => _WordTileGridState();
+}
+
+class _WordTileGridState extends State<WordTileGrid> {
+  final Set<String> rewardedWords = {};
+
+  @override
+  void didUpdateWidget(covariant WordTileGrid oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    for (final word in widget.validWords) {
+      final wasFound = oldWidget.foundWords.contains(word);
+      final isNowFound = widget.foundWords.contains(word);
+
+      if (!wasFound && isNowFound && !rewardedWords.contains(word)) {
+        final revealed = widget.revealedLetters[word];
+
+        // Word qualifies for coin reward only if it had revealed first letter + coin icons
+        if (revealed != null && revealed.isNotEmpty) {
+          final coinTiles = word.length - revealed.length;
+          if (coinTiles > 0) {
+            context.read<CoinBloc>().add(AddCoins(coinTiles));
+            rewardedWords.add(word);
+          }
+        }
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +72,8 @@ class WordTileGrid extends StatelessWidget {
 
           if (wordsPerColumn == 0) continue;
 
-          final neededColumns = (validWords.length / wordsPerColumn).ceil();
+          final neededColumns =
+              (widget.validWords.length / wordsPerColumn).ceil();
 
           if (neededColumns * (tileSize * 6) <= constraints.maxWidth) {
             bestTileSize = tileSize;
@@ -54,8 +88,11 @@ class WordTileGrid extends StatelessWidget {
         final columnWidgets = <Widget>[];
         for (int col = 0; col < columns; col++) {
           final start = col * maxWordsPerColumn;
-          final end = (start + maxWordsPerColumn).clamp(0, validWords.length);
-          final words = validWords.sublist(start, end);
+          final end = (start + maxWordsPerColumn).clamp(
+            0,
+            widget.validWords.length,
+          );
+          final words = widget.validWords.sublist(start, end);
 
           columnWidgets.add(
             Column(
@@ -66,8 +103,8 @@ class WordTileGrid extends StatelessWidget {
                       : CrossAxisAlignment.start,
               children:
                   words.map((word) {
-                    final isFound = foundWords.contains(word);
-                    final revealed = revealedLetters[word] ?? {};
+                    final isFound = widget.foundWords.contains(word);
+                    final revealed = widget.revealedLetters[word] ?? {};
 
                     return Row(
                       mainAxisSize: MainAxisSize.min,
