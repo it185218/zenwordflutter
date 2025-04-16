@@ -207,22 +207,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       emit(newState);
       await _saveGameState(newState);
 
-      // **Fix**: Only reward if the total found extras surpass the next milestone (10, 20, etc.)
-      final rewardThreshold = 10;
-      final currentMilestone = state.extraWordMilestone;
-
-      // Calculate the new milestone (10, 20, 30...)
-      final nextMilestone =
-          (updatedTotalExtras ~/ rewardThreshold) * rewardThreshold;
-
-      if (nextMilestone > currentMilestone) {
-        final rewardedState = newState.copyWith(
-          extraWordMilestone: nextMilestone,
-        );
-        emit(rewardedState);
-        await _saveGameState(rewardedState);
-        await _revealRandomWord(rewardedState, emit);
-      }
+      await _checkAndRewardMilestone(newState, emit);
     } else {
       emit(state.copyWith(selectedIndices: [], currentTouch: null));
     }
@@ -250,6 +235,24 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
     emit(newState);
     await _saveGameState(newState);
+  }
+
+  Future<void> _checkAndRewardMilestone(
+    GameState state,
+    Emitter<GameState> emit,
+  ) async {
+    final rewardThreshold = 10;
+    final currentMilestone = state.extraWordMilestone;
+
+    final nextMilestone =
+        (state.totalFoundExtras ~/ rewardThreshold) * rewardThreshold;
+
+    if (nextMilestone > currentMilestone) {
+      final updatedState = state.copyWith(extraWordMilestone: nextMilestone);
+      emit(updatedState);
+      await _saveGameState(updatedState);
+      await _revealRandomWord(updatedState, emit);
+    }
   }
 
   void _onShuffleLetters(GameShuffleLetters event, Emitter<GameState> emit) {
