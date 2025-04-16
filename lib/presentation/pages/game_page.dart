@@ -12,6 +12,7 @@ import '../../logic/blocs/game/game_state.dart';
 import '../../logic/blocs/level/level_bloc.dart';
 import '../../logic/blocs/level/level_event.dart';
 import '../widgets/background_scaffold.dart';
+import '../widgets/big_circle.dart';
 import '../widgets/current_word_display.dart';
 import '../widgets/found_extras_dialog.dart';
 import '../widgets/hint_container.dart';
@@ -214,15 +215,9 @@ class _GamePageState extends State<GamePage> {
                               },
                               child: Stack(
                                 children: [
-                                  Center(
-                                    child: Container(
-                                      width: radius * 2 + circleSize,
-                                      height: radius * 2 + circleSize,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: Colors.white,
-                                      ),
-                                    ),
+                                  BigCircle(
+                                    radius: radius,
+                                    circleSize: circleSize,
                                   ),
                                   CustomPaint(
                                     size: Size.infinite,

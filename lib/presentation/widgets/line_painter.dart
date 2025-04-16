@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/utils/color_library.dart';
+
 class LinePainter extends CustomPainter {
   final List<Offset> points;
   final Offset? currentTouch;
@@ -12,7 +14,7 @@ class LinePainter extends CustomPainter {
 
     final paint =
         Paint()
-          ..color = Colors.blueAccent
+          ..color = ColorLibrary.letterContainer
           ..strokeWidth = 4
           ..strokeCap = StrokeCap.round;
 

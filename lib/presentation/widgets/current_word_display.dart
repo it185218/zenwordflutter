@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/utils/color_library.dart';
+
 class CurrentWordDisplay extends StatelessWidget {
   final String currentWord;
 
@@ -13,7 +15,7 @@ class CurrentWordDisplay extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         decoration: BoxDecoration(
-          color: Colors.blueGrey,
+          color: ColorLibrary.letterContainer,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Text(
@@ -22,7 +24,7 @@ class CurrentWordDisplay extends StatelessWidget {
             fontSize: 16,
             fontWeight: FontWeight.w600,
             letterSpacing: 2,
-            color: Colors.white,
+            color: ColorLibrary.letterSelected,
           ),
         ),
       ),

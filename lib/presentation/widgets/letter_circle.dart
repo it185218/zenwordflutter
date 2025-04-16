@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/utils/color_library.dart';
+
 class LetterCircle extends StatelessWidget {
   final String letter;
   final bool isSelected;
@@ -19,11 +21,7 @@ class LetterCircle extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: isSelected ? Colors.blueAccent : Colors.transparent,
-        border: Border.all(
-          color: isSelected ? Colors.blueAccent : Colors.transparent,
-          width: 2,
-        ),
+        color: isSelected ? ColorLibrary.letterContainer : Colors.transparent,
       ),
       alignment: Alignment.center,
       child: Text(
@@ -31,7 +29,7 @@ class LetterCircle extends StatelessWidget {
         style: TextStyle(
           fontSize: 24,
           fontWeight: FontWeight.bold,
-          color: isSelected ? Colors.white : Colors.black,
+          color: ColorLibrary.letter,
         ),
       ),
     );
