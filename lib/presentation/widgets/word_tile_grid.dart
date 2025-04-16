@@ -56,7 +56,7 @@ class _WordTileGridState extends State<WordTileGrid> {
 
         const tileSpacing = 8.0;
         const baseTileSize = 40.0;
-        const minTileSize = 28.0;
+        const minTileSize = 26.0;
 
         double bestTileSize = baseTileSize;
         int maxWordsPerColumn = 1;
