@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../core/utils/color_library.dart';
 import '../../logic/blocs/coin/coin_bloc.dart';
 import '../../logic/blocs/coin/coin_event.dart';
 
@@ -133,8 +134,10 @@ class _WordTileGridState extends State<WordTileGrid> {
                           width: bestTileSize,
                           height: bestTileSize,
                           decoration: BoxDecoration(
-                            color: Colors.white,
-                            border: Border.all(color: Colors.black26),
+                            color:
+                                showLetter
+                                    ? ColorLibrary.gridFilled
+                                    : ColorLibrary.gridEmpty,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           alignment: Alignment.center,
@@ -143,8 +146,9 @@ class _WordTileGridState extends State<WordTileGrid> {
                                   ? Text(
                                     word[i],
                                     style: TextStyle(
+                                      color: Colors.white,
                                       fontSize: fontSize,
-                                      fontWeight: FontWeight.bold,
+                                      fontWeight: FontWeight.w600,
                                     ),
                                   )
                                   : isCoin
