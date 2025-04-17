@@ -17,19 +17,22 @@ class BigCircle extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           gradient: RadialGradient(
-            center: const Alignment(-0.3, -0.3), // light from top-left
-            radius: 0.8,
+            center: const Alignment(-0.4, -0.4),
+            radius: 0.95,
             colors: [
+              Color.fromRGBO(255, 255, 255, 0.3),
               Color.fromRGBO(163, 130, 89, 0.4),
               ColorLibrary.roundContainer,
+              Color.fromRGBO(30, 20, 10, 0.25),
             ],
+            stops: [0.0, 0.4, 0.7, 1.0],
           ),
-
           boxShadow: [
             BoxShadow(
               color: Color.fromARGB(78, 0, 0, 0),
-              offset: Offset(4, 4),
-              blurRadius: 10,
+              offset: Offset(6, 6),
+              blurRadius: 12,
+              spreadRadius: 1,
             ),
           ],
         ),
