@@ -20,10 +20,7 @@ class AppScaffold extends StatelessWidget {
       children: [
         Positioned.fill(child: Container(color: ColorLibrary.background)),
         Positioned.fill(
-          child: Image.asset(
-            'assets/images/background_1.jpg',
-            fit: BoxFit.cover,
-          ),
+          child: Image.asset('assets/images/ruins_bg.jpg', fit: BoxFit.cover),
         ),
         Positioned.fill(
           child: Container(color: ColorLibrary.backgroundOverlay),

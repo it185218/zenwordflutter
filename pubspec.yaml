@@ -71,6 +71,7 @@ flutter:
     - assets/dictionary/english-dictionary.txt
     - assets/images/puzzle_background.jpg
     - assets/images/background_1.jpg
+    - assets/images/ruins_bg.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
