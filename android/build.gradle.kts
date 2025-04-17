@@ -25,6 +25,23 @@ subprojects {
     project.layout.buildDirectory.value(newSubprojectBuildDir)
 }
 subprojects {
+    afterEvaluate {
+        plugins.withId("com.android.application") {
+            extensions.configure<com.android.build.gradle.AppExtension>("android") {
+                compileSdkVersion(35)
+                buildToolsVersion = "35.0.0"
+            }
+        }
+        plugins.withId("com.android.library") {
+            extensions.configure<com.android.build.gradle.LibraryExtension>("android") {
+                compileSdkVersion(35)
+                buildToolsVersion = "35.0.0"
+            }
+        }
+    }
+}
+
+subprojects {
     project.evaluationDependsOn(":app")
 }
 
