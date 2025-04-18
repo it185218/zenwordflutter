@@ -35,8 +35,6 @@ class _WordTileGridState extends State<WordTileGrid> {
 
       if (!wasFound && isNowFound && !rewardedWords.contains(word)) {
         final revealed = widget.revealedLetters[word];
-
-        // Word qualifies for coin reward only if it had revealed first letter + coin icons
         if (revealed != null && revealed.isNotEmpty) {
           final coinTiles = word.length - revealed.length;
           if (coinTiles > 0) {
@@ -55,38 +53,19 @@ class _WordTileGridState extends State<WordTileGrid> {
         const baseTileSize = 40.0;
         const minTileSize = 26.0;
 
-        double bestTileSize = baseTileSize;
+        final totalWords = widget.validWords.length;
 
-        // Determine the maximum height for the tiles based on the available space
+        // Estimate columns and rows
+        final columns = (totalWords > 14) ? 2 : 1;
+        final rowsPerColumn = (totalWords / columns).ceil();
+
         final availableHeight = constraints.maxHeight;
-        final maxRows = 14;
-        final maxTileHeight = availableHeight / maxRows;
-        bestTileSize =
-            bestTileSize > maxTileHeight ? maxTileHeight : bestTileSize;
+        double bestTileSize = availableHeight / rowsPerColumn;
 
-        // Shrink to the minimum size if the available height is less than the base size
-        bestTileSize = bestTileSize < minTileSize ? minTileSize : bestTileSize;
-
-        int maxWordsPerColumn = 1;
-        int columns = 1;
-
-        // Calculate the number of columns based on available width
-        for (
-          double tileSize = bestTileSize;
-          tileSize >= minTileSize;
-          tileSize -= 2
-        ) {
-          const wordsPerColumn = 14;
-          final neededColumns =
-              (widget.validWords.length / wordsPerColumn).ceil();
-
-          if (neededColumns <= 2 &&
-              neededColumns * (tileSize * 6) <= constraints.maxWidth) {
-            bestTileSize = tileSize;
-            maxWordsPerColumn = wordsPerColumn;
-            columns = neededColumns;
-            break;
-          }
+        if (bestTileSize > baseTileSize) {
+          bestTileSize = baseTileSize;
+        } else if (bestTileSize < minTileSize) {
+          bestTileSize = minTileSize;
         }
 
         final fontSize = bestTileSize * 0.5;
@@ -95,11 +74,8 @@ class _WordTileGridState extends State<WordTileGrid> {
         final wordsToDisplay = widget.validWords;
 
         for (int col = 0; col < columns; col++) {
-          final start = col * maxWordsPerColumn;
-          final end = (start + maxWordsPerColumn).clamp(
-            0,
-            wordsToDisplay.length,
-          );
+          final start = col * rowsPerColumn;
+          final end = (start + rowsPerColumn).clamp(0, wordsToDisplay.length);
           final words = wordsToDisplay.sublist(start, end);
 
           columnWidgets.add(
