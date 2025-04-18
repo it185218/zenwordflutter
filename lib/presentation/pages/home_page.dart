@@ -42,7 +42,7 @@ class HomePage extends StatelessWidget {
             child: BlocBuilder<LevelBloc, LevelState>(
               builder: (context, state) {
                 return LevelButton(
-                  text: 'Level ${state.currentLevel}',
+                  text: 'Επίπεδο ${state.currentLevel}',
                   onPressed: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
