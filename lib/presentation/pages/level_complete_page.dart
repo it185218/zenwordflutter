@@ -11,13 +11,46 @@ import '../widgets/level_button.dart';
 import '../widgets/top_bar.dart';
 import 'game_page.dart';
 
-class LevelCompletePage extends StatelessWidget {
+class LevelCompletePage extends StatefulWidget {
   final int level;
   const LevelCompletePage({super.key, required this.level});
 
   @override
+  State<LevelCompletePage> createState() => _LevelCompletePageState();
+}
+
+class _LevelCompletePageState extends State<LevelCompletePage>
+    with SingleTickerProviderStateMixin {
+  bool showReward = false;
+  bool rewardGiven = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final completed = context.read<LevelBloc>().state.completedCount;
+    final shouldReward = completed % 10 == 0;
+
+    if (shouldReward) {
+      Future.delayed(const Duration(milliseconds: 500), () {
+        setState(() {
+          showReward = true;
+        });
+
+        Future.delayed(const Duration(seconds: 2), () {
+          if (!rewardGiven) {
+            context.read<CoinBloc>().add(AddCoins(50));
+            setState(() {
+              rewardGiven = true;
+            });
+          }
+        });
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final nextLevel = level + 1;
+    final nextLevel = widget.level + 1;
     final completed = context.select<LevelBloc, int>(
       (bloc) => bloc.state.completedCount,
     );
@@ -34,33 +67,28 @@ class LevelCompletePage extends StatelessWidget {
           },
         ),
       ),
-
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              'PUZZLE GAME',
-              style: const TextStyle(
+            const Text(
+              'Λεξόσφαιρα',
+              style: TextStyle(
                 fontSize: 42,
                 fontWeight: FontWeight.w600,
                 color: Colors.white,
               ),
             ),
-
             const SizedBox(height: 32),
-
-            Text(
+            const Text(
               'Level Completed',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: Colors.white,
               ),
             ),
-
             const SizedBox(height: 16),
-
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 80),
               child: Stack(
@@ -85,36 +113,40 @@ class LevelCompletePage extends StatelessWidget {
                 ],
               ),
             ),
-
             const SizedBox(height: 150),
 
-            if (shouldReward) ...[
-              const Text(
-                '🎉 You earned 50 coins!',
-                style: TextStyle(fontSize: 20, color: Colors.green),
+            // Reward animation
+            if (shouldReward)
+              AnimatedOpacity(
+                opacity: showReward ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 500),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.8),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Text(
+                    'Rewarded Coins!',
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
+                ),
               ),
-              const SizedBox(height: 16),
-              ElevatedButton(
+
+            const SizedBox(height: 16),
+
+            // Level button only if no reward is pending
+            if (!shouldReward || rewardGiven)
+              LevelButton(
+                text: 'Level $nextLevel',
                 onPressed: () {
-                  context.read<CoinBloc>().add(AddCoins(50));
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(
                       builder: (_) => GamePage(level: nextLevel),
                     ),
                   );
                 },
-                child: const Text('Claim & Next Level'),
               ),
-            ],
-
-            LevelButton(
-              text: 'Level $nextLevel',
-              onPressed: () {
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (_) => GamePage(level: nextLevel)),
-                );
-              },
-            ),
           ],
         ),
       ),
