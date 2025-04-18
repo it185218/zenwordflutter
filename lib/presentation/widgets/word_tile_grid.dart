@@ -92,9 +92,7 @@ class _WordTileGridState extends State<WordTileGrid> {
         final fontSize = bestTileSize * 0.5;
 
         final columnWidgets = <Widget>[];
-        final maxValidWords =
-            widget.validWords.length > 14 ? 14 : widget.validWords.length;
-        final wordsToDisplay = widget.validWords.take(maxValidWords).toList();
+        final wordsToDisplay = widget.validWords;
 
         for (int col = 0; col < columns; col++) {
           final start = col * maxWordsPerColumn;
