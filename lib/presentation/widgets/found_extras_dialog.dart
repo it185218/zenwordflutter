@@ -65,7 +65,7 @@ class FoundExtrasDialog extends StatelessWidget {
                   ),
 
                   Text(
-                    'Extra Words',
+                    'Extra λέξεις',
                     style: TextStyle(
                       color: ColorLibrary.dialogText,
                       fontSize: 24,
@@ -118,7 +118,7 @@ class FoundExtrasDialog extends StatelessWidget {
                         Align(
                           alignment: Alignment.center,
                           child: Text(
-                            'Need ${10 - progressToNextReward} more to launch the paperplane!',
+                            '${10 - progressToNextReward} έμεινε για να κερδίσετε ανταμοιβή!',
                             style: const TextStyle(
                               fontSize: 12,
                               color: ColorLibrary.dialogText,
@@ -155,7 +155,7 @@ class FoundExtrasDialog extends StatelessWidget {
                                   child: Align(
                                     alignment: Alignment.center,
                                     child: Text(
-                                      'Found in this level',
+                                      'Βρέθηκαν σε αυτό το επίπεδο',
                                       style: const TextStyle(
                                         color: ColorLibrary.dialogText,
                                         fontSize: 12,
@@ -169,48 +169,55 @@ class FoundExtrasDialog extends StatelessWidget {
                               foundExtras.isEmpty
                                   ? const Align(
                                     alignment: Alignment.center,
-                                    child: Text(
-                                      "No extra words found yet.",
-                                      style: TextStyle(
-                                        color: ColorLibrary.dialogText,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
+                                    child: Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: 16,
+                                      ),
+                                      child: Text(
+                                        "δεν υπάρχουν επιπλέον λόγια ακόμα",
+                                        style: TextStyle(
+                                          color: ColorLibrary.dialogText,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                       ),
                                     ),
                                   )
                                   : Container(
+                                    constraints: BoxConstraints(maxHeight: 200),
                                     width: double.infinity,
                                     decoration: BoxDecoration(
                                       color: ColorLibrary.dialogContainer2,
                                       borderRadius: BorderRadius.circular(8),
                                     ),
-
-                                    child: Wrap(
-                                      spacing: 12,
-                                      runSpacing: 12,
-                                      children:
-                                          foundExtras
-                                              .map(
-                                                (word) => Container(
-                                                  padding:
-                                                      const EdgeInsets.symmetric(
-                                                        horizontal: 12,
-                                                        vertical: 8,
+                                    child: SingleChildScrollView(
+                                      child: Wrap(
+                                        spacing: 12,
+                                        runSpacing: 12,
+                                        children:
+                                            foundExtras
+                                                .map(
+                                                  (word) => Container(
+                                                    padding:
+                                                        const EdgeInsets.symmetric(
+                                                          horizontal: 12,
+                                                          vertical: 8,
+                                                        ),
+                                                    child: Text(
+                                                      word,
+                                                      style: const TextStyle(
+                                                        color:
+                                                            ColorLibrary
+                                                                .dialogText,
+                                                        fontSize: 12,
+                                                        fontWeight:
+                                                            FontWeight.w600,
                                                       ),
-                                                  child: Text(
-                                                    word,
-                                                    style: const TextStyle(
-                                                      color:
-                                                          ColorLibrary
-                                                              .dialogText,
-                                                      fontSize: 12,
-                                                      fontWeight:
-                                                          FontWeight.w600,
                                                     ),
                                                   ),
-                                                ),
-                                              )
-                                              .toList(),
+                                                )
+                                                .toList(),
+                                      ),
                                     ),
                                   ),
                             ],
