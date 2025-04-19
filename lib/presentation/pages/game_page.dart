@@ -55,7 +55,7 @@ class _GamePageState extends State<GamePage> {
         child: BlocBuilder<CoinBloc, CoinState>(
           builder: (context, state) {
             return TopBar(
-              title: 'Level ${widget.level}',
+              title: 'Επίπεδο ${widget.level}',
               coinText: '${state.coins}',
             );
           },
@@ -284,7 +284,7 @@ class _GamePageState extends State<GamePage> {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: Text(
-                                        "Not enough coins for a hint!",
+                                        "Δεν υπάρχουν αρκετά νομίσματα!",
                                       ),
                                     ),
                                   );
