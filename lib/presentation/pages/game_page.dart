@@ -11,6 +11,9 @@ import '../../logic/blocs/game/game_event.dart';
 import '../../logic/blocs/game/game_state.dart';
 import '../../logic/blocs/level/level_bloc.dart';
 import '../../logic/blocs/level/level_event.dart';
+import '../../logic/blocs/treasure/treasure_bloc.dart';
+import '../../logic/blocs/treasure/treasure_event.dart';
+import '../../logic/blocs/treasure/treasure_state.dart';
 import '../widgets/background_scaffold.dart';
 import '../widgets/big_circle.dart';
 import '../widgets/current_word_display.dart';
@@ -43,6 +46,7 @@ class _GamePageState extends State<GamePage> {
     stopwatch = Stopwatch()..start(); // Start timer
 
     Future.microtask(() {
+      context.read<TreasureBloc>().add(LoadTreasure());
       context.read<GameBloc>().add(GameStarted(level: widget.level));
     });
   }
@@ -63,249 +67,315 @@ class _GamePageState extends State<GamePage> {
       ),
 
       child: BlocListener<GameBloc, GameState>(
-        listenWhen:
-            (prev, curr) => prev.foundWords.length != curr.foundWords.length,
+        listenWhen: (prev, curr) => prev.validWords != curr.validWords,
         listener: (context, state) {
-          final allFound =
-              state.validWords.toSet().difference(state.foundWords).isEmpty;
+          final treasureBloc = context.read<TreasureBloc>();
+          final treasureState = treasureBloc.state;
 
-          if (allFound) {
-            stopwatch.stop(); // Stop timer
-            final currentLevel = context.read<LevelBloc>().state.currentLevel;
-
-            final isar = Isar.getInstance();
-            isar!.writeTxn(() async {
-              final saved =
-                  await isar.savedGames
-                      .filter()
-                      .levelEqualTo(currentLevel)
-                      .findFirst();
-              if (saved != null) {
-                await isar.savedGames.delete(saved.id);
-              }
-            });
-
-            context.read<LevelBloc>().add(
-              CompleteLevel(
-                level: currentLevel,
-                durationSeconds: stopwatch.elapsed.inSeconds,
-                foundWords: state.foundWords,
+          if (state.validWords.isNotEmpty &&
+              treasureState is TreasureLoaded &&
+              treasureState.progress.currentLevelWithIcon != widget.level &&
+              widget.level % 2 == 0 &&
+              widget.level >= 6) {
+            treasureBloc.add(
+              GenerateCollectible(
+                level: widget.level,
                 validWords: state.validWords,
+                foundWords: state.foundWords,
               ),
             );
-
-            Future.delayed(const Duration(milliseconds: 400), () {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(
-                  builder: (_) => LevelCompletePage(level: currentLevel),
-                ),
-              );
-            });
           }
         },
 
-        child: BlocBuilder<GameBloc, GameState>(
-          builder: (context, state) {
-            final letters = state.letters;
-            if (letters.isEmpty) {
-              return const Center(child: CircularProgressIndicator());
+        child: BlocListener<GameBloc, GameState>(
+          listenWhen:
+              (prev, curr) => prev.foundWords.length != curr.foundWords.length,
+          listener: (context, state) {
+            final allFound =
+                state.validWords.toSet().difference(state.foundWords).isEmpty;
+
+            final treasureState = context.read<TreasureBloc>().state;
+            if (treasureState is TreasureLoaded) {
+              final collectibleWord =
+                  treasureState.progress.wordWithCollectible;
+              if (collectibleWord != null &&
+                  state.foundWords.contains(collectibleWord)) {
+                context.read<TreasureBloc>().add(
+                  CollectTreasure(word: collectibleWord),
+                );
+              }
             }
 
-            return Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 4,
-                  ),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxHeight: MediaQuery.of(context).size.height * 0.4,
-                    ),
-                    child: WordTileGrid(
-                      validWords: state.validWords,
-                      foundWords: state.foundWords,
-                      revealedLetters: state.revealedLetters,
-                      hintRevealedLetters: state.hintRevealedLetters,
-                    ),
-                  ),
-                ),
-                const Spacer(),
-                CurrentWordDisplay(
-                  currentWord:
-                      state.selectedIndices.map((i) => state.letters[i]).join(),
-                ),
-                const SizedBox(height: 12),
+            if (allFound) {
+              stopwatch.stop(); // Stop timer
+              final currentLevel = context.read<LevelBloc>().state.currentLevel;
 
-                Row(
-                  children: [
-                    SizedBox(
-                      height: 250,
-                      child: Container(
-                        padding: EdgeInsets.only(left: 16, top: 16, bottom: 16),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            HintContainer(
-                              icon: Icons.shuffle_rounded,
-                              onTap: () {
-                                context.read<GameBloc>().add(
-                                  GameShuffleLetters(),
-                                );
-                              },
-                            ),
+              final isar = Isar.getInstance();
+              isar!.writeTxn(() async {
+                final saved =
+                    await isar.savedGames
+                        .filter()
+                        .levelEqualTo(currentLevel)
+                        .findFirst();
+                if (saved != null) {
+                  await isar.savedGames.delete(saved.id);
+                }
+              });
 
-                            HintContainer(
-                              icon: Icons.star_outline_rounded,
-                              onTap: () {
-                                showGeneralDialog(
-                                  context: context,
-                                  barrierDismissible: true,
-                                  barrierLabel: "Extras",
-                                  transitionDuration: const Duration(
-                                    milliseconds: 300,
-                                  ),
-                                  pageBuilder: (_, __, ___) {
-                                    return const FoundExtrasDialog();
-                                  },
-                                );
-                              },
+              context.read<LevelBloc>().add(
+                CompleteLevel(
+                  level: currentLevel,
+                  durationSeconds: stopwatch.elapsed.inSeconds,
+                  foundWords: state.foundWords,
+                  validWords: state.validWords,
+                ),
+              );
+
+              Future.delayed(const Duration(milliseconds: 400), () {
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
+                    builder: (_) => LevelCompletePage(level: currentLevel),
+                  ),
+                );
+              });
+            }
+          },
+
+          child: BlocBuilder<GameBloc, GameState>(
+            builder: (context, state) {
+              final letters = state.letters;
+              if (letters.isEmpty) {
+                return const Center();
+              }
+
+              final treasureBloc = context.read<TreasureBloc>();
+              final treasureState = treasureBloc.state;
+              if (treasureState is TreasureInitial &&
+                  state.validWords.isNotEmpty) {
+                treasureBloc.add(
+                  GenerateCollectible(
+                    level: widget.level,
+                    validWords: state.validWords,
+                    foundWords: state.foundWords,
+                  ),
+                );
+              }
+
+              return Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 4,
+                    ),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxHeight: MediaQuery.of(context).size.height * 0.4,
+                      ),
+                      child: WordTileGrid(
+                        validWords: state.validWords,
+                        foundWords: state.foundWords,
+                        revealedLetters: state.revealedLetters,
+                        hintRevealedLetters: state.hintRevealedLetters,
+                        wordWithCollectible:
+                            treasureState is TreasureLoaded
+                                ? treasureState.progress.wordWithCollectible
+                                : null,
+                        isCollectibleCollected:
+                            treasureState is TreasureLoaded &&
+                            treasureState.progress.wordWithCollectible !=
+                                null &&
+                            state.foundWords.contains(
+                              treasureState.progress.wordWithCollectible!,
                             ),
-                          ],
-                        ),
                       ),
                     ),
+                  ),
+                  const Spacer(),
+                  CurrentWordDisplay(
+                    currentWord:
+                        state.selectedIndices
+                            .map((i) => state.letters[i])
+                            .join(),
+                  ),
+                  const SizedBox(height: 12),
 
-                    Expanded(
-                      child: Container(
-                        height: 300,
-                        alignment: Alignment.center,
-                        child: LayoutBuilder(
-                          builder: (context, constraints) {
-                            final circleCenter = Offset(
-                              constraints.maxWidth / 2,
-                              constraints.maxHeight / 2,
-                            );
-                            final safeRadius = radius - circleSize / 2;
-                            final positions = calculateCircularPositions(
-                              center: circleCenter,
-                              count: letters.length,
-                              radius: safeRadius,
-                            );
-                            return GestureDetector(
-                              onPanStart: (details) {
-                                _handleTouch(
-                                  context,
-                                  details.localPosition,
-                                  positions,
-                                );
-                              },
-                              onPanUpdate: (details) {
-                                context.read<GameBloc>().add(
-                                  GameTouchUpdate(details.localPosition),
-                                );
-                                _handleTouch(
-                                  context,
-                                  details.localPosition,
-                                  positions,
-                                );
-                              },
-                              onPanEnd: (_) {
-                                context.read<GameBloc>().add(GameTouchEnd());
-                              },
-                              child: Stack(
-                                children: [
-                                  BigCircle(
-                                    radius: radius,
-                                    circleSize: circleSize,
-                                  ),
-                                  CustomPaint(
-                                    size: Size.infinite,
-                                    painter: LinePainter(
-                                      points:
-                                          state.selectedIndices
-                                              .map((i) => positions[i])
-                                              .toList(),
-                                      currentTouch: state.currentTouch,
+                  Row(
+                    children: [
+                      SizedBox(
+                        height: 250,
+                        child: Container(
+                          padding: EdgeInsets.only(
+                            left: 16,
+                            top: 16,
+                            bottom: 16,
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              HintContainer(
+                                icon: Icons.shuffle_rounded,
+                                onTap: () {
+                                  context.read<GameBloc>().add(
+                                    GameShuffleLetters(),
+                                  );
+                                },
+                              ),
+
+                              HintContainer(
+                                icon: Icons.star_outline_rounded,
+                                onTap: () {
+                                  showGeneralDialog(
+                                    context: context,
+                                    barrierDismissible: true,
+                                    barrierLabel: "Extras",
+                                    transitionDuration: const Duration(
+                                      milliseconds: 300,
                                     ),
-                                  ),
-                                  ...List.generate(letters.length, (i) {
-                                    final pos = positions[i];
-                                    final isSelected = state.selectedIndices
-                                        .contains(i);
-                                    final id = state.letterIds[i];
+                                    pageBuilder: (_, __, ___) {
+                                      return const FoundExtrasDialog();
+                                    },
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
 
-                                    return AnimatedPositioned(
-                                      key: ValueKey(id),
-                                      duration: const Duration(
-                                        milliseconds: 300,
+                      Expanded(
+                        child: Container(
+                          height: 300,
+                          alignment: Alignment.center,
+                          child: LayoutBuilder(
+                            builder: (context, constraints) {
+                              final circleCenter = Offset(
+                                constraints.maxWidth / 2,
+                                constraints.maxHeight / 2,
+                              );
+                              final safeRadius = radius - circleSize / 2;
+                              final positions = calculateCircularPositions(
+                                center: circleCenter,
+                                count: letters.length,
+                                radius: safeRadius,
+                              );
+                              return GestureDetector(
+                                onPanStart: (details) {
+                                  _handleTouch(
+                                    context,
+                                    details.localPosition,
+                                    positions,
+                                  );
+                                },
+                                onPanUpdate: (details) {
+                                  context.read<GameBloc>().add(
+                                    GameTouchUpdate(details.localPosition),
+                                  );
+                                  _handleTouch(
+                                    context,
+                                    details.localPosition,
+                                    positions,
+                                  );
+                                },
+                                onPanEnd: (_) {
+                                  context.read<GameBloc>().add(GameTouchEnd());
+                                },
+                                child: Stack(
+                                  children: [
+                                    BigCircle(
+                                      radius: radius,
+                                      circleSize: circleSize,
+                                    ),
+                                    CustomPaint(
+                                      size: Size.infinite,
+                                      painter: LinePainter(
+                                        points:
+                                            state.selectedIndices
+                                                .map((i) => positions[i])
+                                                .toList(),
+                                        currentTouch: state.currentTouch,
                                       ),
-                                      curve: Curves.easeInOut,
-                                      left: pos.dx - circleSize / 2,
-                                      top: pos.dy - circleSize / 2,
-                                      child: LetterCircle(
-                                        letter: letters[i],
-                                        isSelected: isSelected,
-                                        size: circleSize,
+                                    ),
+                                    ...List.generate(letters.length, (i) {
+                                      final pos = positions[i];
+                                      final isSelected = state.selectedIndices
+                                          .contains(i);
+                                      final id = state.letterIds[i];
+
+                                      return AnimatedPositioned(
+                                        key: ValueKey(id),
+                                        duration: const Duration(
+                                          milliseconds: 300,
+                                        ),
+                                        curve: Curves.easeInOut,
+                                        left: pos.dx - circleSize / 2,
+                                        top: pos.dy - circleSize / 2,
+                                        child: LetterCircle(
+                                          letter: letters[i],
+                                          isSelected: isSelected,
+                                          size: circleSize,
+                                        ),
+                                      );
+                                    }),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+
+                      SizedBox(
+                        height: 250,
+                        child: Container(
+                          padding: EdgeInsets.only(
+                            right: 16,
+                            top: 16,
+                            bottom: 16,
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              HintContainer(
+                                icon: Icons.emoji_objects_outlined,
+                                onTap: () {
+                                  final coinState =
+                                      context.read<CoinBloc>().state;
+
+                                  if (coinState.coins >= 10) {
+                                    context.read<CoinBloc>().add(
+                                      SpendCoins(10),
+                                    );
+                                    context.read<GameBloc>().add(
+                                      GameUseHintLetter(),
+                                    );
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          "Δεν υπάρχουν αρκετά νομίσματα!",
+                                        ),
                                       ),
                                     );
-                                  }),
-                                ],
+                                  }
+                                },
                               ),
-                            );
-                          },
+                              HintContainer(
+                                icon: Icons.card_giftcard_outlined,
+                                onTap: () {
+                                  context.read<CoinBloc>().add(AddCoins(50));
+                                },
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-
-                    SizedBox(
-                      height: 250,
-                      child: Container(
-                        padding: EdgeInsets.only(
-                          right: 16,
-                          top: 16,
-                          bottom: 16,
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            HintContainer(
-                              icon: Icons.emoji_objects_outlined,
-                              onTap: () {
-                                final coinState =
-                                    context.read<CoinBloc>().state;
-
-                                if (coinState.coins >= 10) {
-                                  context.read<CoinBloc>().add(SpendCoins(10));
-                                  context.read<GameBloc>().add(
-                                    GameUseHintLetter(),
-                                  );
-                                } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        "Δεν υπάρχουν αρκετά νομίσματα!",
-                                      ),
-                                    ),
-                                  );
-                                }
-                              },
-                            ),
-                            HintContainer(
-                              icon: Icons.card_giftcard_outlined,
-                              onTap: () {
-                                context.read<CoinBloc>().add(AddCoins(50));
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            );
-          },
+                    ],
+                  ),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );

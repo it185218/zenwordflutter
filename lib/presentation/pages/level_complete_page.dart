@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:zenwordflutter/presentation/pages/treasure_page.dart';
 
 import '../../core/utils/color_library.dart';
 import '../../logic/blocs/coin/coin_bloc.dart';
 import '../../logic/blocs/coin/coin_event.dart';
 import '../../logic/blocs/coin/coin_state.dart';
 import '../../logic/blocs/level/level_bloc.dart';
+import '../../logic/blocs/treasure/treasure_bloc.dart';
+import '../../logic/blocs/treasure/treasure_state.dart';
 import '../widgets/background_scaffold.dart';
+import '../widgets/crack_bricks_dialog.dart';
 import '../widgets/level_button.dart';
 import '../widgets/top_bar.dart';
+import '../widgets/treasure_container.dart';
 import 'game_page.dart';
 
 class LevelCompletePage extends StatefulWidget {
@@ -69,8 +74,40 @@ class _LevelCompletePageState extends State<LevelCompletePage>
       ),
       child: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
+            Padding(
+              padding: EdgeInsets.only(left: 12, top: 16),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: TreasureContainer(
+                  onTap: () async {
+                    // Check if a set is completed in TreasureBloc
+                    final progress = context.read<TreasureBloc>().state;
+                    final isSetCompleted =
+                        progress is TreasureLoaded &&
+                        progress.progress.setsCompleted > 0;
+
+                    // Navigate to the appropriate page based on set completion
+                    if (isSetCompleted) {
+                      // Show CrackBricksDialog if set is completed
+                      await showDialog(
+                        context: context,
+                        builder: (context) => CrackBricksDialog(),
+                      );
+                    } else {
+                      // Show TreasurePage if set is not completed
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(builder: (_) => TreasurePage()),
+                      );
+                    }
+                  },
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 80),
+
             const Text(
               'Λεξόσφαιρα',
               style: TextStyle(
@@ -99,7 +136,7 @@ class _LevelCompletePageState extends State<LevelCompletePage>
                       value: progressTowardsReward / 10,
                       minHeight: 12,
                       backgroundColor: ColorLibrary.button,
-                      color: ColorLibrary.buttonBorder,
+                      color: ColorLibrary.progress,
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
