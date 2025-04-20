@@ -12,4 +12,5 @@ class TreasureProgress {
   int? currentLevelWithIcon;
   String? wordWithCollectible;
   int? collectibleTileIndex;
+  int lastCrackedSet = 0;
 }

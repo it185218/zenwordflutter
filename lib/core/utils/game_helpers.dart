@@ -4,7 +4,7 @@ import 'package:flutter/services.dart' show rootBundle;
 class GameHelpers {
   static Future<List<String>> loadDictionary() async {
     final text = await rootBundle.loadString(
-      'assets/dictionary/english-dictionary.txt',
+      'assets/dictionary/greek-dictionary.txt',
     );
     return text
         .split('\n')

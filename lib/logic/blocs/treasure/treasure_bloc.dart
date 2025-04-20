@@ -66,11 +66,20 @@ class TreasureBloc extends Bloc<TreasureEvent, TreasureState> {
     if (progress.totalCollected % 3 == 0) {
       progress.setsCompleted += 1;
 
+      // Increase the collectible count requirement
+      if (progress.setsCompleted == 1) {
+        progress.totalCollected = 6; // After 3, it becomes 6
+      } else if (progress.setsCompleted == 2) {
+        progress.totalCollected = 9; // After 6, it becomes 9
+      } else {
+        progress.totalCollected = 12; // After 9, set to 12 or finish
+      }
+
       // Add the next vase index to the vaseIndices list sequentially
       if (progress.vaseIndices.length < 12) {
-        progress.vaseIndices.add(
-          progress.vaseIndices.length,
-        ); // Add the next index
+        final updatedVases = List<int>.from(progress.vaseIndices)
+          ..add(progress.vaseIndices.length);
+        progress.vaseIndices = updatedVases;
       }
     }
 

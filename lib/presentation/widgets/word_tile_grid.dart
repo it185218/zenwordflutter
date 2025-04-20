@@ -3,12 +3,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../core/utils/color_library.dart';
 import '../../logic/blocs/coin/coin_bloc.dart';
 import '../../logic/blocs/coin/coin_event.dart';
+import '../../logic/blocs/treasure/treasure_bloc.dart';
+import '../../logic/blocs/treasure/treasure_state.dart';
 
 class WordTileGrid extends StatefulWidget {
   final List<String> validWords;
   final Set<String> foundWords;
   final Map<String, Set<int>> revealedLetters;
   final Map<String, Set<int>> hintRevealedLetters;
+  final String? wordWithCollectible;
+  final bool isCollectibleCollected;
 
   const WordTileGrid({
     super.key,
@@ -16,6 +20,8 @@ class WordTileGrid extends StatefulWidget {
     required this.foundWords,
     this.revealedLetters = const {},
     this.hintRevealedLetters = const {},
+    this.wordWithCollectible,
+    this.isCollectibleCollected = false,
   });
 
   @override
@@ -103,6 +109,24 @@ class _WordTileGridState extends State<WordTileGrid> {
                         final isCoin =
                             revealedSet.contains(i) && !hintSet.contains(i);
 
+                        final treasureState =
+                            context.watch<TreasureBloc>().state;
+                        int? collectibleIndex;
+
+                        if (treasureState is TreasureLoaded &&
+                            treasureState.progress.wordWithCollectible ==
+                                word) {
+                          collectibleIndex =
+                              treasureState.progress.collectibleTileIndex;
+                        }
+
+                        final showCollectible =
+                            collectibleIndex != null &&
+                            i == collectibleIndex &&
+                            word == widget.wordWithCollectible &&
+                            !widget.foundWords.contains(word) &&
+                            !isCoin;
+
                         return Container(
                           margin: const EdgeInsets.all(2),
                           width: bestTileSize,
@@ -130,6 +154,12 @@ class _WordTileGridState extends State<WordTileGrid> {
                                     Icons.monetization_on,
                                     size: fontSize,
                                     color: Colors.amber[700],
+                                  )
+                                  : showCollectible
+                                  ? Icon(
+                                    Icons.star,
+                                    size: fontSize,
+                                    color: Colors.cyanAccent,
                                   )
                                   : const SizedBox.shrink(),
                         );

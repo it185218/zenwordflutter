@@ -7,11 +7,13 @@ import 'data/model/level.dart';
 import 'data/model/performance.dart';
 import 'data/model/player_data.dart';
 import 'data/model/saved_game.dart';
+import 'data/model/treasure_progress.dart';
 import 'logic/blocs/coin/coin_bloc.dart';
 import 'logic/blocs/coin/coin_event.dart';
 import 'logic/blocs/game/game_bloc.dart';
 import 'logic/blocs/level/level_bloc.dart';
 import 'logic/blocs/level/level_event.dart';
+import 'logic/blocs/treasure/treasure_bloc.dart';
 import 'presentation/pages/home_page.dart';
 
 late final Isar isar;
@@ -25,6 +27,7 @@ void main() async {
     PlayerDataSchema,
     PerformanceSchema,
     SavedGameSchema,
+    TreasureProgressSchema,
   ], directory: dir.path);
 
   runApp(
@@ -33,6 +36,7 @@ void main() async {
         BlocProvider(create: (context) => GameBloc()),
         BlocProvider(create: (_) => LevelBloc(isar)..add(LoadLevels())),
         BlocProvider(create: (_) => CoinBloc(isar)..add(LoadCoins())),
+        BlocProvider(create: (_) => TreasureBloc(isar)),
       ],
 
       child: const MyApp(),
