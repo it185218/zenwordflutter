@@ -26,10 +26,24 @@ class _TreasureContainerState extends State<TreasureContainer> {
     return BlocBuilder<TreasureBloc, TreasureState>(
       builder: (context, state) {
         double progress = 0;
+        int collectedInSet = 0;
+        int required = 3;
 
         if (state is TreasureLoaded) {
-          final collectedInCurrentSet = state.progress.totalCollected % 3;
-          progress = collectedInCurrentSet / 3;
+          final setsCompleted = state.progress.setsCompleted;
+          final totalCollected = state.progress.totalCollected;
+
+          int getRequiredForNextSet(int setsCompleted) {
+            if (setsCompleted == 0) return 3;
+            if (setsCompleted == 1) return 6;
+            return 9;
+          }
+
+          required = getRequiredForNextSet(setsCompleted);
+          final start = [0, 3, 9][setsCompleted];
+          collectedInSet = totalCollected - start;
+
+          progress = collectedInSet / required;
         }
 
         return Column(
@@ -78,6 +92,15 @@ class _TreasureContainerState extends State<TreasureContainer> {
                   backgroundColor: ColorLibrary.button,
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                 ),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '$collectedInSet / $required',
+              style: TextStyle(
+                fontSize: 10,
+                color: Colors.white,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ],
