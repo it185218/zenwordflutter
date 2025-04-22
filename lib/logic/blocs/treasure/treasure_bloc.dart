@@ -33,6 +33,10 @@ class TreasureBloc extends Bloc<TreasureEvent, TreasureState> {
 
     final progress = (state as TreasureLoaded).progress;
 
+    if (progress.levelsGenerated.contains(event.level)) {
+      return;
+    }
+
     if (event.level % 2 == 0 && event.level >= 6) {
       final notFoundWords =
           event.validWords
@@ -48,6 +52,11 @@ class TreasureBloc extends Bloc<TreasureEvent, TreasureState> {
         progress.currentLevelWithIcon = event.level;
         progress.wordWithCollectible = word;
         progress.collectibleTileIndex = chosenIndex;
+        progress.levelsGenerated = List<int>.from(progress.levelsGenerated)
+          ..add(event.level);
+
+        await isar.writeTxn(() => isar.treasureProgress.put(progress));
+        emit(TreasureLoaded(progress));
       }
     }
   }
@@ -62,20 +71,16 @@ class TreasureBloc extends Bloc<TreasureEvent, TreasureState> {
 
     progress.totalCollected += 1;
 
-    // Check if a set of 3 collectibles has been completed
     if (progress.totalCollected % 3 == 0) {
       progress.setsCompleted += 1;
-
-      // Increase the collectible count requirement
       if (progress.setsCompleted == 1) {
-        progress.totalCollected = 6; // After 3, it becomes 6
+        progress.totalCollected = 6;
       } else if (progress.setsCompleted == 2) {
-        progress.totalCollected = 9; // After 6, it becomes 9
+        progress.totalCollected = 9;
       } else {
-        progress.totalCollected = 12; // After 9, set to 12 or finish
+        progress.totalCollected = 12;
       }
 
-      // Add the next vase index to the vaseIndices list sequentially
       if (progress.vaseIndices.length < 12) {
         final updatedVases = List<int>.from(progress.vaseIndices)
           ..add(progress.vaseIndices.length);
@@ -83,11 +88,11 @@ class TreasureBloc extends Bloc<TreasureEvent, TreasureState> {
       }
     }
 
-    // Reset collectible state
+    // Clear collectible data completely
     progress.currentLevelWithIcon = null;
     progress.wordWithCollectible = null;
+    progress.collectibleTileIndex = null;
 
-    // Persist changes in Isar
     await isar.writeTxn(() => isar.treasureProgress.put(progress));
     emit(TreasureLoaded(progress));
   }

@@ -32,23 +32,28 @@ const TreasureProgressSchema = CollectionSchema(
       name: r'lastCrackedSet',
       type: IsarType.long,
     ),
-    r'setsCompleted': PropertySchema(
+    r'levelsGenerated': PropertySchema(
       id: 3,
+      name: r'levelsGenerated',
+      type: IsarType.longList,
+    ),
+    r'setsCompleted': PropertySchema(
+      id: 4,
       name: r'setsCompleted',
       type: IsarType.long,
     ),
     r'totalCollected': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'totalCollected',
       type: IsarType.long,
     ),
     r'vaseIndices': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'vaseIndices',
       type: IsarType.longList,
     ),
     r'wordWithCollectible': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'wordWithCollectible',
       type: IsarType.string,
     )
@@ -73,6 +78,7 @@ int _treasureProgressEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
+  bytesCount += 3 + object.levelsGenerated.length * 8;
   bytesCount += 3 + object.vaseIndices.length * 8;
   {
     final value = object.wordWithCollectible;
@@ -92,10 +98,11 @@ void _treasureProgressSerialize(
   writer.writeLong(offsets[0], object.collectibleTileIndex);
   writer.writeLong(offsets[1], object.currentLevelWithIcon);
   writer.writeLong(offsets[2], object.lastCrackedSet);
-  writer.writeLong(offsets[3], object.setsCompleted);
-  writer.writeLong(offsets[4], object.totalCollected);
-  writer.writeLongList(offsets[5], object.vaseIndices);
-  writer.writeString(offsets[6], object.wordWithCollectible);
+  writer.writeLongList(offsets[3], object.levelsGenerated);
+  writer.writeLong(offsets[4], object.setsCompleted);
+  writer.writeLong(offsets[5], object.totalCollected);
+  writer.writeLongList(offsets[6], object.vaseIndices);
+  writer.writeString(offsets[7], object.wordWithCollectible);
 }
 
 TreasureProgress _treasureProgressDeserialize(
@@ -109,10 +116,11 @@ TreasureProgress _treasureProgressDeserialize(
   object.currentLevelWithIcon = reader.readLongOrNull(offsets[1]);
   object.id = id;
   object.lastCrackedSet = reader.readLong(offsets[2]);
-  object.setsCompleted = reader.readLong(offsets[3]);
-  object.totalCollected = reader.readLong(offsets[4]);
-  object.vaseIndices = reader.readLongList(offsets[5]) ?? [];
-  object.wordWithCollectible = reader.readStringOrNull(offsets[6]);
+  object.levelsGenerated = reader.readLongList(offsets[3]) ?? [];
+  object.setsCompleted = reader.readLong(offsets[4]);
+  object.totalCollected = reader.readLong(offsets[5]);
+  object.vaseIndices = reader.readLongList(offsets[6]) ?? [];
+  object.wordWithCollectible = reader.readStringOrNull(offsets[7]);
   return object;
 }
 
@@ -130,12 +138,14 @@ P _treasureProgressDeserializeProp<P>(
     case 2:
       return (reader.readLong(offset)) as P;
     case 3:
-      return (reader.readLong(offset)) as P;
+      return (reader.readLongList(offset) ?? []) as P;
     case 4:
       return (reader.readLong(offset)) as P;
     case 5:
-      return (reader.readLongList(offset) ?? []) as P;
+      return (reader.readLong(offset)) as P;
     case 6:
+      return (reader.readLongList(offset) ?? []) as P;
+    case 7:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -493,6 +503,151 @@ extension TreasureProgressQueryFilter
         upper: upper,
         includeUpper: includeUpper,
       ));
+    });
+  }
+
+  QueryBuilder<TreasureProgress, TreasureProgress, QAfterFilterCondition>
+      levelsGeneratedElementEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'levelsGenerated',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<TreasureProgress, TreasureProgress, QAfterFilterCondition>
+      levelsGeneratedElementGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'levelsGenerated',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<TreasureProgress, TreasureProgress, QAfterFilterCondition>
+      levelsGeneratedElementLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'levelsGenerated',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<TreasureProgress, TreasureProgress, QAfterFilterCondition>
+      levelsGeneratedElementBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'levelsGenerated',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<TreasureProgress, TreasureProgress, QAfterFilterCondition>
+      levelsGeneratedLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'levelsGenerated',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<TreasureProgress, TreasureProgress, QAfterFilterCondition>
+      levelsGeneratedIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'levelsGenerated',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<TreasureProgress, TreasureProgress, QAfterFilterCondition>
+      levelsGeneratedIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'levelsGenerated',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<TreasureProgress, TreasureProgress, QAfterFilterCondition>
+      levelsGeneratedLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'levelsGenerated',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<TreasureProgress, TreasureProgress, QAfterFilterCondition>
+      levelsGeneratedLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'levelsGenerated',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<TreasureProgress, TreasureProgress, QAfterFilterCondition>
+      levelsGeneratedLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'levelsGenerated',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
     });
   }
 
@@ -1125,6 +1280,13 @@ extension TreasureProgressQueryWhereDistinct
   }
 
   QueryBuilder<TreasureProgress, TreasureProgress, QDistinct>
+      distinctByLevelsGenerated() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'levelsGenerated');
+    });
+  }
+
+  QueryBuilder<TreasureProgress, TreasureProgress, QDistinct>
       distinctBySetsCompleted() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'setsCompleted');
@@ -1180,6 +1342,13 @@ extension TreasureProgressQueryProperty
       lastCrackedSetProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'lastCrackedSet');
+    });
+  }
+
+  QueryBuilder<TreasureProgress, List<int>, QQueryOperations>
+      levelsGeneratedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'levelsGenerated');
     });
   }
 

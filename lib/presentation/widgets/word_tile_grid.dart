@@ -124,6 +124,7 @@ class _WordTileGridState extends State<WordTileGrid> {
                             collectibleIndex != null &&
                             i == collectibleIndex &&
                             word == widget.wordWithCollectible &&
+                            !widget.isCollectibleCollected &&
                             !widget.foundWords.contains(word) &&
                             !isCoin;
 

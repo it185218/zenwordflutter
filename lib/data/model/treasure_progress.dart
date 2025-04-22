@@ -13,4 +13,5 @@ class TreasureProgress {
   String? wordWithCollectible;
   int? collectibleTileIndex;
   int lastCrackedSet = 0;
+  List<int> levelsGenerated = [];
 }
