@@ -104,7 +104,14 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
                         width: 2,
                       ),
                     ),
-                    child: const Center(),
+                    child: Container(
+                      padding: EdgeInsets.all(6),
+                      child: Image.asset(
+                        'assets/images/coin_pattern.png',
+                        width: 4,
+                        height: 4,
+                      ),
+                    ),
                   ),
                 ),
               ),
