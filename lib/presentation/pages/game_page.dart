@@ -21,6 +21,7 @@ import '../widgets/found_extras_dialog.dart';
 import '../widgets/hint_container.dart';
 import '../widgets/letter_circle.dart';
 import '../widgets/line_painter.dart';
+import '../widgets/tile_coins.dart';
 import '../widgets/top_bar.dart';
 import '../widgets/word_tile_grid.dart';
 import 'level_complete_page.dart';
@@ -340,35 +341,73 @@ class _GamePageState extends State<GamePage> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              HintContainer(
-                                icon: Icons.emoji_objects_outlined,
-                                onTap: () {
-                                  final coinState =
-                                      context.read<CoinBloc>().state;
+                              Stack(
+                                clipBehavior: Clip.none,
+                                alignment: Alignment.topCenter,
+                                children: [
+                                  Column(
+                                    children: [
+                                      HintContainer(
+                                        icon: Icons.emoji_objects_outlined,
+                                        onTap: () {
+                                          final coinState =
+                                              context.read<CoinBloc>().state;
 
-                                  if (coinState.coins >= 10) {
-                                    context.read<CoinBloc>().add(
-                                      SpendCoins(10),
-                                    );
-                                    context.read<GameBloc>().add(
-                                      GameUseHintLetter(),
-                                    );
-                                  } else {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          "Δεν υπάρχουν αρκετά νομίσματα!",
-                                        ),
+                                          if (coinState.coins >= 10) {
+                                            context.read<CoinBloc>().add(
+                                              SpendCoins(10),
+                                            );
+                                            context.read<GameBloc>().add(
+                                              GameUseHintLetter(),
+                                            );
+                                          } else {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  "Δεν υπάρχουν αρκετά νομίσματα!",
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                        },
                                       ),
-                                    );
-                                  }
-                                },
+                                    ],
+                                  ),
+                                  Positioned(
+                                    bottom: -10,
+                                    child: TileCoins(
+                                      image: 'assets/images/coin.png',
+                                      text: '80',
+                                    ),
+                                  ),
+                                ],
                               ),
-                              HintContainer(
-                                icon: Icons.rocket_launch_outlined,
-                                onTap: () {
-                                  context.read<CoinBloc>().add(AddCoins(50));
-                                },
+                              Stack(
+                                clipBehavior: Clip.none,
+                                alignment: Alignment.topCenter,
+                                children: [
+                                  Column(
+                                    children: [
+                                      HintContainer(
+                                        icon: Icons.rocket_launch_outlined,
+                                        onTap: () {
+                                          context.read<CoinBloc>().add(
+                                            AddCoins(50),
+                                          );
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                  Positioned(
+                                    bottom: -10,
+                                    child: TileCoins(
+                                      image: 'assets/images/coin.png',
+                                      text: '120',
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
