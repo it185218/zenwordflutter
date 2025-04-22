@@ -42,7 +42,7 @@ class _LevelCompletePageState extends State<LevelCompletePage>
         });
 
         Future.delayed(const Duration(seconds: 2), () {
-          if (!rewardGiven) {
+          if (!rewardGiven && mounted) {
             context.read<CoinBloc>().add(AddCoins(50));
             setState(() {
               rewardGiven = true;
@@ -158,14 +158,21 @@ class _LevelCompletePageState extends State<LevelCompletePage>
                 opacity: showReward ? 1.0 : 0.0,
                 duration: const Duration(milliseconds: 500),
                 child: Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 8,
+                    horizontal: 16,
+                  ),
                   decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.8),
+                    color: ColorLibrary.coinRewardedCpntainer,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Text(
-                    'Rewarded Coins!',
-                    style: TextStyle(fontSize: 16, color: Colors.white),
+                    '50 Coins Rewarded!',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),

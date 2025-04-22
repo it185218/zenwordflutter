@@ -32,4 +32,6 @@ class ColorLibrary {
   static const Color progressBackground = Color.fromARGB(255, 145, 155, 154);
 
   static const Color dialogText = Color.fromARGB(255, 66, 70, 70);
+
+  static const Color coinRewardedCpntainer = Color.fromARGB(220, 111, 159, 118);
 }
