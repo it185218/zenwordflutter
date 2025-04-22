@@ -150,16 +150,14 @@ class _WordTileGridState extends State<WordTileGrid> {
                                     ),
                                   )
                                   : isCoin
-                                  ? Icon(
-                                    Icons.monetization_on,
-                                    size: fontSize,
-                                    color: Colors.amber[700],
+                                  ? Image.asset(
+                                    'assets/images/coin.png',
+                                    width: fontSize,
                                   )
                                   : showCollectible
-                                  ? Icon(
-                                    Icons.star,
-                                    size: fontSize,
-                                    color: Colors.cyanAccent,
+                                  ? Image.asset(
+                                    'assets/images/bricks.png',
+                                    width: fontSize,
                                   )
                                   : const SizedBox.shrink(),
                         );
