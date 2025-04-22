@@ -22,6 +22,22 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     on<GameUndoLastSelection>(_onUndoLastSelection);
     on<GameShuffleLetters>(_onShuffleLetters);
     on<GameUseHintLetter>(_onUseHintLetter);
+    on<ResetGameState>((event, emit) {
+      emit(
+        state.copyWith(
+          letters: [],
+          validWords: [],
+          foundWords: {},
+          foundExtras: {},
+          additionalWords: {},
+          letterIds: [],
+          revealedLetters: {},
+          hintRevealedLetters: {},
+          selectedIndices: [],
+          currentTouch: null,
+        ),
+      );
+    });
   }
 
   Future<void> _onGameStarted(

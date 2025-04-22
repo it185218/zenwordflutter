@@ -130,6 +130,7 @@ class _GamePageState extends State<GamePage> {
                   validWords: state.validWords,
                 ),
               );
+              context.read<GameBloc>().add(ResetGameState());
 
               Future.delayed(const Duration(milliseconds: 400), () {
                 Navigator.of(context).pushReplacement(
