@@ -130,9 +130,10 @@ class _GamePageState extends State<GamePage> {
                   validWords: state.validWords,
                 ),
               );
-              context.read<GameBloc>().add(ResetGameState());
 
-              Future.delayed(const Duration(milliseconds: 400), () {
+              Future.delayed(const Duration(milliseconds: 1000), () {
+                context.read<GameBloc>().add(ResetGameState());
+
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(
                     builder: (_) => LevelCompletePage(level: currentLevel),
