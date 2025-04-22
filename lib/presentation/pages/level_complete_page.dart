@@ -118,7 +118,7 @@ class _LevelCompletePageState extends State<LevelCompletePage>
             ),
             const SizedBox(height: 32),
             const Text(
-              'Level Completed',
+              'Το επίπεδο ολοκληρώθηκε',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -167,7 +167,7 @@ class _LevelCompletePageState extends State<LevelCompletePage>
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Text(
-                    '50 Coins Rewarded!',
+                    'Επιβράβευση 50 νομισμάτων!',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -182,7 +182,7 @@ class _LevelCompletePageState extends State<LevelCompletePage>
             // Level button only if no reward is pending
             if (!shouldReward || rewardGiven)
               LevelButton(
-                text: 'Level $nextLevel',
+                text: 'Επίπεδο $nextLevel',
                 onPressed: () {
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(
