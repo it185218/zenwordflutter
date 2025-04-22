@@ -83,7 +83,20 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     final skillScore = computeSkillScore(history, sampleSize: 5);
 
     final baseWord = GameHelpers.pickAdaptiveBaseWord(_dictionary, skillScore);
-    final ids = List.generate(baseWord.length, (i) => i);
+
+    final baseLetters = baseWord.split('');
+    final baseIds = List.generate(baseLetters.length, (i) => i);
+
+    // Pair each letter with its id, shuffle together
+    final zipped = List.generate(
+      baseLetters.length,
+      (i) => MapEntry(baseLetters[i], baseIds[i]),
+    );
+    zipped.shuffle();
+
+    final shuffledLetters = zipped.map((e) => e.key).toList();
+    final shuffledIds = zipped.map((e) => e.value).toList();
+
     final validSubwords = GameHelpers.findValidSubwords(baseWord, _dictionary);
 
     validSubwords.sort(
@@ -109,8 +122,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
     final newState = state.copyWith(
       level: event.level,
-      letters: baseWord.split(''),
-      letterIds: ids,
+      letters: shuffledLetters,
+      letterIds: shuffledIds,
       validWords: balancedWords,
       additionalWords: extras,
       foundWords: {},
@@ -128,8 +141,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         SavedGame()
           ..level = event.level
           ..baseWord = baseWord
-          ..letters = newState.letters
-          ..letterIds = ids
+          ..letters = shuffledLetters
+          ..letterIds = shuffledIds
           ..validWords = balancedWords
           ..foundWords = []
           ..additionalWords = extras.toList()
