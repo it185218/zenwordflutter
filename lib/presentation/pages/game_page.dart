@@ -174,22 +174,24 @@ class _GamePageState extends State<GamePage> {
                       constraints: BoxConstraints(
                         maxHeight: MediaQuery.of(context).size.height * 0.4,
                       ),
-                      child: WordTileGrid(
-                        validWords: state.validWords,
-                        foundWords: state.foundWords,
-                        revealedLetters: state.revealedLetters,
-                        hintRevealedLetters: state.hintRevealedLetters,
-                        wordWithCollectible:
-                            treasureState is TreasureLoaded
-                                ? treasureState.progress.wordWithCollectible
-                                : null,
-                        isCollectibleCollected:
-                            treasureState is TreasureLoaded &&
-                            treasureState.progress.wordWithCollectible !=
-                                null &&
-                            state.foundWords.contains(
-                              treasureState.progress.wordWithCollectible!,
-                            ),
+                      child: Center(
+                        child: WordTileGrid(
+                          validWords: state.validWords,
+                          foundWords: state.foundWords,
+                          revealedLetters: state.revealedLetters,
+                          hintRevealedLetters: state.hintRevealedLetters,
+                          wordWithCollectible:
+                              treasureState is TreasureLoaded
+                                  ? treasureState.progress.wordWithCollectible
+                                  : null,
+                          isCollectibleCollected:
+                              treasureState is TreasureLoaded &&
+                              treasureState.progress.wordWithCollectible !=
+                                  null &&
+                              state.foundWords.contains(
+                                treasureState.progress.wordWithCollectible!,
+                              ),
+                        ),
                       ),
                     ),
                   ),
