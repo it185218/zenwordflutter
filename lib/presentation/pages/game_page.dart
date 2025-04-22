@@ -362,7 +362,7 @@ class _GamePageState extends State<GamePage> {
                                 },
                               ),
                               HintContainer(
-                                icon: Icons.card_giftcard_outlined,
+                                icon: Icons.rocket_launch_outlined,
                                 onTap: () {
                                   context.read<CoinBloc>().add(AddCoins(50));
                                 },
