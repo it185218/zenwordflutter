@@ -26,10 +26,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       emit(
         state.copyWith(
           letters: [],
-          validWords: [],
           foundWords: {},
-          foundExtras: {},
-          additionalWords: {},
           letterIds: [],
           revealedLetters: {},
           hintRevealedLetters: {},
