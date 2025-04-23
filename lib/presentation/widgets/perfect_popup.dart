@@ -15,7 +15,6 @@ class _PerfectPopupState extends State<PerfectPopup>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _opacity;
-  Timer? _dismissTimer;
 
   @override
   void initState() {
@@ -27,14 +26,15 @@ class _PerfectPopupState extends State<PerfectPopup>
     );
 
     _opacity = Tween<double>(
-      begin: 1.0,
-      end: 0.0,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
 
-    // Start the reverse fade after a short visible duration
-    _dismissTimer = Timer(const Duration(milliseconds: 1200), () {
+    // Start fade-in, wait a second, then pop the dialog
+    _controller.forward().then((_) async {
+      await Future.delayed(const Duration(milliseconds: 1000));
       if (mounted) {
-        _controller.forward(); // play fade out
+        Navigator.of(context).pop(); // auto dismiss
       }
     });
   }
@@ -43,10 +43,9 @@ class _PerfectPopupState extends State<PerfectPopup>
   Widget build(BuildContext context) {
     return FadeTransition(
       opacity: _opacity,
-      child: Align(
-        alignment: Alignment.center,
+      child: Center(
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
           decoration: BoxDecoration(
             color: ColorLibrary.coinRewardedCpntainer,
             borderRadius: BorderRadius.circular(12),
@@ -66,7 +65,6 @@ class _PerfectPopupState extends State<PerfectPopup>
 
   @override
   void dispose() {
-    _dismissTimer?.cancel();
     _controller.dispose();
     super.dispose();
   }

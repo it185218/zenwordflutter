@@ -124,12 +124,11 @@ class _GamePageState extends State<GamePage> {
                     context: context,
                     barrierDismissible: false,
                     barrierColor: Colors.transparent,
-                    builder: (context) {
-                      return const Stack(children: [PerfectPopup()]);
-                    },
+                    builder: (context) => const PerfectPopup(),
                   );
                 }
               });
+
               final currentLevel = context.read<LevelBloc>().state.currentLevel;
 
               final isar = Isar.getInstance();
