@@ -30,3 +30,9 @@ class GameUseHintLetter extends GameEvent {}
 class GameUseHintFirstLetters extends GameEvent {}
 
 class ResetGameState extends GameEvent {}
+
+class GameSettingChanged extends GameEvent {
+  final bool allowMultipleSolutions;
+
+  GameSettingChanged(this.allowMultipleSolutions);
+}

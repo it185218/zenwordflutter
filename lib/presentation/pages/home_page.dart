@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../core/utils/color_library.dart';
 import '../../logic/blocs/coin/coin_bloc.dart';
 import '../../logic/blocs/coin/coin_state.dart';
 import '../../logic/blocs/level/level_bloc.dart';
 import '../../logic/blocs/level/level_state.dart';
 import '../widgets/background_scaffold.dart';
 import '../widgets/level_button.dart';
+import '../widgets/settings_dialog.dart';
 import '../widgets/top_bar.dart';
 import 'game_page.dart';
 
@@ -19,7 +21,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   bool _isVisible = false;
-  bool _allowMultipleSolutions = false;
 
   @override
   void initState() {
@@ -50,6 +51,7 @@ class _HomePageState extends State<HomePage> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          Spacer(),
           AnimatedOpacity(
             opacity: _isVisible ? 1.0 : 0.0,
             duration: const Duration(seconds: 1),
@@ -74,11 +76,7 @@ class _HomePageState extends State<HomePage> {
                     onPressed: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder:
-                              (_) => GamePage(
-                                level: state.currentLevel,
-                                allowMultipleSolutions: _allowMultipleSolutions,
-                              ),
+                          builder: (_) => GamePage(level: state.currentLevel),
                         ),
                       );
                     },
@@ -87,18 +85,34 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
-          const SizedBox(height: 80),
+
+          Spacer(),
+
           AnimatedOpacity(
             opacity: _isVisible ? 1.0 : 0.0,
             duration: const Duration(seconds: 1),
-            child: CheckboxListTile(
-              title: Text("Allow same-length subwords"),
-              value: _allowMultipleSolutions,
-              onChanged: (bool? value) {
-                setState(() {
-                  _allowMultipleSolutions = value!;
-                });
-              },
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: EdgeInsets.only(right: 8, bottom: 16),
+                child: IconButton(
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => const SettingsDialog(),
+                    );
+                  },
+                  icon: Container(
+                    decoration: BoxDecoration(
+                      color: ColorLibrary.button,
+                      shape: BoxShape.circle,
+                    ),
+                    width: 40,
+                    height: 40,
+                    child: Icon(Icons.settings, color: Colors.white),
+                  ),
+                ),
+              ),
             ),
           ),
         ],

@@ -23,6 +23,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     on<GameShuffleLetters>(_onShuffleLetters);
     on<GameUseHintLetter>(_onUseHintLetter);
     on<GameUseHintFirstLetters>(_onUseHintFirstLetters);
+    on<GameSettingChanged>(_onGameSettingChanged);
     on<ResetGameState>((event, emit) {
       emit(
         state.copyWith(
@@ -520,5 +521,12 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         await _checkAndRewardMilestone(newState, emit);
       }
     }
+  }
+
+  void _onGameSettingChanged(
+    GameSettingChanged event,
+    Emitter<GameState> emit,
+  ) {
+    emit(state.copyWith(allowMultipleSolutions: event.allowMultipleSolutions));
   }
 }
