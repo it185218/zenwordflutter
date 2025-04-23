@@ -22,6 +22,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     on<GameUndoLastSelection>(_onUndoLastSelection);
     on<GameShuffleLetters>(_onShuffleLetters);
     on<GameUseHintLetter>(_onUseHintLetter);
+    on<GameUseHintFirstLetters>(_onUseHintFirstLetters);
     on<ResetGameState>((event, emit) {
       emit(
         state.copyWith(
@@ -129,6 +130,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       foundWords: {},
       foundExtras: {},
       revealedLetters: {},
+      hintRevealedLetters: {},
       selectedIndices: [],
       currentTouch: null,
       totalFoundExtras: totalExtras,
@@ -345,12 +347,9 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     final randomWord = validWords[Random().nextInt(validWords.length)];
 
     final revealedLetters = Map<String, Set<int>>.from(state.revealedLetters);
-    revealedLetters[randomWord] = {0}; // Reveal first letter
+    revealedLetters[randomWord] = {0};
 
-    final newState = state.copyWith(
-      revealedLetters: revealedLetters,
-      // ✅ DO NOT reset totalFoundExtras
-    );
+    final newState = state.copyWith(revealedLetters: revealedLetters);
 
     emit(newState);
     await _saveGameState(newState);
@@ -424,6 +423,41 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       ...state.hintRevealedLetters,
       randomWord: {...hintRevealed, letterIndex},
     };
+
+    final newState = state.copyWith(hintRevealedLetters: updatedHintRevealed);
+    emit(newState);
+    await _saveGameState(newState);
+  }
+
+  Future<void> _onUseHintFirstLetters(
+    GameUseHintFirstLetters event,
+    Emitter<GameState> emit,
+  ) async {
+    // Get unfound words
+    final remainingWords =
+        state.validWords
+            .where((word) => !state.foundWords.contains(word))
+            .toList();
+
+    if (remainingWords.isEmpty) return;
+
+    // Shuffle and limit to 5 words max
+    remainingWords.shuffle();
+    final wordsToHint = remainingWords.take(5);
+
+    final updatedHintRevealed = Map<String, Set<int>>.from(
+      state.hintRevealedLetters,
+    );
+
+    for (final word in wordsToHint) {
+      final alreadyRevealed = updatedHintRevealed[word] ?? <int>{};
+      final mainRevealed = state.revealedLetters[word] ?? <int>{};
+
+      // Only add the first letter if not already revealed
+      if (!alreadyRevealed.contains(0) && !mainRevealed.contains(0)) {
+        updatedHintRevealed[word] = {...alreadyRevealed, 0};
+      }
+    }
 
     final newState = state.copyWith(hintRevealedLetters: updatedHintRevealed);
     emit(newState);

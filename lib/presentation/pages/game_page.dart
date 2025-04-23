@@ -384,6 +384,12 @@ class _GamePageState extends State<GamePage> {
                                   ),
                                 ],
                               ),
+                              HintContainer(
+                                icon: Icons.money,
+                                onTap: () {
+                                  context.read<CoinBloc>().add(AddCoins(100));
+                                },
+                              ),
                               Stack(
                                 clipBehavior: Clip.none,
                                 alignment: Alignment.topCenter,
@@ -393,9 +399,27 @@ class _GamePageState extends State<GamePage> {
                                       HintContainer(
                                         icon: Icons.rocket_launch_outlined,
                                         onTap: () {
-                                          context.read<CoinBloc>().add(
-                                            AddCoins(50),
-                                          );
+                                          final coinState =
+                                              context.read<CoinBloc>().state;
+
+                                          if (coinState.coins >= 10) {
+                                            context.read<CoinBloc>().add(
+                                              SpendCoins(120),
+                                            );
+                                            context.read<GameBloc>().add(
+                                              GameUseHintFirstLetters(),
+                                            );
+                                          } else {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  "Δεν υπάρχουν αρκετά νομίσματα!",
+                                                ),
+                                              ),
+                                            );
+                                          }
                                         },
                                       ),
                                     ],

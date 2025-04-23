@@ -25,4 +25,6 @@ class GameShuffleLetters extends GameEvent {}
 
 class GameUseHintLetter extends GameEvent {}
 
+class GameUseHintFirstLetters extends GameEvent {}
+
 class ResetGameState extends GameEvent {}
