@@ -395,7 +395,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     GameUseHintLetter event,
     Emitter<GameState> emit,
   ) async {
-    // Pick a random unfound word
     final remainingWords =
         state.validWords
             .where((word) => !state.foundWords.contains(word))
@@ -405,7 +404,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
     final randomWord = (remainingWords..shuffle()).first;
 
-    // Pick a random unrevealed letter index from the hint-specific map
     final revealed = state.revealedLetters[randomWord] ?? <int>{};
     final hintRevealed = state.hintRevealedLetters[randomWord] ?? <int>{};
 
@@ -416,7 +414,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
     if (unrevealedIndices.isEmpty) return;
 
-    // Only reveal 1 letter for hint
     final letterIndex = unrevealedIndices.first;
 
     final updatedHintRevealed = {
@@ -424,9 +421,27 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       randomWord: {...hintRevealed, letterIndex},
     };
 
-    final newState = state.copyWith(hintRevealedLetters: updatedHintRevealed);
+    final isFullyRevealed =
+        (updatedHintRevealed[randomWord]?.length ?? 0) + (revealed.length) ==
+        randomWord.length;
+
+    Set<String> updatedFoundWords = {...state.foundWords};
+    if (isFullyRevealed) {
+      updatedFoundWords.add(randomWord);
+    }
+
+    final newState = state.copyWith(
+      hintRevealedLetters: updatedHintRevealed,
+      foundWords: updatedFoundWords,
+    );
+
     emit(newState);
     await _saveGameState(newState);
+
+    if (state.additionalWords.contains(randomWord) &&
+        !state.foundExtras.contains(randomWord)) {
+      await _checkAndRewardMilestone(newState, emit);
+    }
   }
 
   Future<void> _onUseHintFirstLetters(
