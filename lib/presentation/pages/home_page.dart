@@ -10,8 +10,25 @@ import '../widgets/level_button.dart';
 import '../widgets/top_bar.dart';
 import 'game_page.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  bool _isVisible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(milliseconds: 1500), () {
+      setState(() {
+        _isVisible = true;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,38 +37,49 @@ class HomePage extends StatelessWidget {
         preferredSize: const Size.fromHeight(kToolbarHeight),
         child: BlocBuilder<CoinBloc, CoinState>(
           builder: (context, state) {
-            return TopBar(showBackButton: false, coinText: '${state.coins}');
+            return AnimatedOpacity(
+              opacity: _isVisible ? 1.0 : 0.0,
+              duration: const Duration(seconds: 1),
+              child: TopBar(showBackButton: false, coinText: '${state.coins}'),
+            );
           },
         ),
       ),
-
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
-            'Λεξόσφαιρα',
-            style: TextStyle(
-              fontSize: 42,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
+          AnimatedOpacity(
+            opacity: _isVisible ? 1.0 : 0.0,
+            duration: const Duration(seconds: 1),
+            child: Text(
+              'Λεξόσφαιρα',
+              style: TextStyle(
+                fontSize: 42,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
             ),
           ),
           const SizedBox(height: 150),
-          Center(
-            child: BlocBuilder<LevelBloc, LevelState>(
-              builder: (context, state) {
-                return LevelButton(
-                  text: 'Επίπεδο ${state.currentLevel}',
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => GamePage(level: state.currentLevel),
-                      ),
-                    );
-                  },
-                );
-              },
+          AnimatedOpacity(
+            opacity: _isVisible ? 1.0 : 0.0,
+            duration: const Duration(seconds: 1),
+            child: Center(
+              child: BlocBuilder<LevelBloc, LevelState>(
+                builder: (context, state) {
+                  return LevelButton(
+                    text: 'Επίπεδο ${state.currentLevel}',
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => GamePage(level: state.currentLevel),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
             ),
           ),
         ],
