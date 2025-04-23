@@ -353,9 +353,9 @@ class _GamePageState extends State<GamePage> {
                                           final coinState =
                                               context.read<CoinBloc>().state;
 
-                                          if (coinState.coins >= 10) {
+                                          if (coinState.coins > 80) {
                                             context.read<CoinBloc>().add(
-                                              SpendCoins(10),
+                                              SpendCoins(80),
                                             );
                                             context.read<GameBloc>().add(
                                               GameUseHintLetter(),
@@ -402,7 +402,7 @@ class _GamePageState extends State<GamePage> {
                                           final coinState =
                                               context.read<CoinBloc>().state;
 
-                                          if (coinState.coins >= 10) {
+                                          if (coinState.coins > 120) {
                                             context.read<CoinBloc>().add(
                                               SpendCoins(120),
                                             );
