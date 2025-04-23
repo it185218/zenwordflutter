@@ -207,6 +207,27 @@ Win32Window::MessageHandler(HWND hwnd,
       return 0;
     }
 
+    case WM_GETMINMAXINFO: {
+      MINMAXINFO* mmi = reinterpret_cast<MINMAXINFO*>(lparam);
+    
+      // Get nearest monitor
+      HMONITOR monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
+      MONITORINFO monitor_info = {};
+      monitor_info.cbSize = sizeof(monitor_info);
+      GetMonitorInfo(monitor, &monitor_info);
+    
+      // Calculate full screen size (excluding taskbar if using rcWork)
+      int screen_width = monitor_info.rcWork.right - monitor_info.rcWork.left;
+      int screen_height = monitor_info.rcWork.bottom - monitor_info.rcWork.top;
+    
+      // Set minimum width to 1/3 of screen width, height to full screen height
+      mmi->ptMinTrackSize.x = screen_width / 3;
+      mmi->ptMinTrackSize.y = screen_height;
+    
+      return 0;
+    }
+    
+
     case WM_ACTIVATE:
       if (child_content_ != nullptr) {
         SetFocus(child_content_);
