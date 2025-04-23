@@ -446,7 +446,7 @@ class _GamePageState extends State<GamePage> {
                                     bottom: -10,
                                     child: TileCoins(
                                       image: 'assets/images/coin.png',
-                                      text: '120',
+                                      text: '240',
                                     ),
                                   ),
                                 ],
