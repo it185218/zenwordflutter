@@ -384,12 +384,12 @@ class _GamePageState extends State<GamePage> {
                                   ),
                                 ],
                               ),
-                              HintContainer(
-                                icon: Icons.money,
-                                onTap: () {
-                                  context.read<CoinBloc>().add(AddCoins(100));
-                                },
-                              ),
+                              // HintContainer(
+                              //   icon: Icons.money,
+                              //   onTap: () {
+                              //     context.read<CoinBloc>().add(AddCoins(100));
+                              //   },
+                              // ),
                               Stack(
                                 clipBehavior: Clip.none,
                                 alignment: Alignment.topCenter,
