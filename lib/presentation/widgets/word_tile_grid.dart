@@ -57,12 +57,12 @@ class _WordTileGridState extends State<WordTileGrid> {
     return LayoutBuilder(
       builder: (context, constraints) {
         const baseTileSize = 40.0;
-        const minTileSize = 26.0;
+        const minTileSize = 30.0;
 
         final totalWords = widget.validWords.length;
 
         // Estimate columns and rows
-        final columns = (totalWords > 9) ? 2 : 1;
+        final columns = (totalWords > 12) ? 2 : 1;
         final rowsPerColumn = (totalWords / columns).ceil();
 
         final availableHeight = constraints.maxHeight;
