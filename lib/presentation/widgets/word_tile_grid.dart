@@ -104,10 +104,17 @@ class _WordTileGridState extends State<WordTileGrid> {
                       children: List.generate(word.length, (i) {
                         final revealedSet = widget.revealedLetters[word] ?? {};
                         final hintSet = widget.hintRevealedLetters[word] ?? {};
-                        final showLetter = isFound || revealed.contains(i);
 
+                        final isRewardedReveal =
+                            revealedSet.length == 1 &&
+                            revealedSet.contains(0) &&
+                            !isFound &&
+                            !hintSet.contains(0);
+
+                        final showLetter = isFound || revealed.contains(i);
                         final isCoin =
-                            revealedSet.contains(i) && !hintSet.contains(i);
+                            isRewardedReveal && i != 0 ||
+                            (revealedSet.contains(i) && !hintSet.contains(i));
 
                         final treasureState =
                             context.watch<TreasureBloc>().state;
