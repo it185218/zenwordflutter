@@ -118,7 +118,7 @@ class FoundExtrasDialog extends StatelessWidget {
                         Align(
                           alignment: Alignment.center,
                           child: Text(
-                            '${10 - progressToNextReward} έμεινε για να κερδίσετε ανταμοιβή!',
+                            '${10 - progressToNextReward} εμειναν για να κερδίσετε ανταμοιβή!!',
                             style: const TextStyle(
                               fontSize: 12,
                               color: ColorLibrary.dialogText,
@@ -174,7 +174,7 @@ class FoundExtrasDialog extends StatelessWidget {
                                         vertical: 16,
                                       ),
                                       child: Text(
-                                        "δεν υπάρχουν επιπλέον λόγια ακόμα",
+                                        "Δεν βρέθηκαν άλλες λέξεις ακόμα",
                                         style: TextStyle(
                                           color: ColorLibrary.dialogText,
                                           fontSize: 12,
