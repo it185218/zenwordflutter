@@ -448,7 +448,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     GameUseHintFirstLetters event,
     Emitter<GameState> emit,
   ) async {
-    // Get unfound words
+    // Get all unfound words
     final remainingWords =
         state.validWords
             .where((word) => !state.foundWords.contains(word))
@@ -456,26 +456,53 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
     if (remainingWords.isEmpty) return;
 
-    // Shuffle and limit to 5 words max
     remainingWords.shuffle();
-    final wordsToHint = remainingWords.take(5);
 
+    // Clone existing hintRevealedLetters and foundWords
     final updatedHintRevealed = Map<String, Set<int>>.from(
       state.hintRevealedLetters,
     );
+    final updatedFoundWords = Set<String>.from(state.foundWords);
 
-    for (final word in wordsToHint) {
-      final alreadyRevealed = updatedHintRevealed[word] ?? <int>{};
-      final mainRevealed = state.revealedLetters[word] ?? <int>{};
+    int lettersRevealed = 0;
 
-      // Only add the first letter if not already revealed
-      if (!alreadyRevealed.contains(0) && !mainRevealed.contains(0)) {
-        updatedHintRevealed[word] = {...alreadyRevealed, 0};
+    for (final word in remainingWords) {
+      if (lettersRevealed >= 5) break;
+
+      final alreadyHinted = updatedHintRevealed[word] ?? <int>{};
+      final alreadyRevealed = state.revealedLetters[word] ?? <int>{};
+      final totalRevealed = {...alreadyHinted, ...alreadyRevealed};
+
+      // Find the first unrevealed letter index
+      for (int i = 0; i < word.length; i++) {
+        if (!totalRevealed.contains(i)) {
+          final newHinted = {...alreadyHinted, i};
+          updatedHintRevealed[word] = newHinted;
+          lettersRevealed++;
+
+          // Check if this word is now fully revealed
+          if (newHinted.length + alreadyRevealed.length == word.length) {
+            updatedFoundWords.add(word);
+          }
+
+          break; // move to next word
+        }
       }
     }
 
-    final newState = state.copyWith(hintRevealedLetters: updatedHintRevealed);
+    final newState = state.copyWith(
+      hintRevealedLetters: updatedHintRevealed,
+      foundWords: updatedFoundWords,
+    );
+
     emit(newState);
     await _saveGameState(newState);
+
+    for (final word in updatedFoundWords) {
+      if (state.additionalWords.contains(word) &&
+          !state.foundExtras.contains(word)) {
+        await _checkAndRewardMilestone(newState, emit);
+      }
+    }
   }
 }
