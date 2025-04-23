@@ -4,12 +4,12 @@ import 'package:flutter/services.dart' show rootBundle;
 class GameHelpers {
   static Future<List<String>> loadDictionary() async {
     final text = await rootBundle.loadString(
-      'assets/dictionary/short-dictionary.txt',
+      'assets/dictionary/greek-dictionary.txt',
     );
     return text
         .split('\n')
         .map((word) => word.trim())
-        .where((word) => word.length >= 3)
+        .where((word) => word.length >= 2)
         .toList();
   }
 
