@@ -4,7 +4,7 @@ import 'package:flutter/services.dart' show rootBundle;
 class GameHelpers {
   static Future<List<String>> loadDictionary() async {
     final text = await rootBundle.loadString(
-      'assets/dictionary/greek-dictionary.txt',
+      'assets/dictionary/short-dictionary.txt',
     );
     return text
         .split('\n')
@@ -53,7 +53,25 @@ class GameHelpers {
       length = 7;
     }
 
-    final filtered = dictionary.where((w) => w.length == length).toList();
+    List<String> filtered =
+        dictionary.where((w) => w.length == length).toList();
+
+    // If no words match the intended length, fallback gracefully
+    if (filtered.isEmpty) {
+      // Try shorter lengths as fallback
+      for (
+        int fallbackLength = length - 1;
+        fallbackLength >= 3;
+        fallbackLength--
+      ) {
+        filtered = dictionary.where((w) => w.length == fallbackLength).toList();
+        if (filtered.isNotEmpty) break;
+      }
+
+      // If still empty, fallback to whole dictionary
+      if (filtered.isEmpty) filtered = dictionary;
+    }
+
     return filtered[Random().nextInt(filtered.length)];
   }
 
