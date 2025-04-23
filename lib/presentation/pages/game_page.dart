@@ -21,6 +21,7 @@ import '../widgets/found_extras_dialog.dart';
 import '../widgets/hint_container.dart';
 import '../widgets/letter_circle.dart';
 import '../widgets/line_painter.dart';
+import '../widgets/perfect_popup.dart';
 import '../widgets/tile_coins.dart';
 import '../widgets/top_bar.dart';
 import '../widgets/word_tile_grid.dart';
@@ -109,6 +110,16 @@ class _GamePageState extends State<GamePage> {
 
             if (allFound) {
               stopwatch.stop(); // Stop timer
+
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                barrierColor: Colors.transparent,
+                builder: (context) {
+                  return Stack(children: [const PerfectPopup()]);
+                },
+              );
+
               final currentLevel = context.read<LevelBloc>().state.currentLevel;
 
               final isar = Isar.getInstance();
@@ -384,12 +395,12 @@ class _GamePageState extends State<GamePage> {
                                   ),
                                 ],
                               ),
-                              // HintContainer(
-                              //   icon: Icons.money,
-                              //   onTap: () {
-                              //     context.read<CoinBloc>().add(AddCoins(100));
-                              //   },
-                              // ),
+                              HintContainer(
+                                icon: Icons.money,
+                                onTap: () {
+                                  context.read<CoinBloc>().add(AddCoins(100));
+                                },
+                              ),
                               Stack(
                                 clipBehavior: Clip.none,
                                 alignment: Alignment.topCenter,
