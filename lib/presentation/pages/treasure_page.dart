@@ -29,7 +29,7 @@ class TreasurePage extends StatelessWidget {
           },
         ),
         title: Text(
-          'Treasures',
+          'Θησαυρός',
           style: const TextStyle(color: Colors.white, fontSize: 20),
         ),
         centerTitle: true,
