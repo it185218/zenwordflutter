@@ -62,13 +62,15 @@ class _WordTileGridState extends State<WordTileGrid> {
         final totalWords = widget.validWords.length;
 
         // Estimate columns and rows
-        final columns = (totalWords > 14) ? 2 : 1;
+        final columns = (totalWords > 9) ? 2 : 1;
         final rowsPerColumn = (totalWords / columns).ceil();
 
         final availableHeight = constraints.maxHeight;
         double bestTileSize = availableHeight / rowsPerColumn;
 
-        if (bestTileSize > baseTileSize) {
+        if (columns == 2) {
+          bestTileSize = minTileSize;
+        } else if (bestTileSize > baseTileSize) {
           bestTileSize = baseTileSize;
         } else if (bestTileSize < minTileSize) {
           bestTileSize = minTileSize;
