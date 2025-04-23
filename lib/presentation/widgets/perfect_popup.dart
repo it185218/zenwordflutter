@@ -1,41 +1,42 @@
-// perfect_popup.dart
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../core/utils/color_library.dart';
 
 class PerfectPopup extends StatefulWidget {
-  const PerfectPopup({Key? key}) : super(key: key);
+  const PerfectPopup({super.key});
 
   @override
-  _PerfectPopupState createState() => _PerfectPopupState();
+  State<PerfectPopup> createState() => _PerfectPopupState();
 }
 
 class _PerfectPopupState extends State<PerfectPopup>
-    with TickerProviderStateMixin {
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _opacity;
+  Timer? _dismissTimer;
 
   @override
   void initState() {
     super.initState();
+
     _controller = AnimationController(
-        duration: const Duration(milliseconds: 1500),
-        vsync: this,
-      )
-      ..forward().then((_) {
-        if (mounted) {
-          Future.delayed(const Duration(milliseconds: 1000), () {
-            if (mounted) {
-              _controller.reverse();
-            }
-          });
-        }
-      });
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
 
     _opacity = Tween<double>(
       begin: 1.0,
       end: 0.0,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+
+    // Start the reverse fade after a short visible duration
+    _dismissTimer = Timer(const Duration(milliseconds: 1200), () {
+      if (mounted) {
+        _controller.forward(); // play fade out
+      }
+    });
   }
 
   @override
@@ -50,7 +51,7 @@ class _PerfectPopupState extends State<PerfectPopup>
             color: ColorLibrary.coinRewardedCpntainer,
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Text(
+          child: const Text(
             'Τέλειος!',
             style: TextStyle(
               color: Colors.white,
@@ -65,6 +66,7 @@ class _PerfectPopupState extends State<PerfectPopup>
 
   @override
   void dispose() {
+    _dismissTimer?.cancel();
     _controller.dispose();
     super.dispose();
   }

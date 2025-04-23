@@ -118,15 +118,18 @@ class _GamePageState extends State<GamePage> {
             if (allFound) {
               stopwatch.stop(); // Stop timer
 
-              showDialog(
-                context: context,
-                barrierDismissible: false,
-                barrierColor: Colors.transparent,
-                builder: (context) {
-                  return Stack(children: [const PerfectPopup()]);
-                },
-              );
-
+              Future.delayed(const Duration(milliseconds: 500), () {
+                if (context.mounted) {
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    barrierColor: Colors.transparent,
+                    builder: (context) {
+                      return const Stack(children: [PerfectPopup()]);
+                    },
+                  );
+                }
+              });
               final currentLevel = context.read<LevelBloc>().state.currentLevel;
 
               final isar = Isar.getInstance();
@@ -150,7 +153,7 @@ class _GamePageState extends State<GamePage> {
                 ),
               );
 
-              Future.delayed(const Duration(milliseconds: 1000), () {
+              Future.delayed(const Duration(milliseconds: 1500), () {
                 context.read<GameBloc>().add(ResetGameState());
 
                 Navigator.of(context).pushReplacement(
