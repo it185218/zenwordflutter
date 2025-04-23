@@ -402,12 +402,12 @@ class _GamePageState extends State<GamePage> {
                                   ),
                                 ],
                               ),
-                              HintContainer(
-                                icon: Icons.money,
-                                onTap: () {
-                                  context.read<CoinBloc>().add(AddCoins(100));
-                                },
-                              ),
+                              // HintContainer(
+                              //   icon: Icons.money,
+                              //   onTap: () {
+                              //     context.read<CoinBloc>().add(AddCoins(100));
+                              //   },
+                              // ),
                               Stack(
                                 clipBehavior: Clip.none,
                                 alignment: Alignment.topCenter,
@@ -420,9 +420,9 @@ class _GamePageState extends State<GamePage> {
                                           final coinState =
                                               context.read<CoinBloc>().state;
 
-                                          if (coinState.coins > 120) {
+                                          if (coinState.coins > 240) {
                                             context.read<CoinBloc>().add(
-                                              SpendCoins(120),
+                                              SpendCoins(240),
                                             );
                                             context.read<GameBloc>().add(
                                               GameUseHintFirstLetters(),
