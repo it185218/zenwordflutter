@@ -73,11 +73,12 @@ class _TreasureContainerState extends State<TreasureContainer> {
                 child: Container(
                   width: 50,
                   height: 50,
+                  padding: EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: ColorLibrary.button,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.widgets, color: Colors.white, size: 30),
+                  child: Image.asset('assets/images/chest.png'),
                 ),
               ),
             ),
