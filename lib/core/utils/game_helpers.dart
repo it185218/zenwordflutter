@@ -9,7 +9,7 @@ class GameHelpers {
     return text
         .split('\n')
         .map((word) => word.trim())
-        .where((word) => word.length >= 2)
+        .where((word) => word.length >= 3)
         .toList();
   }
 
