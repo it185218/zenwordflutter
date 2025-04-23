@@ -14,6 +14,7 @@ class GameState {
   final Map<String, Set<int>> hintRevealedLetters;
   final int totalFoundExtras;
   final int extraWordMilestone;
+  final bool allowMultipleSolutions;
 
   GameState({
     this.level = 0,
@@ -29,6 +30,7 @@ class GameState {
     this.hintRevealedLetters = const {},
     this.totalFoundExtras = 0,
     this.extraWordMilestone = 0,
+    this.allowMultipleSolutions = false,
   });
 
   GameState copyWith({
@@ -45,6 +47,7 @@ class GameState {
     Map<String, Set<int>>? hintRevealedLetters,
     int? totalFoundExtras,
     int? extraWordMilestone,
+    bool? allowMultipleSolutions,
   }) {
     return GameState(
       level: level ?? this.level,
@@ -60,6 +63,8 @@ class GameState {
       hintRevealedLetters: hintRevealedLetters ?? this.hintRevealedLetters,
       totalFoundExtras: totalFoundExtras ?? this.totalFoundExtras,
       extraWordMilestone: extraWordMilestone ?? this.extraWordMilestone,
+      allowMultipleSolutions:
+          allowMultipleSolutions ?? this.allowMultipleSolutions,
     );
   }
 }

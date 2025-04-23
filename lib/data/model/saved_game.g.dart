@@ -22,53 +22,58 @@ const SavedGameSchema = CollectionSchema(
       name: r'additionalWords',
       type: IsarType.stringList,
     ),
-    r'baseWord': PropertySchema(
+    r'allowMultipleSolutions': PropertySchema(
       id: 1,
+      name: r'allowMultipleSolutions',
+      type: IsarType.bool,
+    ),
+    r'baseWord': PropertySchema(
+      id: 2,
       name: r'baseWord',
       type: IsarType.string,
     ),
     r'extraWordMilestone': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'extraWordMilestone',
       type: IsarType.long,
     ),
     r'foundExtras': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'foundExtras',
       type: IsarType.stringList,
     ),
     r'foundWords': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'foundWords',
       type: IsarType.stringList,
     ),
     r'hintRevealedLetters': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'hintRevealedLetters',
       type: IsarType.string,
     ),
     r'letterIds': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'letterIds',
       type: IsarType.longList,
     ),
     r'letters': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'letters',
       type: IsarType.stringList,
     ),
     r'level': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'level',
       type: IsarType.long,
     ),
     r'revealedLetters': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'revealedLetters',
       type: IsarType.string,
     ),
     r'validWords': PropertySchema(
-      id: 10,
+      id: 11,
       name: r'validWords',
       type: IsarType.stringList,
     )
@@ -142,16 +147,17 @@ void _savedGameSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeStringList(offsets[0], object.additionalWords);
-  writer.writeString(offsets[1], object.baseWord);
-  writer.writeLong(offsets[2], object.extraWordMilestone);
-  writer.writeStringList(offsets[3], object.foundExtras);
-  writer.writeStringList(offsets[4], object.foundWords);
-  writer.writeString(offsets[5], object.hintRevealedLetters);
-  writer.writeLongList(offsets[6], object.letterIds);
-  writer.writeStringList(offsets[7], object.letters);
-  writer.writeLong(offsets[8], object.level);
-  writer.writeString(offsets[9], object.revealedLetters);
-  writer.writeStringList(offsets[10], object.validWords);
+  writer.writeBool(offsets[1], object.allowMultipleSolutions);
+  writer.writeString(offsets[2], object.baseWord);
+  writer.writeLong(offsets[3], object.extraWordMilestone);
+  writer.writeStringList(offsets[4], object.foundExtras);
+  writer.writeStringList(offsets[5], object.foundWords);
+  writer.writeString(offsets[6], object.hintRevealedLetters);
+  writer.writeLongList(offsets[7], object.letterIds);
+  writer.writeStringList(offsets[8], object.letters);
+  writer.writeLong(offsets[9], object.level);
+  writer.writeString(offsets[10], object.revealedLetters);
+  writer.writeStringList(offsets[11], object.validWords);
 }
 
 SavedGame _savedGameDeserialize(
@@ -162,17 +168,18 @@ SavedGame _savedGameDeserialize(
 ) {
   final object = SavedGame();
   object.additionalWords = reader.readStringList(offsets[0]) ?? [];
-  object.baseWord = reader.readString(offsets[1]);
-  object.extraWordMilestone = reader.readLong(offsets[2]);
-  object.foundExtras = reader.readStringList(offsets[3]) ?? [];
-  object.foundWords = reader.readStringList(offsets[4]) ?? [];
-  object.hintRevealedLetters = reader.readString(offsets[5]);
+  object.allowMultipleSolutions = reader.readBool(offsets[1]);
+  object.baseWord = reader.readString(offsets[2]);
+  object.extraWordMilestone = reader.readLong(offsets[3]);
+  object.foundExtras = reader.readStringList(offsets[4]) ?? [];
+  object.foundWords = reader.readStringList(offsets[5]) ?? [];
+  object.hintRevealedLetters = reader.readString(offsets[6]);
   object.id = id;
-  object.letterIds = reader.readLongList(offsets[6]) ?? [];
-  object.letters = reader.readStringList(offsets[7]) ?? [];
-  object.level = reader.readLong(offsets[8]);
-  object.revealedLetters = reader.readString(offsets[9]);
-  object.validWords = reader.readStringList(offsets[10]) ?? [];
+  object.letterIds = reader.readLongList(offsets[7]) ?? [];
+  object.letters = reader.readStringList(offsets[8]) ?? [];
+  object.level = reader.readLong(offsets[9]);
+  object.revealedLetters = reader.readString(offsets[10]);
+  object.validWords = reader.readStringList(offsets[11]) ?? [];
   return object;
 }
 
@@ -186,24 +193,26 @@ P _savedGameDeserializeProp<P>(
     case 0:
       return (reader.readStringList(offset) ?? []) as P;
     case 1:
-      return (reader.readString(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 2:
-      return (reader.readLong(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 3:
-      return (reader.readStringList(offset) ?? []) as P;
+      return (reader.readLong(offset)) as P;
     case 4:
       return (reader.readStringList(offset) ?? []) as P;
     case 5:
-      return (reader.readString(offset)) as P;
-    case 6:
-      return (reader.readLongList(offset) ?? []) as P;
-    case 7:
       return (reader.readStringList(offset) ?? []) as P;
-    case 8:
-      return (reader.readLong(offset)) as P;
-    case 9:
+    case 6:
       return (reader.readString(offset)) as P;
+    case 7:
+      return (reader.readLongList(offset) ?? []) as P;
+    case 8:
+      return (reader.readStringList(offset) ?? []) as P;
+    case 9:
+      return (reader.readLong(offset)) as P;
     case 10:
+      return (reader.readString(offset)) as P;
+    case 11:
       return (reader.readStringList(offset) ?? []) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -525,6 +534,16 @@ extension SavedGameQueryFilter
         upper,
         includeUpper,
       );
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterFilterCondition>
+      allowMultipleSolutionsEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'allowMultipleSolutions',
+        value: value,
+      ));
     });
   }
 
@@ -2144,6 +2163,20 @@ extension SavedGameQueryLinks
     on QueryBuilder<SavedGame, SavedGame, QFilterCondition> {}
 
 extension SavedGameQuerySortBy on QueryBuilder<SavedGame, SavedGame, QSortBy> {
+  QueryBuilder<SavedGame, SavedGame, QAfterSortBy>
+      sortByAllowMultipleSolutions() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'allowMultipleSolutions', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterSortBy>
+      sortByAllowMultipleSolutionsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'allowMultipleSolutions', Sort.desc);
+    });
+  }
+
   QueryBuilder<SavedGame, SavedGame, QAfterSortBy> sortByBaseWord() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'baseWord', Sort.asc);
@@ -2209,6 +2242,20 @@ extension SavedGameQuerySortBy on QueryBuilder<SavedGame, SavedGame, QSortBy> {
 
 extension SavedGameQuerySortThenBy
     on QueryBuilder<SavedGame, SavedGame, QSortThenBy> {
+  QueryBuilder<SavedGame, SavedGame, QAfterSortBy>
+      thenByAllowMultipleSolutions() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'allowMultipleSolutions', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterSortBy>
+      thenByAllowMultipleSolutionsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'allowMultipleSolutions', Sort.desc);
+    });
+  }
+
   QueryBuilder<SavedGame, SavedGame, QAfterSortBy> thenByBaseWord() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'baseWord', Sort.asc);
@@ -2292,6 +2339,13 @@ extension SavedGameQueryWhereDistinct
     });
   }
 
+  QueryBuilder<SavedGame, SavedGame, QDistinct>
+      distinctByAllowMultipleSolutions() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'allowMultipleSolutions');
+    });
+  }
+
   QueryBuilder<SavedGame, SavedGame, QDistinct> distinctByBaseWord(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -2370,6 +2424,13 @@ extension SavedGameQueryProperty
       additionalWordsProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'additionalWords');
+    });
+  }
+
+  QueryBuilder<SavedGame, bool, QQueryOperations>
+      allowMultipleSolutionsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'allowMultipleSolutions');
     });
   }
 

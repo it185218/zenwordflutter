@@ -46,6 +46,9 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     final saved =
         await isar!.savedGames.filter().levelEqualTo(event.level).findFirst();
 
+    // Add this part to handle the "Allow multiple solutions" setting
+    final allowMultipleSolutions = event.allowMultipleSolutions;
+
     // Count total found extras across all levels
     final allSaves = await isar.savedGames.where().findAll();
     final totalExtras =
@@ -71,6 +74,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
           currentTouch: null,
           totalFoundExtras: totalExtras,
           extraWordMilestone: maxMilestone,
+          allowMultipleSolutions: saved.allowMultipleSolutions,
         ),
       );
       return;
@@ -104,7 +108,13 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       (a, b) => GameHelpers.scoreWord(b).compareTo(GameHelpers.scoreWord(a)),
     );
 
-    final filteredWords = validSubwords.where((w) => w != baseWord).toList();
+    final filteredWords =
+        allowMultipleSolutions
+            ? validSubwords.where((w) => w != baseWord).toList()
+            : validSubwords
+                .where((w) => w.length != baseWord.length && w != baseWord)
+                .toList();
+
     final balancedWords = selectBalancedGridWords(
       baseWord: baseWord,
       sortedWords: filteredWords,
@@ -120,6 +130,10 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     print("🔥 Extras (${extras.length}): ${extras.join(', ')}");
 
     print("Skill score: $skillScore");
+
+    print("Allow Multiple Solutions: $allowMultipleSolutions");
+    print("Valid Subwords: ${validSubwords.join(', ')}");
+    print("Filtered Words: ${filteredWords.join(', ')}");
 
     final newState = state.copyWith(
       level: event.level,
@@ -149,7 +163,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
           ..foundWords = []
           ..additionalWords = extras.toList()
           ..revealedLetters = ''
-          ..hintRevealedLetters = '';
+          ..hintRevealedLetters = ''
+          ..allowMultipleSolutions = event.allowMultipleSolutions;
 
     await isar.writeTxn(() => isar.savedGames.put(game));
   }
@@ -260,6 +275,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         state.hintRevealedLetters,
       );
       existing.extraWordMilestone = state.extraWordMilestone;
+      existing.allowMultipleSolutions = state.allowMultipleSolutions;
 
       await isar.writeTxn(() => isar.savedGames.put(existing));
     }

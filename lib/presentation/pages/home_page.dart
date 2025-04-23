@@ -19,6 +19,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   bool _isVisible = false;
+  bool _allowMultipleSolutions = false;
 
   @override
   void initState() {
@@ -73,13 +74,31 @@ class _HomePageState extends State<HomePage> {
                     onPressed: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (_) => GamePage(level: state.currentLevel),
+                          builder:
+                              (_) => GamePage(
+                                level: state.currentLevel,
+                                allowMultipleSolutions: _allowMultipleSolutions,
+                              ),
                         ),
                       );
                     },
                   );
                 },
               ),
+            ),
+          ),
+          const SizedBox(height: 80),
+          AnimatedOpacity(
+            opacity: _isVisible ? 1.0 : 0.0,
+            duration: const Duration(seconds: 1),
+            child: CheckboxListTile(
+              title: Text("Allow same-length subwords"),
+              value: _allowMultipleSolutions,
+              onChanged: (bool? value) {
+                setState(() {
+                  _allowMultipleSolutions = value!;
+                });
+              },
             ),
           ),
         ],

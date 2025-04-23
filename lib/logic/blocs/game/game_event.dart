@@ -18,7 +18,9 @@ class GameUndoLastSelection extends GameEvent {}
 
 class GameStarted extends GameEvent {
   final int level;
-  GameStarted({required this.level});
+  final bool allowMultipleSolutions;
+
+  GameStarted({required this.level, this.allowMultipleSolutions = false});
 }
 
 class GameShuffleLetters extends GameEvent {}

@@ -29,8 +29,13 @@ import 'level_complete_page.dart';
 
 class GamePage extends StatefulWidget {
   final int level;
+  final bool allowMultipleSolutions;
 
-  const GamePage({super.key, required this.level});
+  const GamePage({
+    super.key,
+    required this.level,
+    this.allowMultipleSolutions = false,
+  });
 
   @override
   State<GamePage> createState() => _GamePageState();
@@ -49,7 +54,12 @@ class _GamePageState extends State<GamePage> {
 
     Future.microtask(() {
       context.read<TreasureBloc>().add(LoadTreasure());
-      context.read<GameBloc>().add(GameStarted(level: widget.level));
+      context.read<GameBloc>().add(
+        GameStarted(
+          level: widget.level,
+          allowMultipleSolutions: widget.allowMultipleSolutions,
+        ),
+      );
     });
   }
 
