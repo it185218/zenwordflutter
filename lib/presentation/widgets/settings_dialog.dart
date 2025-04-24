@@ -51,7 +51,7 @@ class SettingsDialog extends StatelessWidget {
         children: [
           const SizedBox(height: 16),
           Text(
-            'Να επιτρέπεται στις δευτερεύουσες λέξεις να ταιριάζουν με το μήκος λέξης ρίζας;',
+            'Επιτρεπονται παραγωγα ιδιου αριθμου γραμματων με την λεξη-ριζα;',
             style: TextStyle(
               color: ColorLibrary.dialogText,
               fontSize: 12,
@@ -62,7 +62,7 @@ class SettingsDialog extends StatelessWidget {
           CheckboxListTile(
             activeColor: ColorLibrary.background,
             title: const Text(
-              'Επιτρέπω',
+              'Επιτρέπονται',
               style: TextStyle(color: ColorLibrary.dialogText, fontSize: 12),
             ),
             value: currentSetting,
@@ -73,7 +73,7 @@ class SettingsDialog extends StatelessWidget {
           CheckboxListTile(
             activeColor: ColorLibrary.background,
             title: const Text(
-              'Μην επιτρέπετε',
+              'Δεν επιτρέπονται',
               style: TextStyle(color: ColorLibrary.dialogText, fontSize: 12),
             ),
             value: !currentSetting,
