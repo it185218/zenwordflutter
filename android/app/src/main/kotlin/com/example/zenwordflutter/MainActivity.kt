@@ -1,4 +1,4 @@
-package com.example.zenwordflutter
+package com.example.wordpuzzle
 
 import io.flutter.embedding.android.FlutterActivity
 
