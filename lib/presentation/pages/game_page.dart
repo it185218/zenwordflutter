@@ -118,42 +118,48 @@ class _GamePageState extends State<GamePage> {
             if (allFound) {
               stopwatch.stop(); // Stop timer
 
-              Future.delayed(const Duration(milliseconds: 500), () {
-                if (context.mounted) {
-                  showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    barrierColor: Colors.transparent,
-                    builder: (context) => const PerfectPopup(),
-                  );
-                }
-              });
+              Future.microtask(() async {
+                await Future.delayed(const Duration(milliseconds: 500));
 
-              final currentLevel = context.read<LevelBloc>().state.currentLevel;
+                if (!context.mounted) return;
 
-              final isar = Isar.getInstance();
-              isar!.writeTxn(() async {
-                final saved =
-                    await isar.savedGames
-                        .filter()
-                        .levelEqualTo(currentLevel)
-                        .findFirst();
-                if (saved != null) {
-                  await isar.savedGames.delete(saved.id);
-                }
-              });
+                // Wait for the popup to complete and auto-dismiss
+                await showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  barrierColor: Colors.transparent,
+                  builder: (context) => const PerfectPopup(),
+                );
 
-              context.read<LevelBloc>().add(
-                CompleteLevel(
-                  level: currentLevel,
-                  durationSeconds: stopwatch.elapsed.inSeconds,
-                  foundWords: state.foundWords,
-                  validWords: state.validWords,
-                ),
-              );
+                if (!context.mounted) return;
 
-              Future.delayed(const Duration(milliseconds: 1500), () {
+                final currentLevel =
+                    context.read<LevelBloc>().state.currentLevel;
+
+                final isar = Isar.getInstance();
+                await isar!.writeTxn(() async {
+                  final saved =
+                      await isar.savedGames
+                          .filter()
+                          .levelEqualTo(currentLevel)
+                          .findFirst();
+                  if (saved != null) {
+                    await isar.savedGames.delete(saved.id);
+                  }
+                });
+
+                context.read<LevelBloc>().add(
+                  CompleteLevel(
+                    level: currentLevel,
+                    durationSeconds: stopwatch.elapsed.inSeconds,
+                    foundWords: state.foundWords,
+                    validWords: state.validWords,
+                  ),
+                );
+
                 context.read<GameBloc>().add(ResetGameState());
+
+                if (!context.mounted) return;
 
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(

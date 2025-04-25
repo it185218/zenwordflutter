@@ -32,22 +32,24 @@ class _LevelCompletePageState extends State<LevelCompletePage>
   @override
   void initState() {
     super.initState();
+
     final completed = context.read<LevelBloc>().state.completedCount;
     final shouldReward = completed % 10 == 0;
 
     if (shouldReward) {
       Future.delayed(const Duration(milliseconds: 500), () {
+        if (!mounted) return;
         setState(() {
           showReward = true;
         });
 
         Future.delayed(const Duration(seconds: 2), () {
-          if (!rewardGiven && mounted) {
-            context.read<CoinBloc>().add(AddCoins(50));
-            setState(() {
-              rewardGiven = true;
-            });
-          }
+          if (!mounted || rewardGiven) return;
+
+          context.read<CoinBloc>().add(AddCoins(50));
+          setState(() {
+            rewardGiven = true;
+          });
         });
       });
     }
@@ -62,6 +64,8 @@ class _LevelCompletePageState extends State<LevelCompletePage>
 
     final shouldReward = completed % 10 == 0;
     final progressTowardsReward = completed % 10;
+
+    final showLevelButton = !shouldReward || rewardGiven;
 
     return AppScaffold(
       appBar: PreferredSize(
@@ -180,7 +184,7 @@ class _LevelCompletePageState extends State<LevelCompletePage>
             const SizedBox(height: 16),
 
             // Level button only if no reward is pending
-            if (!shouldReward || rewardGiven)
+            if (showLevelButton)
               LevelButton(
                 text: 'Επίπεδο $nextLevel',
                 onPressed: () {
