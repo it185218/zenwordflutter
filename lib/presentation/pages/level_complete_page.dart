@@ -28,31 +28,58 @@ class _LevelCompletePageState extends State<LevelCompletePage>
     with SingleTickerProviderStateMixin {
   bool showReward = false;
   bool rewardGiven = false;
+  bool showLevelButton = false;
 
   @override
   void initState() {
     super.initState();
 
-    final completed = context.read<LevelBloc>().state.completedCount;
-    final shouldReward = completed % 10 == 0;
+    Future.delayed(Duration(milliseconds: 200), () {
+      if (!mounted) return;
+      final completed = context.read<LevelBloc>().state.completedCount;
+      final shouldReward = completed > 0 && completed % 10 == 0;
 
-    if (shouldReward) {
-      Future.delayed(const Duration(milliseconds: 500), () {
-        if (!mounted) return;
-        setState(() {
-          showReward = true;
-        });
+      final progress = context.read<TreasureBloc>().state;
+      if (progress is TreasureLoaded) {
+        final setsCompleted = progress.progress.setsCompleted;
+        final lastCrackedSet = progress.progress.lastCrackedSet;
 
-        Future.delayed(const Duration(seconds: 2), () {
-          if (!mounted || rewardGiven) return;
+        final newSetCompleted = setsCompleted > lastCrackedSet;
 
-          context.read<CoinBloc>().add(AddCoins(50));
+        if (newSetCompleted) {
+          Future.delayed(const Duration(seconds: 1), () {
+            if (!mounted) return;
+            showDialog(
+              context: context,
+              builder: (context) => const CrackBricksDialog(),
+            );
+          });
+        }
+      }
+
+      if (shouldReward) {
+        Future.delayed(const Duration(seconds: 1), () {
+          if (!mounted) return;
           setState(() {
-            rewardGiven = true;
+            showReward = true;
+          });
+
+          Future.delayed(const Duration(seconds: 1), () {
+            if (!mounted || rewardGiven) return;
+
+            context.read<CoinBloc>().add(AddCoins(50));
+            setState(() {
+              rewardGiven = true;
+              showLevelButton = true;
+            });
           });
         });
-      });
-    }
+      } else {
+        setState(() {
+          showLevelButton = true;
+        });
+      }
+    });
   }
 
   @override
@@ -64,8 +91,6 @@ class _LevelCompletePageState extends State<LevelCompletePage>
 
     final shouldReward = completed % 10 == 0;
     final progressTowardsReward = completed % 10;
-
-    final showLevelButton = !shouldReward || rewardGiven;
 
     return AppScaffold(
       appBar: PreferredSize(
@@ -86,25 +111,9 @@ class _LevelCompletePageState extends State<LevelCompletePage>
                 alignment: Alignment.centerLeft,
                 child: TreasureContainer(
                   onTap: () async {
-                    // Check if a set is completed in TreasureBloc
-                    final progress = context.read<TreasureBloc>().state;
-                    final isSetCompleted =
-                        progress is TreasureLoaded &&
-                        progress.progress.setsCompleted > 0;
-
-                    // Navigate to the appropriate page based on set completion
-                    if (isSetCompleted) {
-                      // Show CrackBricksDialog if set is completed
-                      await showDialog(
-                        context: context,
-                        builder: (context) => CrackBricksDialog(),
-                      );
-                    } else {
-                      // Show TreasurePage if set is not completed
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (_) => TreasurePage()),
-                      );
-                    }
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (_) => TreasurePage()),
+                    );
                   },
                 ),
               ),

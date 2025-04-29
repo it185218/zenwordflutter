@@ -36,14 +36,16 @@ class _TreasureContainerState extends State<TreasureContainer> {
           int getRequiredForNextSet(int setsCompleted) {
             if (setsCompleted == 0) return 3;
             if (setsCompleted == 1) return 6;
-            return 9;
+            if (setsCompleted == 2) return 9;
+            return 12; // Each set after the third requires 12 more
           }
 
           required = getRequiredForNextSet(setsCompleted);
-          final start = [0, 3, 9][setsCompleted];
+          final start = [0, 3, 9, 18][setsCompleted];
           collectedInSet = totalCollected - start;
 
-          progress = collectedInSet / required;
+          // Progress value should not exceed 1.0
+          progress = (collectedInSet / required).clamp(0.0, 1.0);
         }
 
         return Column(

@@ -75,21 +75,28 @@ class TreasureBloc extends Bloc<TreasureEvent, TreasureState> {
     int getRequiredForNextSet(int setsCompleted) {
       if (setsCompleted == 0) return 3;
       if (setsCompleted == 1) return 6;
-      return 9;
+      if (setsCompleted == 2) return 9;
+      return 12; // After 3 sets, each subsequent set requires 12 more collectibles
     }
 
     final requiredForCurrentSet = getRequiredForNextSet(progress.setsCompleted);
-    final currentSetStart = [0, 3, 9][progress.setsCompleted];
+    final currentSetStart = [0, 3, 9, 18][progress.setsCompleted];
     final collectedInCurrentSet = progress.totalCollected - currentSetStart;
 
     if (collectedInCurrentSet >= requiredForCurrentSet) {
       progress.setsCompleted += 1;
 
-      if (progress.vaseIndices.length < 12) {
+      if (progress.setsCompleted <= 12) {
+        // Add vase images until we reach 12
         final updatedVases = List<int>.from(progress.vaseIndices)
           ..add(progress.vaseIndices.length);
         progress.vaseIndices = updatedVases;
       }
+    }
+
+    // If we reach 12 sets, we should stop increasing the sets count
+    if (progress.setsCompleted > 12) {
+      progress.setsCompleted = 12;
     }
 
     // Clear collectible data completely
