@@ -413,7 +413,7 @@ class _GamePageState extends State<GamePage> {
                               // HintContainer(
                               //   icon: Icons.money,
                               //   onTap: () {
-                              //     context.read<CoinBloc>().add(AddCoins(100));
+                              //     context.read<CoinBloc>().add(AddCoins(200));
                               //   },
                               // ),
                               Stack(
@@ -428,9 +428,9 @@ class _GamePageState extends State<GamePage> {
                                           final coinState =
                                               context.read<CoinBloc>().state;
 
-                                          if (coinState.coins > 240) {
+                                          if (coinState.coins > 160) {
                                             context.read<CoinBloc>().add(
-                                              SpendCoins(240),
+                                              SpendCoins(160),
                                             );
                                             context.read<GameBloc>().add(
                                               GameUseHintFirstLetters(),
