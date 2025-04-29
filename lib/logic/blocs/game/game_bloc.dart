@@ -119,6 +119,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     final balancedWords = selectBalancedGridWords(
       baseWord: baseWord,
       sortedWords: filteredWords,
+      maxWords: event.level.clamp(1, 10),
     );
 
     final extras = validSubwords.toSet().difference(balancedWords.toSet());
@@ -173,8 +174,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   List<String> selectBalancedGridWords({
     required String baseWord,
     required List<String> sortedWords,
-    int maxWords = 12,
-    int maxPerColumn = 12,
+    required int maxWords,
+    int maxPerColumn = 10,
     int maxRowLength = 10,
   }) {
     final result = <String>[baseWord];
@@ -185,7 +186,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
     // If base word is larger than 6, limit the number of words to 14 (including the base word)
     if (isBaseWordLarge) {
-      maxWords = 12;
+      maxWords = 10;
     }
 
     for (var word in sortedWords) {
