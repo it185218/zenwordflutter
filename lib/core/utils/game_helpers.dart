@@ -6,10 +6,14 @@ class GameHelpers {
     final text = await rootBundle.loadString(
       'assets/dictionary/greek-dictionary-2.txt',
     );
+
+    // Define banned/curse words
+    final bannedWords = {'ηλίθιος', 'χοντρή', 'βλάκας'};
+
     return text
         .split('\n')
         .map((word) => word.trim())
-        .where((word) => word.length >= 3)
+        .where((word) => word.length >= 3 && !bannedWords.contains(word))
         .toList();
   }
 
