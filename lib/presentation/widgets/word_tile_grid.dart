@@ -56,8 +56,8 @@ class _WordTileGridState extends State<WordTileGrid> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        const baseTileSize = 40.0;
-        const minTileSize = 30.0;
+        const baseTileSize = 48.0;
+        const minTileSize = 42.0;
 
         final totalWords = widget.validWords.length;
 
