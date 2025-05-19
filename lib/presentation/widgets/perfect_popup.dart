@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/utils/color_library.dart';
 
+// Perfect message after finding all words
 class PerfectPopup extends StatefulWidget {
   const PerfectPopup({super.key});
 

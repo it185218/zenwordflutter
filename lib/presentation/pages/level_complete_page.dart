@@ -16,8 +16,13 @@ import '../widgets/top_bar.dart';
 import '../widgets/treasure_container.dart';
 import 'game_page.dart';
 
+// This screen provides visual feedback for completing a level,
+// potentially shows a reward for every 10 levels completed,
+// and allows the user to proceed to the next level.
 class LevelCompletePage extends StatefulWidget {
+  // The level that was just completed.
   final int level;
+
   const LevelCompletePage({super.key, required this.level});
 
   @override
@@ -26,19 +31,23 @@ class LevelCompletePage extends StatefulWidget {
 
 class _LevelCompletePageState extends State<LevelCompletePage>
     with SingleTickerProviderStateMixin {
-  bool showReward = false;
-  bool rewardGiven = false;
-  bool showLevelButton = false;
+  bool showReward = false; // Whether to show the reward message.
+  bool rewardGiven =
+      false; // Whether the coin reward has already been given to avoid duplicate rewards.
+  bool showLevelButton =
+      false; // Whether to show the button for proceeding to the next level.
 
   @override
   void initState() {
     super.initState();
 
+    // Delay to ensure that game state is fully available
     Future.delayed(Duration(milliseconds: 200), () {
       if (!mounted) return;
       final completed = context.read<LevelBloc>().state.completedCount;
       final shouldReward = completed > 0 && completed % 10 == 0;
 
+      // Check if a new collectible set has been completed and show a dialog
       final progress = context.read<TreasureBloc>().state;
       if (progress is TreasureLoaded) {
         final setsCompleted = progress.progress.setsCompleted;
@@ -57,6 +66,7 @@ class _LevelCompletePageState extends State<LevelCompletePage>
         }
       }
 
+      // Show reward animation and give coins if eligible
       if (shouldReward) {
         Future.delayed(const Duration(seconds: 1), () {
           if (!mounted) return;
@@ -64,6 +74,7 @@ class _LevelCompletePageState extends State<LevelCompletePage>
             showReward = true;
           });
 
+          // After animation, give reward and show next level button
           Future.delayed(const Duration(seconds: 1), () {
             if (!mounted || rewardGiven) return;
 
@@ -75,6 +86,7 @@ class _LevelCompletePageState extends State<LevelCompletePage>
           });
         });
       } else {
+        // If no reward, show next level button immediately
         setState(() {
           showLevelButton = true;
         });
@@ -105,6 +117,7 @@ class _LevelCompletePageState extends State<LevelCompletePage>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
+            // Treasure page navigation
             Padding(
               padding: EdgeInsets.only(left: 12, top: 16),
               child: Align(
@@ -139,6 +152,8 @@ class _LevelCompletePageState extends State<LevelCompletePage>
               ),
             ),
             const SizedBox(height: 16),
+
+            // Progress bar toward 10-level reward
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 80),
               child: Stack(
@@ -165,7 +180,7 @@ class _LevelCompletePageState extends State<LevelCompletePage>
             ),
             const SizedBox(height: 150),
 
-            // Reward animation
+            // Reward message animation
             if (shouldReward)
               AnimatedOpacity(
                 opacity: showReward ? 1.0 : 0.0,
@@ -192,7 +207,7 @@ class _LevelCompletePageState extends State<LevelCompletePage>
 
             const SizedBox(height: 16),
 
-            // Level button only if no reward is pending
+            // Button to go to the next level
             if (showLevelButton)
               LevelButton(
                 text: 'Επίπεδο $nextLevel',

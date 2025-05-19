@@ -62,7 +62,7 @@ class _WordTileGridState extends State<WordTileGrid> {
         final totalWords = widget.validWords.length;
 
         // Estimate columns and rows
-        final columns = (totalWords > 12) ? 2 : 1;
+        final columns = (totalWords > 10) ? 2 : 1;
         final rowsPerColumn = (totalWords / columns).ceil();
 
         final availableHeight = constraints.maxHeight;

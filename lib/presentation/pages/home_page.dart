@@ -12,6 +12,8 @@ import '../widgets/settings_dialog.dart';
 import '../widgets/top_bar.dart';
 import 'game_page.dart';
 
+// Displays the game title, current level button, coin count, and settings icon.
+// Animations are used to fade in UI elements after a short delay.
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -20,11 +22,14 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  // Controls the opacity of animated UI elements.
   bool _isVisible = false;
 
   @override
   void initState() {
     super.initState();
+
+    // Delay the appearance of UI elements for animation purposes.
     Future.delayed(const Duration(milliseconds: 1500), () {
       setState(() {
         _isVisible = true;
@@ -37,6 +42,8 @@ class _HomePageState extends State<HomePage> {
     return AppScaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(kToolbarHeight),
+
+        // Displays the top bar with a coin counter using BlocBuilder to react to coin state changes.
         child: BlocBuilder<CoinBloc, CoinState>(
           builder: (context, state) {
             return AnimatedOpacity(
@@ -88,6 +95,7 @@ class _HomePageState extends State<HomePage> {
 
           Spacer(),
 
+          // Show SettingsDialog for allowing multiple solutions
           AnimatedOpacity(
             opacity: _isVisible ? 1.0 : 0.0,
             duration: const Duration(seconds: 1),

@@ -19,6 +19,7 @@ class AppScaffold extends StatelessWidget {
     return Stack(
       children: [
         Positioned.fill(child: Container(color: ColorLibrary.background)),
+        // Background image
         Positioned.fill(
           child: Image.asset('assets/images/ruins_bg.jpg', fit: BoxFit.cover),
         ),

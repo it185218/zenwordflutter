@@ -72,8 +72,13 @@ const SavedGameSchema = CollectionSchema(
       name: r'revealedLetters',
       type: IsarType.string,
     ),
-    r'validWords': PropertySchema(
+    r'totalFoundExtras': PropertySchema(
       id: 11,
+      name: r'totalFoundExtras',
+      type: IsarType.long,
+    ),
+    r'validWords': PropertySchema(
+      id: 12,
       name: r'validWords',
       type: IsarType.stringList,
     )
@@ -157,7 +162,8 @@ void _savedGameSerialize(
   writer.writeStringList(offsets[8], object.letters);
   writer.writeLong(offsets[9], object.level);
   writer.writeString(offsets[10], object.revealedLetters);
-  writer.writeStringList(offsets[11], object.validWords);
+  writer.writeLong(offsets[11], object.totalFoundExtras);
+  writer.writeStringList(offsets[12], object.validWords);
 }
 
 SavedGame _savedGameDeserialize(
@@ -179,7 +185,8 @@ SavedGame _savedGameDeserialize(
   object.letters = reader.readStringList(offsets[8]) ?? [];
   object.level = reader.readLong(offsets[9]);
   object.revealedLetters = reader.readString(offsets[10]);
-  object.validWords = reader.readStringList(offsets[11]) ?? [];
+  object.totalFoundExtras = reader.readLong(offsets[11]);
+  object.validWords = reader.readStringList(offsets[12]) ?? [];
   return object;
 }
 
@@ -213,6 +220,8 @@ P _savedGameDeserializeProp<P>(
     case 10:
       return (reader.readString(offset)) as P;
     case 11:
+      return (reader.readLong(offset)) as P;
+    case 12:
       return (reader.readStringList(offset) ?? []) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1931,6 +1940,62 @@ extension SavedGameQueryFilter
   }
 
   QueryBuilder<SavedGame, SavedGame, QAfterFilterCondition>
+      totalFoundExtrasEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'totalFoundExtras',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterFilterCondition>
+      totalFoundExtrasGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'totalFoundExtras',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterFilterCondition>
+      totalFoundExtrasLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'totalFoundExtras',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterFilterCondition>
+      totalFoundExtrasBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'totalFoundExtras',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterFilterCondition>
       validWordsElementEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -2238,6 +2303,19 @@ extension SavedGameQuerySortBy on QueryBuilder<SavedGame, SavedGame, QSortBy> {
       return query.addSortBy(r'revealedLetters', Sort.desc);
     });
   }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterSortBy> sortByTotalFoundExtras() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'totalFoundExtras', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterSortBy>
+      sortByTotalFoundExtrasDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'totalFoundExtras', Sort.desc);
+    });
+  }
 }
 
 extension SavedGameQuerySortThenBy
@@ -2329,6 +2407,19 @@ extension SavedGameQuerySortThenBy
       return query.addSortBy(r'revealedLetters', Sort.desc);
     });
   }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterSortBy> thenByTotalFoundExtras() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'totalFoundExtras', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QAfterSortBy>
+      thenByTotalFoundExtrasDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'totalFoundExtras', Sort.desc);
+    });
+  }
 }
 
 extension SavedGameQueryWhereDistinct
@@ -2402,6 +2493,12 @@ extension SavedGameQueryWhereDistinct
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'revealedLetters',
           caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<SavedGame, SavedGame, QDistinct> distinctByTotalFoundExtras() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'totalFoundExtras');
     });
   }
 
@@ -2487,6 +2584,12 @@ extension SavedGameQueryProperty
   QueryBuilder<SavedGame, String, QQueryOperations> revealedLettersProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'revealedLetters');
+    });
+  }
+
+  QueryBuilder<SavedGame, int, QQueryOperations> totalFoundExtrasProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'totalFoundExtras');
     });
   }
 

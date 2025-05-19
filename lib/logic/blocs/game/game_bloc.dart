@@ -11,9 +11,14 @@ import 'game_state.dart';
 
 import '../../../core/utils/game_helpers.dart';
 
+// A Bloc that manages the state and logic for game.
+// It handles events such as starting a game, selecting letters, using hints,
+// and shuffling letters. Game progress is persisted with Isar.
 class GameBloc extends Bloc<GameEvent, GameState> {
+  // The list of dictionary words used to validate subwords.
   List<String> _dictionary = [];
 
+  // Constructs a [GameBloc] and registers all event handlers.
   GameBloc() : super(GameState()) {
     on<GameStarted>(_onGameStarted);
     on<GameLetterSelected>(_onLetterSelected);
@@ -25,6 +30,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     on<GameUseHintFirstLetters>(_onUseHintFirstLetters);
     on<GameSettingChanged>(_onGameSettingChanged);
     on<ResetGameState>((event, emit) {
+      // Reset current level game state to default
       emit(
         state.copyWith(
           letters: [],
@@ -39,6 +45,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     });
   }
 
+  // Loads a saved game if available, or generates a new one from the dictionary.
   Future<void> _onGameStarted(
     GameStarted event,
     Emitter<GameState> emit,
@@ -47,10 +54,10 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     final saved =
         await isar!.savedGames.filter().levelEqualTo(event.level).findFirst();
 
-    // Add this part to handle the "Allow multiple solutions" setting
+    // Whether to allow multiple solution words of same length as base word
     final allowMultipleSolutions = event.allowMultipleSolutions;
 
-    // Count total found extras across all levels
+    // Compute total number of extra words found across all levels
     final allSaves = await isar.savedGames.where().findAll();
     final totalExtras =
         allSaves.expand((game) => game.foundExtras).toSet().length;
@@ -59,7 +66,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         .fold(0, (a, b) => a > b ? a : b);
 
     if (saved != null) {
-      // Load saved game
+      // Resume from saved game state
       emit(
         state.copyWith(
           level: event.level,
@@ -80,6 +87,9 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       );
       return;
     }
+
+    print('MAXMILESTONE: $maxMilestone');
+    print('TOTALFOUNDEXTRA: $totalExtras');
 
     // Generate new level
     _dictionary = await GameHelpers.loadDictionary();
@@ -105,10 +115,12 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
     final validSubwords = GameHelpers.findValidSubwords(baseWord, _dictionary);
 
+    // Sort by score (longer/more valuable words first)
     validSubwords.sort(
       (a, b) => GameHelpers.scoreWord(b).compareTo(GameHelpers.scoreWord(a)),
     );
 
+    // Filter based on game rules
     final filteredWords =
         allowMultipleSolutions
             ? validSubwords.where((w) => w != baseWord).toList()
@@ -116,15 +128,17 @@ class GameBloc extends Bloc<GameEvent, GameState> {
                 .where((w) => w.length != baseWord.length && w != baseWord)
                 .toList();
 
+    // Select balanced grid words for layout
     final balancedWords = selectBalancedGridWords(
       baseWord: baseWord,
       sortedWords: filteredWords,
       maxWords: event.level.clamp(1, 10),
     );
 
+    // Remaining words are considered extra
     final extras = validSubwords.toSet().difference(balancedWords.toSet());
 
-    // 🔥 Print here
+    // Debug print logs
     print("🔤 Base word: $baseWord");
     print(
       "🧩 Grid Words (${balancedWords.length}): ${balancedWords.join(', ')}",
@@ -134,9 +148,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     print("Skill score: $skillScore");
 
     print("Allow Multiple Solutions: $allowMultipleSolutions");
-    print("Valid Subwords: ${validSubwords.join(', ')}");
-    print("Filtered Words: ${filteredWords.join(', ')}");
 
+    // Emit the initial state of the new game
     final newState = state.copyWith(
       level: event.level,
       letters: shuffledLetters,
@@ -154,7 +167,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
     emit(newState);
 
-    // Save to Isar
+    // Save new game state
     final game =
         SavedGame()
           ..level = event.level
@@ -166,11 +179,13 @@ class GameBloc extends Bloc<GameEvent, GameState> {
           ..additionalWords = extras.toList()
           ..revealedLetters = ''
           ..hintRevealedLetters = ''
-          ..allowMultipleSolutions = event.allowMultipleSolutions;
+          ..allowMultipleSolutions = event.allowMultipleSolutions
+          ..totalFoundExtras = totalExtras;
 
     await isar.writeTxn(() => isar.savedGames.put(game));
   }
 
+  // Selects a list of words for the game grid based on layout and max word constraints.
   List<String> selectBalancedGridWords({
     required String baseWord,
     required List<String> sortedWords,
@@ -181,19 +196,11 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     final result = <String>[baseWord];
     final usedWords = <String>{baseWord};
 
-    // Check if the base word is longer than 6 characters
-    final isBaseWordLarge = baseWord.length > 6;
-
-    // If base word is larger than 6, limit the number of words to 14 (including the base word)
-    if (isBaseWordLarge) {
-      maxWords = 10;
-    }
-
     for (var word in sortedWords) {
       if (result.length >= maxWords) break;
       if (usedWords.contains(word)) continue;
 
-      // Try placing the word in combination with existing ones
+      // Place the word in combination with existing ones
       bool added = false;
 
       for (int i = 0; i <= result.length; i++) {
@@ -207,7 +214,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
           final left = col1.length > row ? col1[row] : '';
           final right = col2.length > row ? col2[row] : '';
 
-          // Try adding to column 1
+          // Column 1
           if (left.isEmpty && word.length + right.length <= maxRowLength) {
             result.insert(row, word);
             usedWords.add(word);
@@ -215,7 +222,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
             break;
           }
 
-          // Try adding to column 2
+          // Column 2
           if (right.isEmpty && word.length + left.length <= maxRowLength) {
             result.insert((result.length / 2).ceil() + row, word);
             usedWords.add(word);
@@ -234,6 +241,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       }
     }
 
+    // Group by length then sort by score
     final groupedByLength = <int, List<String>>{};
 
     for (var word in result) {
@@ -260,6 +268,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     return finalList;
   }
 
+  // Saves the current in-progress game state to Isar database.
   Future<void> _saveGameState(GameState state) async {
     final isar = Isar.getInstance();
     final existing =
@@ -270,19 +279,22 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       existing.foundExtras =
           state.foundWords
               .where((w) => state.additionalWords.contains(w))
-              .toList(); // ✅ Save only extras that were found
+              .toList(); // Save only extras that were found
       existing.additionalWords = state.additionalWords.toList();
       existing.revealedLetters = serializeRevealed(state.revealedLetters);
       existing.hintRevealedLetters = serializeRevealed(
         state.hintRevealedLetters,
       );
       existing.extraWordMilestone = state.extraWordMilestone;
+      existing.totalFoundExtras = state.totalFoundExtras;
       existing.allowMultipleSolutions = state.allowMultipleSolutions;
 
       await isar.writeTxn(() => isar.savedGames.put(existing));
     }
   }
 
+  // Handles letter selection during gameplay.
+  // Adds the selected index if it hasn’t been selected yet.
   void _onLetterSelected(GameLetterSelected event, Emitter<GameState> emit) {
     if (!state.selectedIndices.contains(event.index)) {
       emit(
@@ -293,6 +305,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     }
   }
 
+  // Handles undoing the last letter selection in the current word path.
   void _onUndoLastSelection(
     GameUndoLastSelection event,
     Emitter<GameState> emit,
@@ -304,10 +317,13 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     }
   }
 
+  // Updates the UI with the current touch offset during drag/selection.
   void _onTouchUpdate(GameTouchUpdate event, Emitter<GameState> emit) {
     emit(state.copyWith(currentTouch: event.offset));
   }
 
+  // Ends a word selection attempt, checks for word validity,
+  // updates found and extra words, saves state, and rewards if applicable.
   Future<void> _onTouchEnd(GameTouchEnd event, Emitter<GameState> emit) async {
     final word = state.selectedIndices.map((i) => state.letters[i]).join();
 
@@ -329,7 +345,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       // Load all saved games and compute new global total of found extra words
       final allSaves = await Isar.getInstance()!.savedGames.where().findAll();
       final globalFoundExtras = allSaves.expand((g) => g.foundExtras).toSet();
-      if (isAdditional) globalFoundExtras.add(word); // include this new one
+      if (isAdditional) globalFoundExtras.add(word);
       final updatedTotalExtras = globalFoundExtras.length;
 
       final newState = state.copyWith(
@@ -344,6 +360,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       emit(newState);
       await _saveGameState(newState);
 
+      // Check for rewards if a new extra word was found
       if (newExtraWordFound) {
         await _checkAndRewardMilestone(newState, emit);
       }
@@ -352,6 +369,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     }
   }
 
+  // Randomly reveals the first letter of one unfound word, used as a milestone reward.
   Future<void> _revealRandomWord(
     GameState state,
     Emitter<GameState> emit,
@@ -365,7 +383,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     final randomWord = validWords[Random().nextInt(validWords.length)];
 
     final revealedLetters = Map<String, Set<int>>.from(state.revealedLetters);
-    revealedLetters[randomWord] = {0};
+    revealedLetters[randomWord] = {0}; // Reveal first letter
 
     final newState = state.copyWith(revealedLetters: revealedLetters);
 
@@ -373,6 +391,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     await _saveGameState(newState);
   }
 
+  // Checks whether the player reached a milestone (every 10 extra words),
   Future<void> _checkAndRewardMilestone(
     GameState state,
     Emitter<GameState> emit,
@@ -391,6 +410,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     }
   }
 
+  // Shuffles the order of displayed letter tiles (and their IDs).
   void _onShuffleLetters(GameShuffleLetters event, Emitter<GameState> emit) {
     final shuffled = List<String>.from(state.letters);
     final shuffledIds = List<int>.from(state.letterIds);
@@ -409,6 +429,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     );
   }
 
+  // Reveals one letter of a random unfound word.
+  // If the word becomes fully revealed, it is marked as found.
   Future<void> _onUseHintLetter(
     GameUseHintLetter event,
     Emitter<GameState> emit,
@@ -462,6 +484,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     }
   }
 
+  // Reveals the first letter of up to 5 unfound words as a batch hint.
+  // Fully revealed words are automatically marked as found.
   Future<void> _onUseHintFirstLetters(
     GameUseHintFirstLetters event,
     Emitter<GameState> emit,
@@ -524,6 +548,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     }
   }
 
+  // Updates the game setting to allow or disallow multiple solutions.
   void _onGameSettingChanged(
     GameSettingChanged event,
     Emitter<GameState> emit,

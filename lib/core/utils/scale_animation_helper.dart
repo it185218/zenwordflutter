@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// Scale down animation when icon buttons are tapped
 class AnimationHelper {
   static void onTapDown(
     TapDownDetails details,

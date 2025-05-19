@@ -59,8 +59,11 @@ class GameState {
       foundExtras: foundExtras ?? this.foundExtras,
       additionalWords: additionalWords ?? this.additionalWords,
       letterIds: letterIds ?? this.letterIds,
-      revealedLetters: revealedLetters ?? this.revealedLetters,
-      hintRevealedLetters: hintRevealedLetters ?? this.hintRevealedLetters,
+      revealedLetters:
+          revealedLetters ?? this.revealedLetters, // Used by extra words reward
+      hintRevealedLetters:
+          hintRevealedLetters ??
+          this.hintRevealedLetters, // Used by light bulb and rocket launch hints
       totalFoundExtras: totalFoundExtras ?? this.totalFoundExtras,
       extraWordMilestone: extraWordMilestone ?? this.extraWordMilestone,
       allowMultipleSolutions:

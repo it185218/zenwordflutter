@@ -1,4 +1,3 @@
-// coin_event.dart
 abstract class CoinEvent {}
 
 class LoadCoins extends CoinEvent {}

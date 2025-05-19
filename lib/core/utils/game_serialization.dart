@@ -1,3 +1,4 @@
+// For Isar handling of Map
 Map<String, Set<int>> deserializeRevealed(String input) {
   final map = <String, Set<int>>{};
   if (input.isEmpty) return map;

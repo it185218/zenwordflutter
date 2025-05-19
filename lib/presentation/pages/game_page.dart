@@ -27,7 +27,11 @@ import '../widgets/top_bar.dart';
 import '../widgets/word_tile_grid.dart';
 import 'level_complete_page.dart';
 
+// GamePage represents the main gameplay screen where the player interacts
+// with the game logic, attempts to find valid words, and progresses through levels.
+// It handles the game state, timer, UI layout, word selection, hints, and collectibles.
 class GamePage extends StatefulWidget {
+  // The current level number to be played.
   final int level;
 
   const GamePage({super.key, required this.level});
@@ -37,16 +41,17 @@ class GamePage extends StatefulWidget {
 }
 
 class _GamePageState extends State<GamePage> {
-  final double radius = 100.0;
-  final double circleSize = 50.0;
-  late Stopwatch stopwatch;
+  final double radius = 100.0; // Radius for the circular letter layout
+  final double circleSize = 50.0; // Size of each circular letter tile
+  late Stopwatch stopwatch; // Tracks level duration for performance stats
 
   @override
   void initState() {
     super.initState();
 
-    stopwatch = Stopwatch()..start(); // Start timer
+    stopwatch = Stopwatch()..start(); // Start tracking elapsed time
 
+    // Load game and treasure state after widget build is complete
     Future.microtask(() {
       final allowMultipleSolutions =
           context.read<GameBloc>().state.allowMultipleSolutions;
@@ -75,9 +80,11 @@ class _GamePageState extends State<GamePage> {
         ),
       ),
 
+      // Listens for changes in found words to determine if game is complete or a collectible should be collected
       child: BlocListener<GameBloc, GameState>(
         listenWhen: (prev, curr) => prev.validWords != curr.validWords,
         listener: (context, state) {
+          // Trigger collectible generation logic if conditions are met
           final treasureBloc = context.read<TreasureBloc>();
           final treasureState = treasureBloc.state;
 
@@ -96,6 +103,7 @@ class _GamePageState extends State<GamePage> {
           }
         },
 
+        // Second listener for tracking word finding and level completion
         child: BlocListener<GameBloc, GameState>(
           listenWhen:
               (prev, curr) => prev.foundWords.length != curr.foundWords.length,
@@ -103,6 +111,7 @@ class _GamePageState extends State<GamePage> {
             final allFound =
                 state.validWords.toSet().difference(state.foundWords).isEmpty;
 
+            // Check if a collectible was found and dispatch collection event
             final treasureState = context.read<TreasureBloc>().state;
             if (treasureState is TreasureLoaded) {
               final collectibleWord =
@@ -115,6 +124,7 @@ class _GamePageState extends State<GamePage> {
               }
             }
 
+            // If all words are found, complete the level
             if (allFound) {
               stopwatch.stop(); // Stop timer
 
@@ -133,6 +143,7 @@ class _GamePageState extends State<GamePage> {
 
                 if (!context.mounted) return;
 
+                // Clear saved game for completed level
                 final currentLevel =
                     context.read<LevelBloc>().state.currentLevel;
 
@@ -148,6 +159,7 @@ class _GamePageState extends State<GamePage> {
                   }
                 });
 
+                // Dispatch level completion with duration and words
                 context.read<LevelBloc>().add(
                   CompleteLevel(
                     level: currentLevel,
@@ -161,6 +173,7 @@ class _GamePageState extends State<GamePage> {
 
                 if (!context.mounted) return;
 
+                // Navigate to next screen after completion
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(
                     builder: (_) => LevelCompletePage(level: currentLevel),
@@ -170,6 +183,7 @@ class _GamePageState extends State<GamePage> {
             }
           },
 
+          // Main UI Builder for GamePage
           child: BlocBuilder<GameBloc, GameState>(
             builder: (context, state) {
               final letters = state.letters;
@@ -177,6 +191,7 @@ class _GamePageState extends State<GamePage> {
                 return const Center();
               }
 
+              // Generate collectible if needed (early fallback)
               final treasureBloc = context.read<TreasureBloc>();
               final treasureState = treasureBloc.state;
               if (treasureState is TreasureInitial &&
@@ -192,6 +207,7 @@ class _GamePageState extends State<GamePage> {
 
               return Column(
                 children: [
+                  // Grid of tiles representing valid words
                   Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
@@ -223,6 +239,8 @@ class _GamePageState extends State<GamePage> {
                     ),
                   ),
                   const Spacer(),
+
+                  // Displays the currently forming word
                   CurrentWordDisplay(
                     currentWord:
                         state.selectedIndices
@@ -233,6 +251,7 @@ class _GamePageState extends State<GamePage> {
 
                   Row(
                     children: [
+                      // Left side buttons (Shuffle, Extras)
                       SizedBox(
                         height: 250,
                         child: Container(
@@ -244,6 +263,7 @@ class _GamePageState extends State<GamePage> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
+                              // Shuffle letters
                               HintContainer(
                                 icon: Icons.shuffle_rounded,
                                 onTap: () {
@@ -253,6 +273,7 @@ class _GamePageState extends State<GamePage> {
                                 },
                               ),
 
+                              // Shows/Opens Extra Words dialog box
                               HintContainer(
                                 icon: Icons.star_outline_rounded,
                                 onTap: () {
@@ -274,6 +295,7 @@ class _GamePageState extends State<GamePage> {
                         ),
                       ),
 
+                      // Central circle of letters
                       Expanded(
                         child: Container(
                           height: 300,
@@ -313,6 +335,7 @@ class _GamePageState extends State<GamePage> {
                                 },
                                 child: Stack(
                                   children: [
+                                    // Sphere container
                                     BigCircle(
                                       radius: radius,
                                       circleSize: circleSize,
@@ -341,6 +364,8 @@ class _GamePageState extends State<GamePage> {
                                         curve: Curves.easeInOut,
                                         left: pos.dx - circleSize / 2,
                                         top: pos.dy - circleSize / 2,
+
+                                        // Letter choices
                                         child: LetterCircle(
                                           letter: letters[i],
                                           isSelected: isSelected,
@@ -356,6 +381,7 @@ class _GamePageState extends State<GamePage> {
                         ),
                       ),
 
+                      // Right side buttons (Hints)
                       SizedBox(
                         height: 250,
                         child: Container(
@@ -373,6 +399,7 @@ class _GamePageState extends State<GamePage> {
                                 children: [
                                   Column(
                                     children: [
+                                      // Hint: Reveal one letter
                                       HintContainer(
                                         icon: Icons.emoji_objects_outlined,
                                         onTap: () {
@@ -410,18 +437,20 @@ class _GamePageState extends State<GamePage> {
                                   ),
                                 ],
                               ),
-                              // HintContainer(
-                              //   icon: Icons.money,
-                              //   onTap: () {
-                              //     context.read<CoinBloc>().add(AddCoins(200));
-                              //   },
-                              // ),
+                              // Free coins for testing
+                              HintContainer(
+                                icon: Icons.money,
+                                onTap: () {
+                                  context.read<CoinBloc>().add(AddCoins(200));
+                                },
+                              ),
                               Stack(
                                 clipBehavior: Clip.none,
                                 alignment: Alignment.topCenter,
                                 children: [
                                   Column(
                                     children: [
+                                      // Hint: Reveal multiple letters (rocket)
                                       HintContainer(
                                         icon: Icons.rocket_launch_outlined,
                                         onTap: () {
@@ -474,6 +503,7 @@ class _GamePageState extends State<GamePage> {
     );
   }
 
+  // Handles the user's touch input to select letter tiles based on their position.
   void _handleTouch(
     BuildContext context,
     Offset touchPoint,

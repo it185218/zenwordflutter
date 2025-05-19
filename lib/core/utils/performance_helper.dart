@@ -1,5 +1,6 @@
 import 'package:zenwordflutter/data/model/performance.dart';
 
+// Compute skill score using the performance from completed levels
 double computeSkillScore(List<Performance> history, {int sampleSize = 5}) {
   if (history.isEmpty) return 0.0;
 

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 
 class ColorLibrary {
-  // 85 = 217 , 90 = 230, 75 = 191
-
   static const Color background = Color.fromARGB(255, 117, 199, 197);
   static const Color backgroundOverlay = Color.fromARGB(25, 108, 182, 178);
 

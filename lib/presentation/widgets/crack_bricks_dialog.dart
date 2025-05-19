@@ -35,7 +35,6 @@ class _CrackBricksDialogState extends State<CrackBricksDialog>
   void initState() {
     super.initState();
 
-    // Hammer animation setup
     _hammerController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1000),
@@ -91,7 +90,6 @@ class _CrackBricksDialogState extends State<CrackBricksDialog>
       ),
     );
 
-    // Brick shake setup
     _brickShakeController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 800),
@@ -101,13 +99,11 @@ class _CrackBricksDialogState extends State<CrackBricksDialog>
       CurvedAnimation(parent: _brickShakeController, curve: Curves.elasticIn),
     );
 
-    // Vase scale + bounce
     _vaseScaleController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 600),
     );
 
-    // Use a simpler scale animation
     _vaseScale = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _vaseScaleController, curve: Curves.easeOutBack),
     );
@@ -128,7 +124,6 @@ class _CrackBricksDialogState extends State<CrackBricksDialog>
         return;
       }
 
-      // Start animation sequence
       Future.delayed(const Duration(milliseconds: 500), () {
         _hammerController.forward().whenComplete(() async {
           await Future.delayed(const Duration(milliseconds: 200));
@@ -183,7 +178,6 @@ class _CrackBricksDialogState extends State<CrackBricksDialog>
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // Brick shake
             if (!_bricksCracked)
               AnimatedBuilder(
                 animation: _brickShakeController,
@@ -199,7 +193,6 @@ class _CrackBricksDialogState extends State<CrackBricksDialog>
                 child: Image.asset('assets/images/bricks.png', height: 200),
               ),
 
-            // Vase reveal (with simplified ScaleTransition)
             if (_bricksCracked && vaseIndex != -1)
               AnimatedBuilder(
                 animation: _vaseScaleController,
@@ -214,7 +207,6 @@ class _CrackBricksDialogState extends State<CrackBricksDialog>
                 },
               ),
 
-            // Hammer swing and fade
             AnimatedBuilder(
               animation: _hammerController,
               builder: (_, child) {

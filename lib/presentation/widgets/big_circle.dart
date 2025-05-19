@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// Sphere
 class BigCircle extends StatelessWidget {
   final double radius;
   final double circleSize;

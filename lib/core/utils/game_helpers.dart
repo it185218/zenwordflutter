@@ -17,6 +17,7 @@ class GameHelpers {
         .toList();
   }
 
+  // Search subwords from the base word
   static List<String> findValidSubwords(String base, List<String> dictionary) {
     final baseLetters = _letterCount(base);
 
@@ -40,6 +41,7 @@ class GameHelpers {
     return map;
   }
 
+  // Pick baseword length base from skill score
   static String pickAdaptiveBaseWord(
     List<String> dictionary,
     double skillScore,
@@ -60,9 +62,9 @@ class GameHelpers {
     List<String> filtered =
         dictionary.where((w) => w.length == length).toList();
 
-    // If no words match the intended length, fallback gracefully
+    // If no words match the intended length, fallback
     if (filtered.isEmpty) {
-      // Try shorter lengths as fallback
+      // Shorter lengths as fallback
       for (
         int fallbackLength = length - 1;
         fallbackLength >= 3;

@@ -15,6 +15,7 @@ class SavedGame {
   List<String> foundExtras = [];
   late List<String> additionalWords;
   int extraWordMilestone = 0;
+  int totalFoundExtras = 0;
   bool allowMultipleSolutions = false;
 
   /// Serialized Map<String, Set<int>>

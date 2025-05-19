@@ -5,6 +5,7 @@ import '../../core/utils/color_library.dart';
 import '../../logic/blocs/game/game_bloc.dart';
 import '../../logic/blocs/game/game_event.dart';
 
+// Allowing of multiple solutions for baseword
 class SettingsDialog extends StatelessWidget {
   const SettingsDialog({super.key});
 
