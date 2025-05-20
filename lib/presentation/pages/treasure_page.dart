@@ -36,9 +36,7 @@ class _TreasurePageState extends State<TreasurePage> {
           ),
           splashColor: Colors.transparent,
           highlightColor: Colors.transparent,
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           'Θησαυρός',
@@ -59,47 +57,77 @@ class _TreasurePageState extends State<TreasurePage> {
 
               final progress = state.progress;
 
-              return GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 0.6,
-                ),
-                itemCount: 12,
-                itemBuilder: (context, index) {
-                  final isCompleted = progress.vaseIndices.contains(index);
-                  final piecesCollected =
-                      (progress.currentPieces.length > index)
-                          ? progress.currentPieces[index]
-                          : 0;
+              return LayoutBuilder(
+                builder: (context, constraints) {
+                  final shelfHeight = constraints.maxHeight / 6;
 
-                  if (isCompleted) {
-                    return Image.asset(
-                      'assets/images/vases/vase-${index + 1}.png',
-                      fit: BoxFit.contain,
-                    );
-                  } else {
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: Colors.brown[300],
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: Colors.brown.shade700,
-                          width: 2,
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: List.generate(4, (shelfIndex) {
+                      final start = shelfIndex * 3;
+
+                      // Build vase widgets for this shelf
+                      final List<Widget> vaseWidgets = List.generate(3, (i) {
+                        final index = start + i;
+                        final isCompleted = progress.vaseIndices.contains(
+                          index,
+                        );
+                        final piecesCollected =
+                            (progress.currentPieces.length > index)
+                                ? progress.currentPieces[index]
+                                : 0;
+
+                        if (isCompleted) {
+                          return Image.asset(
+                            'assets/images/vases/vase-${index + 1}.png',
+                            width: 60,
+                            height: 60,
+                            fit: BoxFit.contain,
+                          );
+                        } else {
+                          return Container(
+                            width: 60,
+                            height: 60,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: Colors.brown.shade700,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              '$piecesCollected/4',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          );
+                        }
+                      });
+
+                      return SizedBox(
+                        height: shelfHeight,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Image.asset(
+                              'assets/images/wood_shelf.png',
+                              fit: BoxFit.contain,
+                              width: double.infinity,
+                            ),
+                            Transform.translate(
+                              offset: const Offset(0, -35),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: vaseWidgets,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        '$piecesCollected/4',
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    );
-                  }
+                      );
+                    }),
+                  );
                 },
               );
             },
