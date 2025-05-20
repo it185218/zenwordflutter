@@ -12,7 +12,6 @@ class TreasureBloc extends Bloc<TreasureEvent, TreasureState> {
   TreasureBloc(this.isar) : super(TreasureInitial()) {
     on<LoadTreasure>(_onLoad);
     on<GenerateCollectible>(_onGenerate);
-    on<CollectTreasure>(_onCollect);
     on<LoadCrackedBricks>(_onLoadCrackedBricks);
     on<CrackBrick>(_onCrackBrick);
   }
@@ -63,49 +62,6 @@ class TreasureBloc extends Bloc<TreasureEvent, TreasureState> {
         emit(TreasureLoaded(progress));
       }
     }
-  }
-
-  Future<void> _onCollect(
-    CollectTreasure event,
-    Emitter<TreasureState> emit,
-  ) async {
-    if (state is! TreasureLoaded) return;
-
-    final progress = (state as TreasureLoaded).progress;
-
-    progress.totalCollected += 1;
-
-    int getRequiredForNextSet(int setsCompleted) {
-      if (setsCompleted == 0) return 3;
-      if (setsCompleted == 1) return 6;
-      if (setsCompleted == 2) return 9;
-      return 12;
-    }
-
-    final requiredForCurrentSet = getRequiredForNextSet(progress.setsCompleted);
-    final currentSetStart = [0, 3, 9, 18][progress.setsCompleted];
-    final collectedInCurrentSet = progress.totalCollected - currentSetStart;
-
-    if (collectedInCurrentSet >= requiredForCurrentSet) {
-      progress.setsCompleted += 1;
-
-      if (progress.setsCompleted <= 12) {
-        final updatedVases = List<int>.from(progress.vaseIndices)
-          ..add(progress.vaseIndices.length);
-        progress.vaseIndices = updatedVases;
-      }
-    }
-
-    if (progress.setsCompleted > 12) {
-      progress.setsCompleted = 12;
-    }
-
-    progress.currentLevelWithIcon = null;
-    progress.wordWithCollectible = null;
-    progress.collectibleTileIndex = null;
-
-    await isar.writeTxn(() => isar.treasureProgress.put(progress));
-    emit(TreasureLoaded(progress));
   }
 
   Future<void> _onLoadCrackedBricks(
