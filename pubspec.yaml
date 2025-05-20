@@ -69,11 +69,13 @@ flutter:
   assets:
     - assets/dictionary/greek-dictionary.txt
     - assets/dictionary/greek-dictionary-2.txt
+    - assets/images/
     - assets/images/puzzle_background.jpg
     - assets/images/background_1.jpg
     - assets/images/ruins_bg.jpg
     - assets/images/wood_shelf.png
     - assets/images/vases/
+    - assets/images/vase-pieces/
     - assets/images/bricks.png
     - assets/images/chest.png
     - assets/images/hammer.png
