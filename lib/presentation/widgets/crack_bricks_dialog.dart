@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:isar/isar.dart';
+import 'package:zenwordflutter/data/model/treasure_progress.dart';
 
 import '../../logic/blocs/treasure/treasure_bloc.dart';
 import '../../logic/blocs/treasure/treasure_event.dart';
@@ -91,21 +93,19 @@ class _CrackBricksDialogState extends State<CrackBricksDialog>
     super.dispose();
   }
 
-  void _onTapBrick(int index, CrackedBricksLoaded state) {
+  void _onTapBrick(int index, CrackedBricksLoaded state) async {
     if (state.cracked[index]) return;
 
-    context.read<TreasureBloc>().add(CrackBrick(brickIndex: index));
+    final isar = Isar.getInstance();
+    final progress = await isar?.treasureProgress.where().findFirst();
 
-    final allPiecesFound = state.pieceIndices.every(
-      (i) => i == index || state.cracked[i],
-    );
-
-    if (allPiecesFound) {
-      _controller.forward();
+    if (progress == null || progress.totalHammers <= 0) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Not enough hammer!")));
+      return;
     }
-  }
 
-  void _handleTapWithHammer(int index, VoidCallback onComplete) {
     final brickContext = _brickKeys[index].currentContext;
     final stackContext = _stackKey.currentContext;
 
@@ -134,7 +134,16 @@ class _CrackBricksDialogState extends State<CrackBricksDialog>
               setState(() {
                 _hammerPosition = null;
               });
-              onComplete(); // ← Trigger the actual cracking AFTER animation
+
+              context.read<TreasureBloc>().add(CrackBrick(brickIndex: index));
+
+              final allPiecesFound = state.pieceIndices.every(
+                (i) => i == index || state.cracked[i],
+              );
+
+              if (allPiecesFound) {
+                _controller.forward();
+              }
             }
           });
         }
@@ -181,9 +190,7 @@ class _CrackBricksDialogState extends State<CrackBricksDialog>
                         onTap: () {
                           if (state.cracked[index]) return;
 
-                          _handleTapWithHammer(index, () {
-                            _onTapBrick(index, state);
-                          });
+                          _onTapBrick(index, state);
                         },
 
                         child: Stack(
