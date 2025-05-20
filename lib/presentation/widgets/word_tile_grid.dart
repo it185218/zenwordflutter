@@ -166,7 +166,7 @@ class _WordTileGridState extends State<WordTileGrid> {
                                   )
                                   : showCollectible
                                   ? Image.asset(
-                                    'assets/images/bricks.png',
+                                    'assets/images/hammer.png',
                                     width: fontSize,
                                   )
                                   : const SizedBox.shrink(),
