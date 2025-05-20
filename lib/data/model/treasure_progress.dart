@@ -9,6 +9,7 @@ class TreasureProgress {
   int totalCollected = 0;
   int setsCompleted = 0;
   List<int> vaseIndices = [];
+  List<int> currentPieces = List.filled(12, 0);
   int? currentLevelWithIcon;
   String? wordWithCollectible;
   int? collectibleTileIndex;
