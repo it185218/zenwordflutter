@@ -18,6 +18,14 @@ class _CrackBricksDialogState extends State<CrackBricksDialog>
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
 
+  Offset? _hammerPosition;
+  late AnimationController _hammerController;
+  late Animation<double> _hammerScale;
+  late Animation<double> _hammerRotation;
+
+  final List<GlobalKey> _brickKeys = List.generate(12, (_) => GlobalKey());
+  final GlobalKey _stackKey = GlobalKey();
+
   @override
   void initState() {
     super.initState();
@@ -35,6 +43,34 @@ class _CrackBricksDialogState extends State<CrackBricksDialog>
       }
     });
 
+    _hammerController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+
+    _hammerScale = Tween<double>(begin: 1.5, end: 1.0).animate(
+      CurvedAnimation(parent: _hammerController, curve: Curves.elasticOut),
+    );
+
+    _hammerController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        Future.delayed(const Duration(milliseconds: 300), () {
+          if (mounted) {
+            setState(() {
+              _hammerPosition = null;
+            });
+          }
+        });
+      }
+    });
+
+    _hammerRotation = TweenSequence([
+      TweenSequenceItem(tween: Tween(begin: -0.4, end: 0.3), weight: 50),
+      TweenSequenceItem(tween: Tween(begin: 0.3, end: 0.0), weight: 50),
+    ]).animate(
+      CurvedAnimation(parent: _hammerController, curve: Curves.easeOutCubic),
+    );
+
     _fadeAnimation = Tween<double>(
       begin: 0,
       end: 1,
@@ -51,6 +87,7 @@ class _CrackBricksDialogState extends State<CrackBricksDialog>
   @override
   void dispose() {
     _controller.dispose();
+    _hammerController.dispose();
     super.dispose();
   }
 
@@ -68,6 +105,43 @@ class _CrackBricksDialogState extends State<CrackBricksDialog>
     }
   }
 
+  void _handleTapWithHammer(int index, VoidCallback onComplete) {
+    final brickContext = _brickKeys[index].currentContext;
+    final stackContext = _stackKey.currentContext;
+
+    if (brickContext != null && stackContext != null) {
+      final brickBox = brickContext.findRenderObject() as RenderBox;
+      final stackBox = stackContext.findRenderObject() as RenderBox;
+
+      final brickGlobal = brickBox.localToGlobal(Offset.zero);
+      final stackGlobal = stackBox.localToGlobal(Offset.zero);
+
+      final offsetInStack = brickGlobal - stackGlobal;
+      final brickSize = brickBox.size;
+
+      setState(() {
+        _hammerPosition =
+            offsetInStack +
+            Offset(brickSize.width / 2 - 24, brickSize.height / 2 - 24);
+      });
+
+      _hammerController.forward(from: 0);
+
+      _hammerController.addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          Future.delayed(const Duration(milliseconds: 300), () {
+            if (mounted) {
+              setState(() {
+                _hammerPosition = null;
+              });
+              onComplete(); // ← Trigger the actual cracking AFTER animation
+            }
+          });
+        }
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<TreasureBloc, TreasureState>(
@@ -82,6 +156,7 @@ class _CrackBricksDialogState extends State<CrackBricksDialog>
           return Dialog(
             backgroundColor: Colors.transparent,
             child: Stack(
+              key: _stackKey, // ← track the Stack's position
               alignment: Alignment.center,
               children: [
                 AnimatedOpacity(
@@ -103,8 +178,16 @@ class _CrackBricksDialogState extends State<CrackBricksDialog>
                       final pieceNumber = state.pieceIndices.indexOf(index) + 1;
 
                       return GestureDetector(
-                        onTap: () => _onTapBrick(index, state),
+                        onTap: () {
+                          if (state.cracked[index]) return;
+
+                          _handleTapWithHammer(index, () {
+                            _onTapBrick(index, state);
+                          });
+                        },
+
                         child: Stack(
+                          key: _brickKeys[index],
                           children: [
                             if (!isCracked)
                               Positioned.fill(
@@ -145,6 +228,22 @@ class _CrackBricksDialogState extends State<CrackBricksDialog>
                         width: 200,
                         height: 200,
                         fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+                if (_hammerPosition != null)
+                  Positioned(
+                    left: _hammerPosition!.dx,
+                    top: _hammerPosition!.dy,
+                    child: RotationTransition(
+                      turns: _hammerRotation,
+                      child: ScaleTransition(
+                        scale: _hammerScale,
+                        child: Image.asset(
+                          'assets/images/hammer.png',
+                          width: 48,
+                          height: 48,
+                        ),
                       ),
                     ),
                   ),
