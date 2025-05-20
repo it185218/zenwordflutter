@@ -89,6 +89,8 @@ class TreasureBloc extends Bloc<TreasureEvent, TreasureState> {
   ) async {
     emit(CrackedBricksLoading());
 
+    final progress = await isar.treasureProgress.where().findFirst();
+
     for (int i = 0; i < 12; i++) {
       final crackedEntry =
           await isar.crackedBricks.filter().setIndexEqualTo(i).findFirst();
@@ -105,6 +107,7 @@ class TreasureBloc extends Bloc<TreasureEvent, TreasureState> {
               cracked: List.from(crackedEntry.crackedStates),
               pieceIndices: List.from(crackedEntry.pieceIndices),
               allPiecesFound: false,
+              totalHammers: progress?.totalHammers ?? 0,
             ),
           );
           return;
@@ -130,6 +133,7 @@ class TreasureBloc extends Bloc<TreasureEvent, TreasureState> {
             cracked: cracked,
             pieceIndices: pieceIndices,
             allPiecesFound: false,
+            totalHammers: progress?.totalHammers ?? 0,
           ),
         );
         return;
@@ -144,6 +148,7 @@ class TreasureBloc extends Bloc<TreasureEvent, TreasureState> {
         cracked: List.filled(12, true),
         pieceIndices: [],
         allPiecesFound: true,
+        totalHammers: progress?.totalHammers ?? 0,
       ),
     );
   }
@@ -220,6 +225,7 @@ class TreasureBloc extends Bloc<TreasureEvent, TreasureState> {
         cracked: cracked,
         pieceIndices: currentState.pieceIndices,
         allPiecesFound: allPiecesFound,
+        totalHammers: treasureProgress.totalHammers, // <-- updated here
       ),
     );
   }

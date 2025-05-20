@@ -164,96 +164,138 @@ class _CrackBricksDialogState extends State<CrackBricksDialog>
 
           return Dialog(
             backgroundColor: Colors.transparent,
-            child: Stack(
-              key: _stackKey, // ← track the Stack's position
-              alignment: Alignment.center,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                AnimatedOpacity(
-                  duration: const Duration(milliseconds: 600),
-                  opacity: state.allPiecesFound ? 0 : 1,
-                  child: GridView.builder(
-                    padding: const EdgeInsets.all(16),
-                    shrinkWrap: true,
-                    itemCount: 12,
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
-                          mainAxisSpacing: 12,
-                          crossAxisSpacing: 12,
-                        ),
-                    itemBuilder: (context, index) {
-                      final isCracked = state.cracked[index];
-                      final hasPiece = state.pieceIndices.contains(index);
-                      final pieceNumber = state.pieceIndices.indexOf(index) + 1;
-
-                      return GestureDetector(
-                        onTap: () {
-                          if (state.cracked[index]) return;
-
-                          _onTapBrick(index, state);
-                        },
-
-                        child: Stack(
-                          key: _brickKeys[index],
-                          children: [
-                            if (!isCracked)
-                              Positioned.fill(
-                                child: Image.asset(
-                                  'assets/images/bricks.png',
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            if (isCracked)
-                              Positioned.fill(
-                                child:
-                                    hasPiece
-                                        ? Image.asset(
-                                          'assets/images/vase-pieces/vase-${state.vaseIndex + 1}-$pieceNumber.png',
-                                          fit: BoxFit.contain,
-                                        )
-                                        : const Center(
-                                          child: Icon(
-                                            Icons.clear,
-                                            size: 32,
-                                            color: Colors.black45,
-                                          ),
-                                        ),
-                              ),
-                          ],
-                        ),
-                      );
-                    },
+                Align(
+                  alignment: Alignment.topRight,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 16, top: 12),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Image.asset(
+                            'assets/images/hammer.png',
+                            width: 20,
+                            height: 20,
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            '${state.totalHammers}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-                if (state.allPiecesFound)
-                  ScaleTransition(
-                    scale: _scaleAnimation,
-                    child: FadeTransition(
-                      opacity: _fadeAnimation,
-                      child: Image.asset(
-                        'assets/images/vases/vase-${state.vaseIndex + 1}.png',
-                        width: 200,
-                        height: 200,
-                        fit: BoxFit.contain,
+
+                Stack(
+                  key: _stackKey,
+                  alignment: Alignment.center,
+                  children: [
+                    AnimatedOpacity(
+                      duration: const Duration(milliseconds: 600),
+                      opacity: state.allPiecesFound ? 0 : 1,
+                      child: GridView.builder(
+                        padding: const EdgeInsets.all(16),
+                        shrinkWrap: true,
+                        itemCount: 12,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3,
+                              mainAxisSpacing: 12,
+                              crossAxisSpacing: 12,
+                            ),
+                        itemBuilder: (context, index) {
+                          final isCracked = state.cracked[index];
+                          final hasPiece = state.pieceIndices.contains(index);
+                          final pieceNumber =
+                              state.pieceIndices.indexOf(index) + 1;
+
+                          return GestureDetector(
+                            onTap: () {
+                              if (state.cracked[index]) return;
+
+                              _onTapBrick(index, state);
+                            },
+
+                            child: Stack(
+                              key: _brickKeys[index],
+                              children: [
+                                if (!isCracked)
+                                  Positioned.fill(
+                                    child: Image.asset(
+                                      'assets/images/bricks.png',
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                if (isCracked)
+                                  Positioned.fill(
+                                    child:
+                                        hasPiece
+                                            ? Image.asset(
+                                              'assets/images/vase-pieces/vase-${state.vaseIndex + 1}-$pieceNumber.png',
+                                              fit: BoxFit.contain,
+                                            )
+                                            : const Center(
+                                              child: Icon(
+                                                Icons.clear,
+                                                size: 32,
+                                                color: Colors.black45,
+                                              ),
+                                            ),
+                                  ),
+                              ],
+                            ),
+                          );
+                        },
                       ),
                     ),
-                  ),
-                if (_hammerPosition != null)
-                  Positioned(
-                    left: _hammerPosition!.dx,
-                    top: _hammerPosition!.dy,
-                    child: RotationTransition(
-                      turns: _hammerRotation,
-                      child: ScaleTransition(
-                        scale: _hammerScale,
-                        child: Image.asset(
-                          'assets/images/hammer.png',
-                          width: 48,
-                          height: 48,
+                    if (state.allPiecesFound)
+                      ScaleTransition(
+                        scale: _scaleAnimation,
+                        child: FadeTransition(
+                          opacity: _fadeAnimation,
+                          child: Image.asset(
+                            'assets/images/vases/vase-${state.vaseIndex + 1}.png',
+                            width: 200,
+                            height: 200,
+                            fit: BoxFit.contain,
+                          ),
                         ),
                       ),
-                    ),
-                  ),
+                    if (_hammerPosition != null)
+                      Positioned(
+                        left: _hammerPosition!.dx,
+                        top: _hammerPosition!.dy,
+                        child: RotationTransition(
+                          turns: _hammerRotation,
+                          child: ScaleTransition(
+                            scale: _hammerScale,
+                            child: Image.asset(
+                              'assets/images/hammer.png',
+                              width: 48,
+                              height: 48,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ],
             ),
           );

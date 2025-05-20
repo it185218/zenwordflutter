@@ -18,6 +18,7 @@ class CrackedBricksLoaded extends TreasureState {
   final List<bool> cracked;
   final List<int> pieceIndices;
   final bool allPiecesFound;
+  final int totalHammers; // ← ADD THIS
 
   CrackedBricksLoaded({
     required this.setIndex,
@@ -25,5 +26,6 @@ class CrackedBricksLoaded extends TreasureState {
     required this.cracked,
     required this.pieceIndices,
     required this.allPiecesFound,
+    required this.totalHammers, // ← AND INITIALIZE IT
   });
 }
