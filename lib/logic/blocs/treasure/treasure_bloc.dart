@@ -158,6 +158,19 @@ class TreasureBloc extends Bloc<TreasureEvent, TreasureState> {
 
     if (currentState.cracked[event.brickIndex]) return; // Already cracked
 
+    final treasureProgress = await isar.treasureProgress.where().findFirst();
+    if (treasureProgress == null) return;
+
+    // 🛑 Check if there are hammers available
+    if (treasureProgress.totalHammers <= 0) {
+      // Not enough hammers, do not allow cracking
+      return;
+    }
+
+    // ✅ Deduct one hammer
+    treasureProgress.totalHammers--;
+
+    // Proceed with cracking
     final cracked = List<bool>.from(currentState.cracked);
     cracked[event.brickIndex] = true;
 
@@ -169,7 +182,6 @@ class TreasureBloc extends Bloc<TreasureEvent, TreasureState> {
 
     if (crackedEntry != null) {
       crackedEntry.crackedStates[event.brickIndex] = true;
-
       await isar.writeTxn(() async {
         await isar.crackedBricks.put(crackedEntry);
       });
@@ -177,34 +189,29 @@ class TreasureBloc extends Bloc<TreasureEvent, TreasureState> {
 
     final allPiecesFound = currentState.pieceIndices.every((i) => cracked[i]);
 
-    final treasureProgress = await isar.treasureProgress.where().findFirst();
-
-    if (treasureProgress != null) {
-      final pieces = List<int>.from(treasureProgress.currentPieces);
-
-      while (pieces.length < 12) {
-        pieces.add(0);
-      }
-
-      // ✅ FIX: Only count if cracked brick contains a vase piece
-      if (currentState.pieceIndices.contains(event.brickIndex)) {
-        if (pieces[currentState.setIndex] < currentState.pieceIndices.length) {
-          pieces[currentState.setIndex] += 1;
-        }
-      }
-
-      treasureProgress.currentPieces = pieces;
-
-      if (allPiecesFound) {
-        final completedVases = List<int>.from(treasureProgress.vaseIndices);
-        if (!completedVases.contains(currentState.setIndex)) {
-          completedVases.add(currentState.setIndex);
-        }
-        treasureProgress.vaseIndices = completedVases;
-      }
-
-      await isar.writeTxn(() => isar.treasureProgress.put(treasureProgress));
+    final pieces = List<int>.from(treasureProgress.currentPieces);
+    while (pieces.length < 12) {
+      pieces.add(0);
     }
+
+    // ✅ Count piece only if this was a collectible tile
+    if (currentState.pieceIndices.contains(event.brickIndex)) {
+      if (pieces[currentState.setIndex] < currentState.pieceIndices.length) {
+        pieces[currentState.setIndex] += 1;
+      }
+    }
+
+    treasureProgress.currentPieces = pieces;
+
+    if (allPiecesFound) {
+      final completedVases = List<int>.from(treasureProgress.vaseIndices);
+      if (!completedVases.contains(currentState.setIndex)) {
+        completedVases.add(currentState.setIndex);
+      }
+      treasureProgress.vaseIndices = completedVases;
+    }
+
+    await isar.writeTxn(() => isar.treasureProgress.put(treasureProgress));
 
     emit(
       CrackedBricksLoaded(
