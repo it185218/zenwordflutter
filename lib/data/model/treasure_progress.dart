@@ -15,4 +15,5 @@ class TreasureProgress {
   int? collectibleTileIndex;
   int lastCrackedSet = 0;
   List<int> levelsGenerated = [];
+  int totalHammers = 0;
 }

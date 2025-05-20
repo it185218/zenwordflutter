@@ -52,13 +52,18 @@ const TreasureProgressSchema = CollectionSchema(
       name: r'totalCollected',
       type: IsarType.long,
     ),
-    r'vaseIndices': PropertySchema(
+    r'totalHammers': PropertySchema(
       id: 7,
+      name: r'totalHammers',
+      type: IsarType.long,
+    ),
+    r'vaseIndices': PropertySchema(
+      id: 8,
       name: r'vaseIndices',
       type: IsarType.longList,
     ),
     r'wordWithCollectible': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'wordWithCollectible',
       type: IsarType.string,
     )
@@ -108,8 +113,9 @@ void _treasureProgressSerialize(
   writer.writeLongList(offsets[4], object.levelsGenerated);
   writer.writeLong(offsets[5], object.setsCompleted);
   writer.writeLong(offsets[6], object.totalCollected);
-  writer.writeLongList(offsets[7], object.vaseIndices);
-  writer.writeString(offsets[8], object.wordWithCollectible);
+  writer.writeLong(offsets[7], object.totalHammers);
+  writer.writeLongList(offsets[8], object.vaseIndices);
+  writer.writeString(offsets[9], object.wordWithCollectible);
 }
 
 TreasureProgress _treasureProgressDeserialize(
@@ -127,8 +133,9 @@ TreasureProgress _treasureProgressDeserialize(
   object.levelsGenerated = reader.readLongList(offsets[4]) ?? [];
   object.setsCompleted = reader.readLong(offsets[5]);
   object.totalCollected = reader.readLong(offsets[6]);
-  object.vaseIndices = reader.readLongList(offsets[7]) ?? [];
-  object.wordWithCollectible = reader.readStringOrNull(offsets[8]);
+  object.totalHammers = reader.readLong(offsets[7]);
+  object.vaseIndices = reader.readLongList(offsets[8]) ?? [];
+  object.wordWithCollectible = reader.readStringOrNull(offsets[9]);
   return object;
 }
 
@@ -154,8 +161,10 @@ P _treasureProgressDeserializeProp<P>(
     case 6:
       return (reader.readLong(offset)) as P;
     case 7:
-      return (reader.readLongList(offset) ?? []) as P;
+      return (reader.readLong(offset)) as P;
     case 8:
+      return (reader.readLongList(offset) ?? []) as P;
+    case 9:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -919,6 +928,62 @@ extension TreasureProgressQueryFilter
   }
 
   QueryBuilder<TreasureProgress, TreasureProgress, QAfterFilterCondition>
+      totalHammersEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'totalHammers',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<TreasureProgress, TreasureProgress, QAfterFilterCondition>
+      totalHammersGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'totalHammers',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<TreasureProgress, TreasureProgress, QAfterFilterCondition>
+      totalHammersLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'totalHammers',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<TreasureProgress, TreasureProgress, QAfterFilterCondition>
+      totalHammersBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'totalHammers',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<TreasureProgress, TreasureProgress, QAfterFilterCondition>
       vaseIndicesElementEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -1297,6 +1362,20 @@ extension TreasureProgressQuerySortBy
   }
 
   QueryBuilder<TreasureProgress, TreasureProgress, QAfterSortBy>
+      sortByTotalHammers() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'totalHammers', Sort.asc);
+    });
+  }
+
+  QueryBuilder<TreasureProgress, TreasureProgress, QAfterSortBy>
+      sortByTotalHammersDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'totalHammers', Sort.desc);
+    });
+  }
+
+  QueryBuilder<TreasureProgress, TreasureProgress, QAfterSortBy>
       sortByWordWithCollectible() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'wordWithCollectible', Sort.asc);
@@ -1397,6 +1476,20 @@ extension TreasureProgressQuerySortThenBy
   }
 
   QueryBuilder<TreasureProgress, TreasureProgress, QAfterSortBy>
+      thenByTotalHammers() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'totalHammers', Sort.asc);
+    });
+  }
+
+  QueryBuilder<TreasureProgress, TreasureProgress, QAfterSortBy>
+      thenByTotalHammersDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'totalHammers', Sort.desc);
+    });
+  }
+
+  QueryBuilder<TreasureProgress, TreasureProgress, QAfterSortBy>
       thenByWordWithCollectible() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'wordWithCollectible', Sort.asc);
@@ -1459,6 +1552,13 @@ extension TreasureProgressQueryWhereDistinct
       distinctByTotalCollected() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'totalCollected');
+    });
+  }
+
+  QueryBuilder<TreasureProgress, TreasureProgress, QDistinct>
+      distinctByTotalHammers() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'totalHammers');
     });
   }
 
@@ -1532,6 +1632,12 @@ extension TreasureProgressQueryProperty
       totalCollectedProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'totalCollected');
+    });
+  }
+
+  QueryBuilder<TreasureProgress, int, QQueryOperations> totalHammersProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'totalHammers');
     });
   }
 

@@ -14,10 +14,10 @@ class GenerateCollectible extends TreasureEvent {
   });
 }
 
-class CollectTreasure extends TreasureEvent {
+class CollectHammer extends TreasureEvent {
   final String word;
 
-  CollectTreasure({required this.word});
+  CollectHammer({required this.word});
 }
 
 class LoadCrackedBricks extends TreasureEvent {}

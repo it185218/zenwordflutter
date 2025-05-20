@@ -12,6 +12,7 @@ class TreasureBloc extends Bloc<TreasureEvent, TreasureState> {
   TreasureBloc(this.isar) : super(TreasureInitial()) {
     on<LoadTreasure>(_onLoad);
     on<GenerateCollectible>(_onGenerate);
+    on<CollectHammer>(_onCollect);
     on<LoadCrackedBricks>(_onLoadCrackedBricks);
     on<CrackBrick>(_onCrackBrick);
   }
@@ -62,6 +63,24 @@ class TreasureBloc extends Bloc<TreasureEvent, TreasureState> {
         emit(TreasureLoaded(progress));
       }
     }
+  }
+
+  Future<void> _onCollect(
+    CollectHammer event,
+    Emitter<TreasureState> emit,
+  ) async {
+    if (state is! TreasureLoaded) return;
+
+    final progress = (state as TreasureLoaded).progress;
+
+    progress.totalHammers += 3;
+
+    progress.currentLevelWithIcon = null;
+    progress.wordWithCollectible = null;
+    progress.collectibleTileIndex = null;
+
+    await isar.writeTxn(() => isar.treasureProgress.put(progress));
+    emit(TreasureLoaded(progress));
   }
 
   Future<void> _onLoadCrackedBricks(
