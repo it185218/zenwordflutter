@@ -7,10 +7,14 @@ import '../../logic/blocs/coin/coin_state.dart';
 import '../../logic/blocs/level/level_bloc.dart';
 import '../../logic/blocs/level/level_state.dart';
 import '../widgets/background_scaffold.dart';
+import '../widgets/crack_bricks_dialog.dart';
+import '../widgets/hammer_container.dart';
 import '../widgets/level_button.dart';
 import '../widgets/settings_dialog.dart';
 import '../widgets/top_bar.dart';
+import '../widgets/treasure_container.dart';
 import 'game_page.dart';
+import 'treasure_page.dart';
 
 // Displays the game title, current level button, coin count, and settings icon.
 // Animations are used to fade in UI elements after a short delay.
@@ -58,7 +62,43 @@ class _HomePageState extends State<HomePage> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Spacer(),
+          AnimatedOpacity(
+            opacity: _isVisible ? 1.0 : 0.0,
+            duration: const Duration(seconds: 1),
+            child: Column(
+              children: [
+                Padding(
+                  padding: EdgeInsets.only(left: 12, top: 16),
+                  child: Align(
+                    alignment: Alignment.bottomLeft,
+                    child: Column(
+                      children: [
+                        // Treasure page navigation
+                        TreasureContainer(
+                          onTap: () async {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => TreasurePage()),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 4),
+                        // Show brick-cracking dialog
+                        HammerContainer(
+                          onTap: () async {
+                            showDialog(
+                              context: context,
+                              builder: (context) => const CrackBricksDialog(),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 50),
           AnimatedOpacity(
             opacity: _isVisible ? 1.0 : 0.0,
             duration: const Duration(seconds: 1),
@@ -115,8 +155,8 @@ class _HomePageState extends State<HomePage> {
                       color: ColorLibrary.button,
                       shape: BoxShape.circle,
                     ),
-                    width: 40,
-                    height: 40,
+                    width: 50,
+                    height: 50,
                     child: Icon(Icons.settings, color: Colors.white),
                   ),
                 ),

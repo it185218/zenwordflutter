@@ -7,10 +7,9 @@ import '../../logic/blocs/coin/coin_bloc.dart';
 import '../../logic/blocs/coin/coin_event.dart';
 import '../../logic/blocs/coin/coin_state.dart';
 import '../../logic/blocs/level/level_bloc.dart';
-import '../../logic/blocs/treasure/treasure_bloc.dart';
-import '../../logic/blocs/treasure/treasure_state.dart';
 import '../widgets/background_scaffold.dart';
 import '../widgets/crack_bricks_dialog.dart';
+import '../widgets/hammer_container.dart';
 import '../widgets/level_button.dart';
 import '../widgets/top_bar.dart';
 import '../widgets/treasure_container.dart';
@@ -46,25 +45,6 @@ class _LevelCompletePageState extends State<LevelCompletePage>
       if (!mounted) return;
       final completed = context.read<LevelBloc>().state.completedCount;
       final shouldReward = completed > 0 && completed % 10 == 0;
-
-      // Check if a new collectible set has been completed and show a dialog
-      final progress = context.read<TreasureBloc>().state;
-      if (progress is TreasureLoaded) {
-        final setsCompleted = progress.progress.setsCompleted;
-        final lastCrackedSet = progress.progress.lastCrackedSet;
-
-        final newSetCompleted = setsCompleted > lastCrackedSet;
-
-        if (newSetCompleted) {
-          Future.delayed(const Duration(seconds: 1), () {
-            if (!mounted) return;
-            showDialog(
-              context: context,
-              builder: (context) => const CrackBricksDialog(),
-            );
-          });
-        }
-      }
 
       // Show reward animation and give coins if eligible
       if (shouldReward) {
@@ -117,22 +97,36 @@ class _LevelCompletePageState extends State<LevelCompletePage>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            // Treasure page navigation
             Padding(
               padding: EdgeInsets.only(left: 12, top: 16),
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: TreasureContainer(
-                  onTap: () async {
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (_) => TreasurePage()),
-                    );
-                  },
+                child: Column(
+                  children: [
+                    // Treasure page navigation
+                    TreasureContainer(
+                      onTap: () async {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => TreasurePage()),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 4),
+                    // Show brick-cracking dialog
+                    HammerContainer(
+                      onTap: () async {
+                        showDialog(
+                          context: context,
+                          builder: (context) => const CrackBricksDialog(),
+                        );
+                      },
+                    ),
+                  ],
                 ),
               ),
             ),
 
-            const SizedBox(height: 80),
+            const SizedBox(height: 40),
 
             const Text(
               'Λεξόσφαιρα',
