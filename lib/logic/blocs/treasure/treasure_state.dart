@@ -9,3 +9,21 @@ class TreasureLoaded extends TreasureState {
 
   TreasureLoaded(this.progress);
 }
+
+class CrackedBricksLoading extends TreasureState {}
+
+class CrackedBricksLoaded extends TreasureState {
+  final int setIndex;
+  final int vaseIndex;
+  final List<bool> cracked;
+  final List<int> pieceIndices;
+  final bool allPiecesFound;
+
+  CrackedBricksLoaded({
+    required this.setIndex,
+    required this.vaseIndex,
+    required this.cracked,
+    required this.pieceIndices,
+    required this.allPiecesFound,
+  });
+}

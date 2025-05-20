@@ -19,3 +19,11 @@ class CollectTreasure extends TreasureEvent {
 
   CollectTreasure({required this.word});
 }
+
+class LoadCrackedBricks extends TreasureEvent {}
+
+class CrackBrick extends TreasureEvent {
+  final int brickIndex;
+
+  CrackBrick({required this.brickIndex});
+}
