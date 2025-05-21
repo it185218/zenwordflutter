@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:isar/isar.dart';
 import 'package:zenwordflutter/data/model/treasure_progress.dart';
 
+import '../../core/utils/color_library.dart';
 import '../../logic/blocs/treasure/treasure_bloc.dart';
 import '../../logic/blocs/treasure/treasure_event.dart';
 import '../../logic/blocs/treasure/treasure_state.dart';
@@ -163,7 +164,7 @@ class _CrackBricksDialogState extends State<CrackBricksDialog>
           }
 
           return Dialog(
-            backgroundColor: Colors.transparent,
+            backgroundColor: ColorLibrary.bricksBackground,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -177,7 +178,7 @@ class _CrackBricksDialogState extends State<CrackBricksDialog>
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.black,
+                        color: ColorLibrary.dialogContainer,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Row(
@@ -192,7 +193,7 @@ class _CrackBricksDialogState extends State<CrackBricksDialog>
                           Text(
                             '${state.totalHammers}',
                             style: const TextStyle(
-                              color: Colors.white,
+                              color: ColorLibrary.dialogText,
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                             ),
@@ -255,7 +256,7 @@ class _CrackBricksDialogState extends State<CrackBricksDialog>
                                               child: Icon(
                                                 Icons.clear,
                                                 size: 32,
-                                                color: Colors.black45,
+                                                color: ColorLibrary.dialogText,
                                               ),
                                             ),
                                   ),

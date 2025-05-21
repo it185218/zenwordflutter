@@ -26,6 +26,9 @@ class ColorLibrary {
   static const Color dialogContainer2 = Color.fromARGB(255, 196, 226, 224);
   static const Color dialogContainer3 = Color.fromARGB(255, 182, 219, 217);
 
+  static const Color bricksBackground = Color.fromARGB(255, 117, 199, 197);
+  static const Color hammerContainer = Color.fromARGB(255, 67, 114, 113);
+
   static const Color progress = Color.fromARGB(255, 117, 199, 197);
   static const Color progressBackground = Color.fromARGB(255, 145, 155, 154);
 
