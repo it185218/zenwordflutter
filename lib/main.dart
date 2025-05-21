@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:zenwordflutter/data/model/cracked_bricks.dart';
 
 import 'data/model/level.dart';
 import 'data/model/performance.dart';
@@ -15,6 +16,7 @@ import 'logic/blocs/game/game_bloc.dart';
 import 'logic/blocs/level/level_bloc.dart';
 import 'logic/blocs/level/level_event.dart';
 import 'logic/blocs/treasure/treasure_bloc.dart';
+import 'logic/blocs/treasure/treasure_event.dart';
 import 'presentation/pages/home_page.dart';
 
 late final Isar isar;
@@ -32,6 +34,7 @@ void main() async {
     PerformanceSchema,
     SavedGameSchema,
     TreasureProgressSchema,
+    CrackedBricksSchema,
   ], directory: dir.path);
 
   runApp(
@@ -41,6 +44,7 @@ void main() async {
         BlocProvider(create: (_) => LevelBloc(isar)..add(LoadLevels())),
         BlocProvider(create: (_) => CoinBloc(isar)..add(LoadCoins())),
         BlocProvider(create: (_) => TreasureBloc(isar)),
+        BlocProvider(create: (_) => TreasureBloc(isar)..add(LoadTreasure())),
       ],
 
       child: const MyApp(),
