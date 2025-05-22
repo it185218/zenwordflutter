@@ -7,14 +7,54 @@ class GameHelpers {
       'assets/dictionary/greek-dictionary-2.txt',
     );
 
-    // Define banned/curse words
     final bannedWords = {'ΗΛΙΘΙΟΣ', 'ΧΟΝΤΡΗ', 'ΒΛΑΚΑΣ'};
 
-    return text
-        .split('\n')
-        .map((word) => word.trim().toUpperCase())
-        .where((word) => word.length >= 3 && !bannedWords.contains(word))
-        .toList();
+    // Common suffixes in Greek to exclude (plural, participle, etc.)
+    final excludedSuffixes = [
+      'ΟΙ',
+      'ΕΙΣ',
+      'ΩΝ',
+      'ΗΣ',
+      'ΕΣ',
+      'ΜΕΝΟΣ',
+      'ΜΕΝΗ',
+      'ΜΕΝΟ',
+      'ΟΥΣΑ',
+      'ΟΝΤΑΣ',
+      'ΟΥΝ',
+      'ΟΥΣΕΣ',
+      'ΟΥΜΕ',
+      'ΕΤΕ',
+      'ΕΙ',
+      'ΑΝ',
+      'ΑΜΕ',
+      'ΑΣ',
+      'ΑΤΕ',
+    ];
+
+    final allWords =
+        text
+            .split('\n')
+            .map((word) => word.trim().toUpperCase())
+            .where((word) => word.length >= 3 && !bannedWords.contains(word))
+            .toSet(); // Use set to remove duplicates
+
+    final filtered = <String>{};
+
+    for (final word in allWords) {
+      // Skip words ending with excluded suffixes
+      if (excludedSuffixes.any((suffix) => word.endsWith(suffix))) continue;
+
+      // Skip if a shorter version of this word already exists
+      bool isInflection = filtered.any(
+        (base) => word.startsWith(base) && word != base,
+      );
+      if (isInflection) continue;
+
+      filtered.add(word);
+    }
+
+    return filtered.toList();
   }
 
   // Search subwords from the base word
