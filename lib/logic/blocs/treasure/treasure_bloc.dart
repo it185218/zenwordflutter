@@ -40,7 +40,7 @@ class TreasureBloc extends Bloc<TreasureEvent, TreasureState> {
       return;
     }
 
-    if (event.level % 2 == 0 && event.level >= 3) {
+    if (event.level % 2 == 0 && event.level >= 6) {
       final notFoundWords =
           event.validWords
               .where((word) => !event.foundWords.contains(word))

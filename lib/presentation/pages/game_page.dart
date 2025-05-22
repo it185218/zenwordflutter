@@ -92,7 +92,7 @@ class _GamePageState extends State<GamePage> {
               treasureState is TreasureLoaded &&
               treasureState.progress.currentLevelWithIcon != widget.level &&
               widget.level % 2 == 0 &&
-              widget.level >= 12) {
+              widget.level >= 6) {
             treasureBloc.add(
               GenerateCollectible(
                 level: widget.level,
