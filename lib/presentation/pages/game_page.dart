@@ -92,7 +92,7 @@ class _GamePageState extends State<GamePage> {
               treasureState is TreasureLoaded &&
               treasureState.progress.currentLevelWithIcon != widget.level &&
               widget.level % 2 == 0 &&
-              widget.level >= 6) {
+              widget.level >= 12) {
             treasureBloc.add(
               GenerateCollectible(
                 level: widget.level,
@@ -119,7 +119,7 @@ class _GamePageState extends State<GamePage> {
               if (collectibleWord != null &&
                   state.foundWords.contains(collectibleWord)) {
                 context.read<TreasureBloc>().add(
-                  CollectTreasure(word: collectibleWord),
+                  CollectHammer(word: collectibleWord),
                 );
               }
             }
