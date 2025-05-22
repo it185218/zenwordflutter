@@ -99,27 +99,38 @@ class GameHelpers {
       length = 7;
     }
 
-    List<String> filtered =
+    List<String> candidates =
         dictionary.where((w) => w.length == length).toList();
 
-    // If no words match the intended length, fallback
-    if (filtered.isEmpty) {
-      // Shorter lengths as fallback
-      for (
-        int fallbackLength = length - 1;
-        fallbackLength >= 3;
-        fallbackLength--
-      ) {
-        filtered = dictionary.where((w) => w.length == fallbackLength).toList();
-        if (filtered.isNotEmpty) break;
+    if (candidates.isEmpty) {
+      for (int fallback = length - 1; fallback >= 3; fallback--) {
+        candidates = dictionary.where((w) => w.length == fallback).toList();
+        if (candidates.isNotEmpty) break;
       }
-
-      // If still empty, fallback to whole dictionary
-      if (filtered.isEmpty) filtered = dictionary;
+      if (candidates.isEmpty) candidates = dictionary;
     }
 
-    return filtered[Random().nextInt(filtered.length)];
+    // Sort by number of difficult letters (descending) as skill increases
+    if (skillScore >= 0.75) {
+      candidates.sort((a, b) {
+        int aScore = _countDifficultLetters(a);
+        int bScore = _countDifficultLetters(b);
+        return bScore.compareTo(aScore);
+      });
+
+      // Top N% with most difficult letters
+      int topN = (candidates.length * 0.3).round();
+      candidates = candidates.take(topN).toList();
+    }
+
+    return candidates[Random().nextInt(candidates.length)];
   }
+
+  static int _countDifficultLetters(String word) {
+    return word.split('').where(difficultLetters.contains).length;
+  }
+
+  static const difficultLetters = {'Ξ', 'Ψ', 'Ζ', 'Χ', 'Φ', 'Θ'};
 
   static int scoreWord(String word) {
     final uniqueLetters = word.split('').toSet().length;
