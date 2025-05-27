@@ -7,14 +7,56 @@ class GameHelpers {
       'assets/dictionary/greek-dictionary-2.txt',
     );
 
-    // Define banned/curse words
     final bannedWords = {'ΗΛΙΘΙΟΣ', 'ΧΟΝΤΡΗ', 'ΒΛΑΚΑΣ'};
 
-    return text
-        .split('\n')
-        .map((word) => word.trim().toUpperCase())
-        .where((word) => word.length >= 3 && !bannedWords.contains(word))
-        .toList();
+    final lines = text.split('\n');
+
+    final seenRoots = <String>{};
+    final filteredWords = <String>[];
+
+    for (var word in lines) {
+      word = word.trim().toUpperCase();
+
+      if (word.length < 3 || bannedWords.contains(word)) continue;
+
+      final root = _greekRootForm(word);
+
+      if (!seenRoots.contains(root)) {
+        seenRoots.add(root);
+        filteredWords.add(word);
+      }
+    }
+
+    return filteredWords;
+  }
+
+  static String _greekRootForm(String word) {
+    // Remove trailing Σ if it's likely a plural or conjugated form
+    if (word.endsWith('Σ') && word.length > 4) {
+      word = word.substring(0, word.length - 1);
+    }
+
+    // Remove common Greek suffixes (very basic stemmer)
+    const suffixes = [
+      'ΟΥΜΕ',
+      'ΕΤΕ',
+      'ΑΜΕ',
+      'ΑΤΕ',
+      'ΕΙΣ',
+      'ΕΙ',
+      'Ω',
+      'Α',
+      'Ε',
+      'Ο',
+    ];
+
+    for (final suffix in suffixes) {
+      if (word.endsWith(suffix) && word.length > suffix.length + 2) {
+        return word.substring(0, word.length - suffix.length);
+      }
+    }
+
+    return word;
   }
 
   // Search subwords from the base word
