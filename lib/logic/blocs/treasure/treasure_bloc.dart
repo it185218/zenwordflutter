@@ -40,28 +40,27 @@ class TreasureBloc extends Bloc<TreasureEvent, TreasureState> {
       return;
     }
 
-    if (event.level % 2 == 0 && event.level >= 6) {
-      final notFoundWords =
-          event.validWords
-              .where((word) => !event.foundWords.contains(word))
-              .toList();
+    // Proceed for every level starting from level 1
+    final notFoundWords =
+        event.validWords
+            .where((word) => !event.foundWords.contains(word))
+            .toList();
 
-      if (notFoundWords.isNotEmpty) {
-        final word = (notFoundWords..shuffle()).first;
+    if (notFoundWords.isNotEmpty) {
+      final word = (notFoundWords..shuffle()).first;
 
-        final indexRange = List.generate(word.length, (i) => i)..remove(0);
-        indexRange.shuffle();
-        final chosenIndex = indexRange.first;
+      final indexRange = List.generate(word.length, (i) => i)..remove(0);
+      indexRange.shuffle();
+      final chosenIndex = indexRange.first;
 
-        progress.currentLevelWithIcon = event.level;
-        progress.wordWithCollectible = word;
-        progress.collectibleTileIndex = chosenIndex;
-        progress.levelsGenerated = List<int>.from(progress.levelsGenerated)
-          ..add(event.level);
+      progress.currentLevelWithIcon = event.level;
+      progress.wordWithCollectible = word;
+      progress.collectibleTileIndex = chosenIndex;
+      progress.levelsGenerated = List<int>.from(progress.levelsGenerated)
+        ..add(event.level);
 
-        await isar.writeTxn(() => isar.treasureProgress.put(progress));
-        emit(TreasureLoaded(progress));
-      }
+      await isar.writeTxn(() => isar.treasureProgress.put(progress));
+      emit(TreasureLoaded(progress));
     }
   }
 

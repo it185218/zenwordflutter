@@ -90,9 +90,7 @@ class _GamePageState extends State<GamePage> {
 
           if (state.validWords.isNotEmpty &&
               treasureState is TreasureLoaded &&
-              treasureState.progress.currentLevelWithIcon != widget.level &&
-              widget.level % 2 == 0 &&
-              widget.level >= 6) {
+              treasureState.progress.currentLevelWithIcon != widget.level) {
             treasureBloc.add(
               GenerateCollectible(
                 level: widget.level,
