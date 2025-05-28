@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:flutter/services.dart' show rootBundle;
 
 class GameHelpers {
@@ -21,6 +20,28 @@ class GameHelpers {
 
       final root = _greekRootForm(word);
 
+      if (!seenRoots.contains(root)) {
+        seenRoots.add(root);
+        filteredWords.add(word);
+      }
+    }
+
+    return filteredWords;
+  }
+
+  static Future<List<String>> loadBaseWords() async {
+    final text = await rootBundle.loadString(
+      'assets/dictionary/greek_base_words.txt',
+    );
+    final lines = text.split('\n');
+    final seenRoots = <String>{};
+    final filteredWords = <String>[];
+
+    for (var word in lines) {
+      word = word.trim().toUpperCase();
+      if (word.length < 3) continue;
+
+      final root = _greekRootForm(word);
       if (!seenRoots.contains(root)) {
         seenRoots.add(root);
         filteredWords.add(word);
@@ -81,46 +102,6 @@ class GameHelpers {
       map[letter] = (map[letter] ?? 0) + 1;
     }
     return map;
-  }
-
-  // Pick baseword length base from skill score
-  static String pickAdaptiveBaseWord(
-    List<String> dictionary,
-    double skillScore,
-  ) {
-    int length;
-    if (skillScore < 0.4) {
-      length = 3;
-    } else if (skillScore < 0.6) {
-      length = 4;
-    } else if (skillScore < 0.75) {
-      length = 5;
-    } else if (skillScore < 0.85) {
-      length = 6;
-    } else {
-      length = 7;
-    }
-
-    List<String> filtered =
-        dictionary.where((w) => w.length == length).toList();
-
-    // If no words match the intended length, fallback
-    if (filtered.isEmpty) {
-      // Shorter lengths as fallback
-      for (
-        int fallbackLength = length - 1;
-        fallbackLength >= 3;
-        fallbackLength--
-      ) {
-        filtered = dictionary.where((w) => w.length == fallbackLength).toList();
-        if (filtered.isNotEmpty) break;
-      }
-
-      // If still empty, fallback to whole dictionary
-      if (filtered.isEmpty) filtered = dictionary;
-    }
-
-    return filtered[Random().nextInt(filtered.length)];
   }
 
   static int scoreWord(String word) {

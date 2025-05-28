@@ -88,17 +88,16 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       return;
     }
 
-    print('MAXMILESTONE: $maxMilestone');
-    print('TOTALFOUNDEXTRA: $totalExtras');
-
-    // Generate new level
-    _dictionary = await GameHelpers.loadDictionary();
-
     final history =
         await isar.performances.where().sortByLevelDesc().limit(10).findAll();
     final skillScore = computeSkillScore(history, sampleSize: 5);
 
-    final baseWord = GameHelpers.pickAdaptiveBaseWord(_dictionary, skillScore);
+    final baseWords = await GameHelpers.loadBaseWords();
+    final baseWordIndex = event.level.clamp(0, baseWords.length - 1);
+    final baseWord = baseWords[baseWordIndex];
+
+    _dictionary = await GameHelpers.loadDictionary();
+    final filteredDictionary = _dictionary.where((w) => w != baseWord).toList();
 
     final baseLetters = baseWord.split('');
     final baseIds = List.generate(baseLetters.length, (i) => i);
@@ -113,7 +112,10 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     final shuffledLetters = zipped.map((e) => e.key).toList();
     final shuffledIds = zipped.map((e) => e.value).toList();
 
-    final validSubwords = GameHelpers.findValidSubwords(baseWord, _dictionary);
+    final validSubwords = GameHelpers.findValidSubwords(
+      baseWord,
+      filteredDictionary,
+    );
 
     // Sort by score (longer/more valuable words first)
     validSubwords.sort(
@@ -129,10 +131,12 @@ class GameBloc extends Bloc<GameEvent, GameState> {
                 .toList();
 
     // Select balanced grid words for layout
+    final gridWordCount = gridWordCountForLevel(event.level);
+
     final balancedWords = selectBalancedGridWords(
       baseWord: baseWord,
       sortedWords: filteredWords,
-      maxWords: event.level.clamp(1, 10),
+      maxWords: gridWordCount,
     );
 
     // Remaining words are considered extra
@@ -183,6 +187,16 @@ class GameBloc extends Bloc<GameEvent, GameState> {
           ..totalFoundExtras = totalExtras;
 
     await isar.writeTxn(() => isar.savedGames.put(game));
+  }
+
+  int gridWordCountForLevel(int level) {
+    if (level < 5) return 4;
+    if (level < 10) return 5;
+    if (level < 15) return 6;
+    if (level < 20) return 7;
+    if (level < 25) return 8;
+    if (level < 30) return 9;
+    return 10;
   }
 
   // Selects a list of words for the game grid based on layout and max word constraints.
