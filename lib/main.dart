@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:zenwordflutter/data/model/cracked_bricks.dart';
+import 'package:zenwordflutter/data/model/global_stats.dart';
 
 import 'data/model/level.dart';
 import 'data/model/performance.dart';
@@ -35,6 +36,7 @@ void main() async {
     SavedGameSchema,
     TreasureProgressSchema,
     CrackedBricksSchema,
+    GlobalStatsSchema,
   ], directory: dir.path);
 
   runApp(

@@ -5,6 +5,7 @@ import 'package:isar/isar.dart';
 import 'package:zenwordflutter/data/model/performance.dart';
 import '../../../core/utils/game_serialization.dart';
 import '../../../core/utils/performance_helper.dart';
+import '../../../data/model/global_stats.dart';
 import '../../../data/model/saved_game.dart';
 import 'game_event.dart';
 import 'game_state.dart';
@@ -58,12 +59,14 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     final allowMultipleSolutions = event.allowMultipleSolutions;
 
     // Compute total number of extra words found across all levels
-    final allSaves = await isar.savedGames.where().findAll();
-    final totalExtras =
-        allSaves.expand((game) => game.foundExtras).toSet().length;
-    final maxMilestone = allSaves
-        .map((g) => g.extraWordMilestone)
-        .fold(0, (a, b) => a > b ? a : b);
+    GlobalStats? stats = await isar.globalStats.get(0);
+    if (stats == null) {
+      stats = GlobalStats();
+      await isar.writeTxn(() => isar.globalStats.put(stats!));
+    }
+
+    final totalExtras = stats.totalFoundExtras;
+    final maxMilestone = stats.extraWordMilestone;
 
     if (saved != null) {
       // Resume from saved game state
@@ -357,10 +360,16 @@ class GameBloc extends Bloc<GameEvent, GameState> {
           isAdditional ? {...state.foundExtras, word} : state.foundExtras;
 
       // Load all saved games and compute new global total of found extra words
-      final allSaves = await Isar.getInstance()!.savedGames.where().findAll();
-      final globalFoundExtras = allSaves.expand((g) => g.foundExtras).toSet();
-      if (isAdditional) globalFoundExtras.add(word);
-      final updatedTotalExtras = globalFoundExtras.length;
+      final updatedTotalExtras =
+          state.totalFoundExtras + (newExtraWordFound ? 1 : 0);
+
+      final isar = Isar.getInstance();
+      final globalStats = await isar!.globalStats.get(0);
+      if (globalStats != null) {
+        globalStats.totalFoundExtras = updatedTotalExtras;
+        globalStats.extraWordMilestone = state.extraWordMilestone;
+        await isar.writeTxn(() => isar.globalStats.put(globalStats));
+      }
 
       final newState = state.copyWith(
         selectedIndices: [],
@@ -421,6 +430,13 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       emit(updatedState);
       await _saveGameState(updatedState);
       await _revealRandomWord(updatedState, emit);
+
+      final isar = Isar.getInstance();
+      final stats = await isar!.globalStats.get(0);
+      if (stats != null) {
+        stats.extraWordMilestone = nextMilestone;
+        await isar.writeTxn(() => isar.globalStats.put(stats));
+      }
     }
   }
 
