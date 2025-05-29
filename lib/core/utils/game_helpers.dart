@@ -52,27 +52,40 @@ class GameHelpers {
   }
 
   static String _greekRootForm(String word) {
-    // Remove trailing Σ if it's likely a plural or conjugated form
+    word = word.toUpperCase(); // Normalize
+
+    // Exclude if ends with Σ and is longer than 4 letters
     if (word.endsWith('Σ') && word.length > 4) {
-      word = word.substring(0, word.length - 1);
+      return '';
     }
 
-    // Remove common Greek suffixes (very basic stemmer)
+    // Expanded suffix list – longer suffixes first
     const suffixes = [
+      'ΟΥΜΑΣΤΕ',
+      'ΟΣΑΣΤΕ',
+      'ΟΝΤΑΙ',
       'ΟΥΜΕ',
+      'ΟΥΝΕ',
+      'ΟΜΑΣΤΕ',
+      'ΟΜΑΙ',
+      'ΕΙΣΤΕ',
+      'ΑΤΕ',
       'ΕΤΕ',
       'ΑΜΕ',
-      'ΑΤΕ',
       'ΕΙΣ',
+      'ΕΤΑΙ',
+      'ΟΥΝ',
       'ΕΙ',
       'Ω',
       'Α',
       'Ε',
       'Ο',
+      'ΟΝ',
+      'ΕΣ',
     ];
 
     for (final suffix in suffixes) {
-      if (word.endsWith(suffix) && word.length > suffix.length + 2) {
+      if (word.endsWith(suffix) && word.length > suffix.length + 1) {
         return word.substring(0, word.length - suffix.length);
       }
     }
