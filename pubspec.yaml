@@ -69,17 +69,8 @@ flutter:
   assets:
     - assets/dictionary/
     - assets/images/
-    - assets/images/puzzle_background.jpg
-    - assets/images/background_1.jpg
-    - assets/images/ruins_bg.jpg
-    - assets/images/wood_shelf.png
     - assets/images/vases/
     - assets/images/vase-pieces/
-    - assets/images/bricks.png
-    - assets/images/chest.png
-    - assets/images/hammer.png
-    - assets/images/coin.png
-    - assets/images/coin_pattern.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
