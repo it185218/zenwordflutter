@@ -95,17 +95,17 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         await isar.performances.where().sortByLevelDesc().limit(10).findAll();
     final skillScore = computeSkillScore(history, sampleSize: 5);
 
-    final baseWords = await GameHelpers.loadBaseWords();
-    final baseWordIndex = event.level.clamp(0, baseWords.length - 1);
-    final baseWord = baseWords[baseWordIndex];
+    // Load level configuration using GameHelpers.getLevelConfiguration
+    final config = await GameHelpers.getLevelConfiguration(event.level);
+    final baseWord = config['baseWord'] as String;
+    final validSubwords = config['subwords'] as List<String>;
+    final baseLetters = config['tiles'] as List<String>;
 
     _dictionary = await GameHelpers.loadDictionary();
     final filteredDictionary = _dictionary.where((w) => w != baseWord).toList();
 
-    final baseLetters = baseWord.split('');
-    final baseIds = List.generate(baseLetters.length, (i) => i);
-
     // Pair each letter with its id, shuffle together
+    final baseIds = List.generate(baseLetters.length, (i) => i);
     final zipped = List.generate(
       baseLetters.length,
       (i) => MapEntry(baseLetters[i], baseIds[i]),
@@ -115,35 +115,60 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     final shuffledLetters = zipped.map((e) => e.key).toList();
     final shuffledIds = zipped.map((e) => e.value).toList();
 
-    final validSubwords = GameHelpers.findValidSubwords(
+    // Get level requirements
+    final sortedKeys = GameHelpers.levelRequirements.keys.toList()..sort();
+    final requirementKey = sortedKeys.lastWhere((k) => k <= event.level);
+    final requirements = GameHelpers.levelRequirements[requirementKey]!;
+    final subwordRequirements =
+        requirements['subwords'] as List<Map<String, dynamic>>;
+
+    // Select exactly the required subwords
+    final balancedWords = <String>[baseWord]; // Include base word
+    final allValidSubwords = GameHelpers.findValidSubwords(
       baseWord,
       filteredDictionary,
     );
+    final wordsByLength = <int, List<String>>{};
+    for (var word in allValidSubwords) {
+      if (allowMultipleSolutions || word.length != baseWord.length) {
+        wordsByLength.putIfAbsent(word.length, () => []).add(word);
+      }
+    }
 
-    // Sort by score (longer/more valuable words first)
-    validSubwords.sort(
-      (a, b) => GameHelpers.scoreWord(b).compareTo(GameHelpers.scoreWord(a)),
-    );
+    bool meetsRequirements = true;
+    for (final req in subwordRequirements) {
+      final length = req['length'] as int;
+      final count =
+          req['count'] is List ? (req['count'][1] as int) : req['count'] as int;
+      final availableWords = wordsByLength[length] ?? [];
+      availableWords.shuffle(Random());
+      if (availableWords.length < count) {
+        meetsRequirements = false;
+        break;
+      }
+      balancedWords.addAll(availableWords.take(count));
+    }
 
-    // Filter based on game rules
-    final filteredWords =
-        allowMultipleSolutions
-            ? validSubwords.where((w) => w != baseWord).toList()
-            : validSubwords
-                .where((w) => w.length != baseWord.length && w != baseWord)
-                .toList();
+    // If requirements not met, fallback to minimal valid words
+    if (!meetsRequirements) {
+      balancedWords.clear();
+      balancedWords.add(baseWord);
+      for (final req in subwordRequirements) {
+        final length = req['length'] as int;
+        final count =
+            req['count'] is List
+                ? (req['count'][0] as int)
+                : req['count'] as int;
+        final availableWords = wordsByLength[length] ?? [];
+        availableWords.shuffle(Random());
+        balancedWords.addAll(availableWords.take(count));
+      }
+    }
 
-    // Select balanced grid words for layout
-    final gridWordCount = gridWordCountForLevel(event.level);
-
-    final balancedWords = selectBalancedGridWords(
-      baseWord: baseWord,
-      sortedWords: filteredWords,
-      maxWords: gridWordCount,
-    );
+    balancedWords.sort((a, b) => a.length.compareTo(b.length));
 
     // Remaining words are considered extra
-    final extras = validSubwords.toSet().difference(balancedWords.toSet());
+    final extras = allValidSubwords.toSet().difference(balancedWords.toSet());
 
     // Debug print logs
     print("🔤 Base word: $baseWord");
@@ -190,99 +215,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
           ..totalFoundExtras = totalExtras;
 
     await isar.writeTxn(() => isar.savedGames.put(game));
-  }
-
-  int gridWordCountForLevel(int level) {
-    if (level < 5) return 4;
-    if (level < 10) return 5;
-    if (level < 15) return 6;
-    if (level < 20) return 7;
-    if (level < 25) return 8;
-    if (level < 30) return 9;
-    return 10;
-  }
-
-  // Selects a list of words for the game grid based on layout and max word constraints.
-  List<String> selectBalancedGridWords({
-    required String baseWord,
-    required List<String> sortedWords,
-    required int maxWords,
-    int maxPerColumn = 10,
-    int maxRowLength = 10,
-  }) {
-    final result = <String>[baseWord];
-    final usedWords = <String>{baseWord};
-
-    for (var word in sortedWords) {
-      if (result.length >= maxWords) break;
-      if (usedWords.contains(word)) continue;
-
-      // Place the word in combination with existing ones
-      bool added = false;
-
-      for (int i = 0; i <= result.length; i++) {
-        final col1 = result.sublist(0, (result.length / 2).ceil());
-        final col2 = result.sublist((result.length / 2).ceil());
-
-        final minLen = col1.length <= col2.length ? col1.length : col2.length;
-
-        // Construct current row pairs to test placement
-        for (int row = 0; row < minLen; row++) {
-          final left = col1.length > row ? col1[row] : '';
-          final right = col2.length > row ? col2[row] : '';
-
-          // Column 1
-          if (left.isEmpty && word.length + right.length <= maxRowLength) {
-            result.insert(row, word);
-            usedWords.add(word);
-            added = true;
-            break;
-          }
-
-          // Column 2
-          if (right.isEmpty && word.length + left.length <= maxRowLength) {
-            result.insert((result.length / 2).ceil() + row, word);
-            usedWords.add(word);
-            added = true;
-            break;
-          }
-        }
-
-        if (added) break;
-      }
-
-      // Fallback: add if space left and word can fit alone
-      if (!added && result.length < maxWords) {
-        result.add(word);
-        usedWords.add(word);
-      }
-    }
-
-    // Group by length then sort by score
-    final groupedByLength = <int, List<String>>{};
-
-    for (var word in result) {
-      groupedByLength.putIfAbsent(word.length, () => []).add(word);
-    }
-
-    final sortedByLengthThenScore =
-        groupedByLength.entries.toList()
-          ..sort((a, b) => a.key.compareTo(b.key));
-
-    final finalList =
-        sortedByLengthThenScore
-            .expand((entry) {
-              entry.value.sort(
-                (a, b) => GameHelpers.scoreWord(
-                  b,
-                ).compareTo(GameHelpers.scoreWord(a)),
-              );
-              return entry.value;
-            })
-            .take(maxWords)
-            .toList();
-
-    return finalList;
   }
 
   // Saves the current in-progress game state to Isar database.
