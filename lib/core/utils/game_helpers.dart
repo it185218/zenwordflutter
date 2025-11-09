@@ -109,8 +109,12 @@ class GameHelpers {
     return baseWords;
   }
 
-  // Get level configuration (base word and subwords)
-  static Future<Map<String, dynamic>> getLevelConfiguration(int level) async {
+  // CHANGED: Fixed subword validation, prevented duplicates, ensured two 5-letter subwords
+  static Future<Map<String, dynamic>> getLevelConfiguration(
+    int level, {
+    int retryCount = 0,
+    bool allowMultipleSolutions = false,
+  }) async {
     final dictionary = await loadDictionary();
     final baseWords = await loadBaseWords();
 
@@ -122,79 +126,307 @@ class GameHelpers {
 
     while (index >= 0) {
       final requirementKey = sortedKeys[index];
-      final requirements = levelRequirements[requirementKey]!;
+      var requirements = levelRequirements[requirementKey]!;
+      var subwordRequirements = List<Map<String, dynamic>>.from(
+        requirements['subwords'] as List<Map<String, dynamic>>,
+      );
+      var totalTiles = requirements['totalTiles'];
 
-      final totalTiles = requirements['totalTiles'];
-      final subwordRequirements =
-          requirements['subwords'] as List<Map<String, dynamic>>;
-
-      // Calculate minimum base word length needed
-      int minBaseLength = 0;
+      // Calculate maximum subword length for prioritization
+      int maxSubwordLength = 0;
       for (final req in subwordRequirements) {
         final length = req['length'] as int;
-        minBaseLength = max(minBaseLength, length); // Longest subword length
+        maxSubwordLength = max(maxSubwordLength, length);
       }
 
-      final validBaseWords =
-          baseWords.where((word) {
-            final tileCount = word.length;
-            return tileCount >= minBaseLength;
-          }).toList();
+      // Prioritize shortest base word lengths starting from maxSubwordLength
+      final availableBaseLengths =
+          baseWords.map((word) => word.length).toSet().toList()..sort();
+      final baseLengthsToTry =
+          availableBaseLengths
+              .where((length) => length >= maxSubwordLength)
+              .toList();
 
-      validBaseWords.shuffle(Random());
+      // Track if any base word was valid to avoid premature fallback
+      bool anyBaseWordTried = false;
 
-      for (final base in validBaseWords) {
-        final subwords = findValidSubwords(base, dictionary);
-        final selectedSubwords = <String>[];
+      for (int preferredBaseLength in baseLengthsToTry) {
+        final validBaseWords =
+            baseWords
+                .where((word) => word.length == preferredBaseLength)
+                .toList();
 
-        bool meetsRequirements = true;
-        int currentTileCount = 0;
-
-        // Group subwords by length for selection
-        final subwordsByLength = <int, List<String>>{};
-        for (var word in subwords) {
-          subwordsByLength.putIfAbsent(word.length, () => []).add(word);
+        if (validBaseWords.isEmpty) {
+          print(
+            "🚫 No base words of length $preferredBaseLength for level $level",
+          );
+          continue;
         }
 
-        for (final req in subwordRequirements) {
+        anyBaseWordTried = true;
+
+        validBaseWords.shuffle(Random());
+
+        for (final base in validBaseWords) {
+          // Filter subwords based on allowMultipleSolutions
+          final subwords =
+              findValidSubwords(base, dictionary)
+                  .where(
+                    (word) =>
+                        allowMultipleSolutions ||
+                        word.length != base.length ||
+                        word == base,
+                  )
+                  .toList();
+
+          // CHANGED: Check subword availability against original requirements
+          final subwordsByLength = <int, List<String>>{};
+          for (var word in subwords) {
+            subwordsByLength.putIfAbsent(word.length, () => []).add(word);
+          }
+
+          bool hasEnoughSubwords = true;
+          for (final req in subwordRequirements) {
+            final length = req['length'] as int;
+            final count =
+                req['count'] is List
+                    ? req['count'][1] as int
+                    : req['count'] as int;
+            final matchingSubwords = subwordsByLength[length] ?? [];
+            // Adjust count if base word is used as a subword
+            final adjustedCount =
+                (length == maxSubwordLength &&
+                        preferredBaseLength == maxSubwordLength)
+                    ? (count > 1 ? count - 1 : count)
+                    : count;
+            if (matchingSubwords.length < adjustedCount) {
+              hasEnoughSubwords = false;
+              print(
+                "🚫 Skipping base '$base': insufficient $length-letter subwords upfront; need $adjustedCount, have ${matchingSubwords.length}",
+              );
+              break;
+            }
+          }
+
+          if (!hasEnoughSubwords) continue;
+
+          // Try base word as one of the required subwords
+          final selectedSubwords = <String>{}; // Use Set to avoid duplicates
+          bool meetsRequirements = true;
+          int currentTileCount = 0;
+
+          // Include base word once if it matches maxSubwordLength
+          if (preferredBaseLength == maxSubwordLength) {
+            selectedSubwords.add(base);
+            currentTileCount += base.length;
+          }
+
+          // Select unique subwords
+          for (final req in subwordRequirements) {
+            final length = req['length'] as int;
+            final count =
+                req['count'] is List
+                    ? req['count'][1] as int
+                    : req['count'] as int;
+            final adjustedCount =
+                (length == maxSubwordLength &&
+                        preferredBaseLength == maxSubwordLength)
+                    ? (count > 1 ? count - 1 : count)
+                    : count;
+
+            final matchingSubwords =
+                (subwordsByLength[length] ?? [])
+                    .where((word) => !selectedSubwords.contains(word))
+                    .toList();
+            if (matchingSubwords.length < adjustedCount) {
+              meetsRequirements = false;
+              print(
+                "🚫 Skipping base '$base': insufficient unique $length-letter subwords; need $adjustedCount, have ${matchingSubwords.length}",
+              );
+              break;
+            }
+
+            matchingSubwords.shuffle(Random());
+            final selected = matchingSubwords.take(adjustedCount).toList();
+            selectedSubwords.addAll(selected);
+            currentTileCount += (length * adjustedCount).toInt();
+          }
+
+          // Validate exact counts with unique subwords
+          if (meetsRequirements) {
+            final subwordCounts = <int, int>{};
+            for (var word in selectedSubwords) {
+              subwordCounts[word.length] =
+                  (subwordCounts[word.length] ?? 0) + 1;
+            }
+
+            bool countsValid = true;
+            for (final req in subwordRequirements) {
+              final length = req['length'] as int;
+              final requiredCount =
+                  req['count'] is List
+                      ? req['count'][1] as int
+                      : req['count'] as int;
+              final actualCount = subwordCounts[length] ?? 0;
+              if (actualCount != requiredCount) {
+                meetsRequirements = false;
+                print(
+                  "🚫 Skipping base '$base': incorrect $length-letter subword count; need exactly $requiredCount, have $actualCount",
+                );
+                break;
+              }
+            }
+
+            bool tilesValid =
+                totalTiles is int
+                    ? currentTileCount == totalTiles
+                    : currentTileCount >= totalTiles[0] &&
+                        currentTileCount <= totalTiles[1];
+
+            if (meetsRequirements && tilesValid && countsValid) {
+              print(
+                "✅ Found valid configuration for level $level with base '$base', subwords: ${selectedSubwords.toList()}",
+              );
+              return {
+                'baseWord': base,
+                'subwords': selectedSubwords.toList(),
+                'tiles': base.split(''),
+              };
+            } else if (!tilesValid) {
+              print(
+                "🚫 Skipping base '$base': invalid tile count; got $currentTileCount, need $totalTiles",
+              );
+            }
+          }
+
+          // Try original requirements with base word not as subword
+          selectedSubwords.clear();
+          currentTileCount = 0;
+
+          meetsRequirements = true;
+          for (final req in subwordRequirements) {
+            final length = req['length'] as int;
+            final count =
+                req['count'] is List
+                    ? req['count'][1] as int
+                    : req['count'] as int;
+            final matchingSubwords =
+                (subwordsByLength[length] ?? [])
+                    .where((word) => !selectedSubwords.contains(word))
+                    .toList();
+            if (matchingSubwords.length < count) {
+              meetsRequirements = false;
+              print(
+                "🚫 Skipping base '$base': insufficient $length-letter subwords (second attempt); need $count, have ${matchingSubwords.length}",
+              );
+              break;
+            }
+
+            matchingSubwords.shuffle(Random());
+            final selected = matchingSubwords.take(count).toList();
+            selectedSubwords.addAll(selected);
+            currentTileCount += (length * count).toInt();
+          }
+
+          if (meetsRequirements) {
+            final subwordCounts = <int, int>{};
+            for (var word in selectedSubwords) {
+              subwordCounts[word.length] =
+                  (subwordCounts[word.length] ?? 0) + 1;
+            }
+
+            bool countsValid = true;
+            for (final req in subwordRequirements) {
+              final length = req['length'] as int;
+              final requiredCount =
+                  req['count'] is List
+                      ? req['count'][1] as int
+                      : req['count'] as int;
+              final actualCount = subwordCounts[length] ?? 0;
+              if (actualCount != requiredCount) {
+                meetsRequirements = false;
+                print(
+                  "🚫 Skipping base '$base': incorrect $length-letter subword count (second attempt); need exactly $requiredCount, have $actualCount",
+                );
+                break;
+              }
+            }
+
+            bool tilesValid =
+                totalTiles is int
+                    ? currentTileCount == totalTiles
+                    : currentTileCount >= totalTiles[0] &&
+                        currentTileCount <= totalTiles[1];
+
+            if (meetsRequirements && tilesValid && countsValid) {
+              print(
+                "✅ Found valid configuration for level $level with base '$base', subwords: ${selectedSubwords.toList()}",
+              );
+              return {
+                'baseWord': base,
+                'subwords': selectedSubwords.toList(),
+                'tiles': base.split(''),
+              };
+            } else if (!tilesValid) {
+              print(
+                "🚫 Skipping base '$base': invalid tile count (second attempt); got $currentTileCount, need $totalTiles",
+              );
+            }
+          }
+        }
+      }
+
+      // Only fallback to reduced subword counts if no base words were valid
+      if (anyBaseWordTried && retryCount < 3) {
+        var reducedRequirements =
+            subwordRequirements.map((req) {
+              final count = req['count'];
+              int newCount = count is List ? (count[1] as int) : count as int;
+              if (newCount > 1) newCount--;
+              return {
+                'length': req['length'],
+                'count': count is List ? [newCount, newCount] : newCount,
+              };
+            }).toList();
+
+        // Recalculate totalTiles for reduced requirements
+        int minTiles = 0, maxTiles = 0;
+        for (var req in reducedRequirements) {
           final length = req['length'] as int;
           final count =
               req['count'] is List
-                  ? (req['count'][1] as int)
+                  ? (req['count'][0] as int)
                   : req['count'] as int;
-
-          final matchingSubwords = subwordsByLength[length] ?? [];
-          if (matchingSubwords.length < count) {
-            meetsRequirements = false;
-            break;
-          }
-
-          matchingSubwords.shuffle(Random());
-          final selected = matchingSubwords.take(count).toList();
-          selectedSubwords.addAll(selected);
-          currentTileCount += (length * count).toInt();
+          minTiles += length * count;
+          maxTiles += length * count;
         }
+        var newTotalTiles =
+            minTiles == maxTiles ? minTiles : [minTiles, maxTiles];
 
-        // Validate tile count
-        bool tilesValid =
-            totalTiles is int
-                ? currentTileCount == totalTiles
-                : currentTileCount >= totalTiles[0] &&
-                    currentTileCount <= totalTiles[1];
+        print(
+          "🔄 Fallback: Trying reduced requirements for level $level: $reducedRequirements",
+        );
 
-        if (meetsRequirements && tilesValid) {
-          return {
-            'baseWord': base,
-            'subwords': selectedSubwords,
-            'tiles': base.split(''),
-          };
+        final retryResult = await getLevelConfiguration(
+          level,
+          retryCount: retryCount + 1,
+          allowMultipleSolutions: allowMultipleSolutions,
+        );
+        if (retryResult != null) {
+          return retryResult;
         }
       }
 
-      // No match found for this config; fallback to previous
+      // Fallback to previous requirement level only after exhausting all base words and reduced requirements
+      print(
+        "⚠️ No valid configuration for level $level with requirement key $requirementKey; trying previous level requirements",
+      );
       index -= 1;
     }
 
+    print(
+      "❌ Failed to find configuration for level $level after all fallbacks",
+    );
     throw Exception(
       'No base word found for level $level or any fallback requirement levels.',
     );

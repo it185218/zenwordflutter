@@ -95,10 +95,12 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         await isar.performances.where().sortByLevelDesc().limit(10).findAll();
     final skillScore = computeSkillScore(history, sampleSize: 5);
 
-    // Load level configuration using GameHelpers.getLevelConfiguration
-    final config = await GameHelpers.getLevelConfiguration(event.level);
+    // CHANGED: Pass allowMultipleSolutions to getLevelConfiguration
+    final config = await GameHelpers.getLevelConfiguration(
+      event.level,
+      allowMultipleSolutions: allowMultipleSolutions,
+    );
     final baseWord = config['baseWord'] as String;
-    final validSubwords = config['subwords'] as List<String>;
     final baseLetters = config['tiles'] as List<String>;
 
     _dictionary = await GameHelpers.loadDictionary();
@@ -176,9 +178,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       "🧩 Grid Words (${balancedWords.length}): ${balancedWords.join(', ')}",
     );
     print("🔥 Extras (${extras.length}): ${extras.join(', ')}");
-
     print("Skill score: $skillScore");
-
     print("Allow Multiple Solutions: $allowMultipleSolutions");
 
     // Emit the initial state of the new game

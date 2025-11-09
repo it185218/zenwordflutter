@@ -1,0 +1,872 @@
+// **************************************************************************
+// IsarCollectionGenerator
+// **************************************************************************
+
+// coverage:ignore-file
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
+
+extension GetPerformanceCollection on Isar {
+  IsarCollection<Performance> get performances => this.collection();
+}
+
+const PerformanceSchema = CollectionSchema(
+  name: r'Performance',
+  id: -4570756533851326690,
+  properties: {
+    r'avgFoundLength': PropertySchema(
+      id: 0,
+      name: r'avgFoundLength',
+      type: IsarType.long,
+    ),
+    r'completionRate': PropertySchema(
+      id: 1,
+      name: r'completionRate',
+      type: IsarType.double,
+    ),
+    r'durationSeconds': PropertySchema(
+      id: 2,
+      name: r'durationSeconds',
+      type: IsarType.long,
+    ),
+    r'foundWords': PropertySchema(
+      id: 3,
+      name: r'foundWords',
+      type: IsarType.long,
+    ),
+    r'level': PropertySchema(
+      id: 4,
+      name: r'level',
+      type: IsarType.long,
+    ),
+    r'totalWords': PropertySchema(
+      id: 5,
+      name: r'totalWords',
+      type: IsarType.long,
+    )
+  },
+  estimateSize: _performanceEstimateSize,
+  serialize: _performanceSerialize,
+  deserialize: _performanceDeserialize,
+  deserializeProp: _performanceDeserializeProp,
+  idName: r'id',
+  indexes: {},
+  links: {},
+  embeddedSchemas: {},
+  getId: _performanceGetId,
+  getLinks: _performanceGetLinks,
+  attach: _performanceAttach,
+  version: '3.1.0+1',
+);
+
+int _performanceEstimateSize(
+  Performance object,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  var bytesCount = offsets.last;
+  return bytesCount;
+}
+
+void _performanceSerialize(
+  Performance object,
+  IsarWriter writer,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  writer.writeLong(offsets[0], object.avgFoundLength);
+  writer.writeDouble(offsets[1], object.completionRate);
+  writer.writeLong(offsets[2], object.durationSeconds);
+  writer.writeLong(offsets[3], object.foundWords);
+  writer.writeLong(offsets[4], object.level);
+  writer.writeLong(offsets[5], object.totalWords);
+}
+
+Performance _performanceDeserialize(
+  Id id,
+  IsarReader reader,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  final object = Performance();
+  object.avgFoundLength = reader.readLong(offsets[0]);
+  object.durationSeconds = reader.readLong(offsets[2]);
+  object.foundWords = reader.readLong(offsets[3]);
+  object.id = id;
+  object.level = reader.readLong(offsets[4]);
+  object.totalWords = reader.readLong(offsets[5]);
+  return object;
+}
+
+P _performanceDeserializeProp<P>(
+  IsarReader reader,
+  int propertyId,
+  int offset,
+  Map<Type, List<int>> allOffsets,
+) {
+  switch (propertyId) {
+    case 0:
+      return (reader.readLong(offset)) as P;
+    case 1:
+      return (reader.readDouble(offset)) as P;
+    case 2:
+      return (reader.readLong(offset)) as P;
+    case 3:
+      return (reader.readLong(offset)) as P;
+    case 4:
+      return (reader.readLong(offset)) as P;
+    case 5:
+      return (reader.readLong(offset)) as P;
+    default:
+      throw IsarError('Unknown property with id $propertyId');
+  }
+}
+
+Id _performanceGetId(Performance object) {
+  return object.id;
+}
+
+List<IsarLinkBase<dynamic>> _performanceGetLinks(Performance object) {
+  return [];
+}
+
+void _performanceAttach(
+    IsarCollection<dynamic> col, Id id, Performance object) {
+  object.id = id;
+}
+
+extension PerformanceQueryWhereSort
+    on QueryBuilder<Performance, Performance, QWhere> {
+  QueryBuilder<Performance, Performance, QAfterWhere> anyId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(const IdWhereClause.any());
+    });
+  }
+}
+
+extension PerformanceQueryWhere
+    on QueryBuilder<Performance, Performance, QWhereClause> {
+  QueryBuilder<Performance, Performance, QAfterWhereClause> idEqualTo(Id id) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IdWhereClause.between(
+        lower: id,
+        upper: id,
+      ));
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterWhereClause> idNotEqualTo(
+      Id id) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(
+              IdWhereClause.lessThan(upper: id, includeUpper: false),
+            )
+            .addWhereClause(
+              IdWhereClause.greaterThan(lower: id, includeLower: false),
+            );
+      } else {
+        return query
+            .addWhereClause(
+              IdWhereClause.greaterThan(lower: id, includeLower: false),
+            )
+            .addWhereClause(
+              IdWhereClause.lessThan(upper: id, includeUpper: false),
+            );
+      }
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterWhereClause> idGreaterThan(Id id,
+      {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IdWhereClause.greaterThan(lower: id, includeLower: include),
+      );
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterWhereClause> idLessThan(Id id,
+      {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IdWhereClause.lessThan(upper: id, includeUpper: include),
+      );
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterWhereClause> idBetween(
+    Id lowerId,
+    Id upperId, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IdWhereClause.between(
+        lower: lowerId,
+        includeLower: includeLower,
+        upper: upperId,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+}
+
+extension PerformanceQueryFilter
+    on QueryBuilder<Performance, Performance, QFilterCondition> {
+  QueryBuilder<Performance, Performance, QAfterFilterCondition>
+      avgFoundLengthEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'avgFoundLength',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterFilterCondition>
+      avgFoundLengthGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'avgFoundLength',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterFilterCondition>
+      avgFoundLengthLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'avgFoundLength',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterFilterCondition>
+      avgFoundLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'avgFoundLength',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterFilterCondition>
+      completionRateEqualTo(
+    double value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'completionRate',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterFilterCondition>
+      completionRateGreaterThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'completionRate',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterFilterCondition>
+      completionRateLessThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'completionRate',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterFilterCondition>
+      completionRateBetween(
+    double lower,
+    double upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'completionRate',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterFilterCondition>
+      durationSecondsEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'durationSeconds',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterFilterCondition>
+      durationSecondsGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'durationSeconds',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterFilterCondition>
+      durationSecondsLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'durationSeconds',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterFilterCondition>
+      durationSecondsBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'durationSeconds',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterFilterCondition>
+      foundWordsEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'foundWords',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterFilterCondition>
+      foundWordsGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'foundWords',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterFilterCondition>
+      foundWordsLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'foundWords',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterFilterCondition>
+      foundWordsBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'foundWords',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterFilterCondition> idEqualTo(
+      Id value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'id',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterFilterCondition> idGreaterThan(
+    Id value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'id',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterFilterCondition> idLessThan(
+    Id value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'id',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterFilterCondition> idBetween(
+    Id lower,
+    Id upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'id',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterFilterCondition> levelEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'level',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterFilterCondition>
+      levelGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'level',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterFilterCondition> levelLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'level',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterFilterCondition> levelBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'level',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterFilterCondition>
+      totalWordsEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'totalWords',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterFilterCondition>
+      totalWordsGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'totalWords',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterFilterCondition>
+      totalWordsLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'totalWords',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterFilterCondition>
+      totalWordsBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'totalWords',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+}
+
+extension PerformanceQueryObject
+    on QueryBuilder<Performance, Performance, QFilterCondition> {}
+
+extension PerformanceQueryLinks
+    on QueryBuilder<Performance, Performance, QFilterCondition> {}
+
+extension PerformanceQuerySortBy
+    on QueryBuilder<Performance, Performance, QSortBy> {
+  QueryBuilder<Performance, Performance, QAfterSortBy> sortByAvgFoundLength() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'avgFoundLength', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterSortBy>
+      sortByAvgFoundLengthDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'avgFoundLength', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterSortBy> sortByCompletionRate() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'completionRate', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterSortBy>
+      sortByCompletionRateDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'completionRate', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterSortBy> sortByDurationSeconds() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'durationSeconds', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterSortBy>
+      sortByDurationSecondsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'durationSeconds', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterSortBy> sortByFoundWords() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'foundWords', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterSortBy> sortByFoundWordsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'foundWords', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterSortBy> sortByLevel() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'level', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterSortBy> sortByLevelDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'level', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterSortBy> sortByTotalWords() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'totalWords', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterSortBy> sortByTotalWordsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'totalWords', Sort.desc);
+    });
+  }
+}
+
+extension PerformanceQuerySortThenBy
+    on QueryBuilder<Performance, Performance, QSortThenBy> {
+  QueryBuilder<Performance, Performance, QAfterSortBy> thenByAvgFoundLength() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'avgFoundLength', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterSortBy>
+      thenByAvgFoundLengthDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'avgFoundLength', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterSortBy> thenByCompletionRate() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'completionRate', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterSortBy>
+      thenByCompletionRateDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'completionRate', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterSortBy> thenByDurationSeconds() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'durationSeconds', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterSortBy>
+      thenByDurationSecondsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'durationSeconds', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterSortBy> thenByFoundWords() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'foundWords', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterSortBy> thenByFoundWordsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'foundWords', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterSortBy> thenById() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'id', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterSortBy> thenByIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'id', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterSortBy> thenByLevel() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'level', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterSortBy> thenByLevelDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'level', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterSortBy> thenByTotalWords() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'totalWords', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QAfterSortBy> thenByTotalWordsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'totalWords', Sort.desc);
+    });
+  }
+}
+
+extension PerformanceQueryWhereDistinct
+    on QueryBuilder<Performance, Performance, QDistinct> {
+  QueryBuilder<Performance, Performance, QDistinct> distinctByAvgFoundLength() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'avgFoundLength');
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QDistinct> distinctByCompletionRate() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'completionRate');
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QDistinct>
+      distinctByDurationSeconds() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'durationSeconds');
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QDistinct> distinctByFoundWords() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'foundWords');
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QDistinct> distinctByLevel() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'level');
+    });
+  }
+
+  QueryBuilder<Performance, Performance, QDistinct> distinctByTotalWords() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'totalWords');
+    });
+  }
+}
+
+extension PerformanceQueryProperty
+    on QueryBuilder<Performance, Performance, QQueryProperty> {
+  QueryBuilder<Performance, int, QQueryOperations> idProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'id');
+    });
+  }
+
+  QueryBuilder<Performance, int, QQueryOperations> avgFoundLengthProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'avgFoundLength');
+    });
+  }
+
+  QueryBuilder<Performance, double, QQueryOperations> completionRateProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'completionRate');
+    });
+  }
+
+  QueryBuilder<Performance, int, QQueryOperations> durationSecondsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'durationSeconds');
+    });
+  }
+
+  QueryBuilder<Performance, int, QQueryOperations> foundWordsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'foundWords');
+    });
+  }
+
+  QueryBuilder<Performance, int, QQueryOperations> levelProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'level');
+    });
+  }
+
+  QueryBuilder<Performance, int, QQueryOperations> totalWordsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'totalWords');
+    });
+  }
+}

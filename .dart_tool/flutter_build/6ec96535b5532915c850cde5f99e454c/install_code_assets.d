@@ -1,0 +1,1 @@
+ C:\\Users\\kirak\\Documents\\Flutter\\zenwordflutter\\.dart_tool\\flutter_build\\6ec96535b5532915c850cde5f99e454c\\native_assets.json: 
