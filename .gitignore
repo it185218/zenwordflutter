@@ -48,3 +48,50 @@ Thumbs.db
 *.mov
 *.wmv
 
+# Flutter/Dart
+.dart_tool/
+.packages
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+build/
+.idea/
+*.iml
+*.ipr
+*.iws
+*.lock
+*.log
+
+# Generated files
+*.apk
+*.aab
+*.ipa
+*.app
+*.dSYM
+*.exe
+*.dll
+*.so
+*.dylib
+*.hmap
+*.xcworkspace
+*.xcuserstate
+
+# VS Code
+.vscode/
+
+# MacOS
+.DS_Store
+
+# Linux
+*.desktop
+*.directory
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# IntelliJ
+out/
+
+
