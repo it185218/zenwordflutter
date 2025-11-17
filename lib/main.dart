@@ -13,6 +13,8 @@ import 'data/model/saved_game.dart';
 import 'data/model/treasure_progress.dart';
 import 'logic/blocs/coin/coin_bloc.dart';
 import 'logic/blocs/coin/coin_event.dart';
+import 'logic/blocs/daily_gift/daily_gift_bloc.dart';
+import 'logic/blocs/daily_gift/daily_gift_event.dart';
 import 'logic/blocs/game/game_bloc.dart';
 import 'logic/blocs/level/level_bloc.dart';
 import 'logic/blocs/level/level_event.dart';
@@ -45,6 +47,11 @@ void main() async {
         BlocProvider(create: (context) => GameBloc()),
         BlocProvider(create: (_) => LevelBloc(isar)..add(LoadLevels())),
         BlocProvider(create: (_) => CoinBloc(isar)..add(LoadCoins())),
+        BlocProvider(
+          create: (context) =>
+              DailyGiftBloc(isar, context.read<CoinBloc>())
+                ..add(const LoadDailyGift()),
+        ),
         BlocProvider(create: (_) => TreasureBloc(isar)),
         BlocProvider(create: (_) => TreasureBloc(isar)..add(LoadTreasure())),
       ],

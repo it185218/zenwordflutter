@@ -8,6 +8,8 @@ import '../../logic/blocs/level/level_bloc.dart';
 import '../../logic/blocs/level/level_state.dart';
 import '../widgets/background_scaffold.dart';
 import '../widgets/crack_bricks_dialog.dart';
+import '../widgets/daily_gift_button.dart';
+import '../widgets/daily_gift_dialog.dart';
 import '../widgets/hammer_container.dart';
 import '../widgets/level_button.dart';
 import '../widgets/settings_dialog.dart';
@@ -88,6 +90,15 @@ class _HomePageState extends State<HomePage> {
                             showDialog(
                               context: context,
                               builder: (context) => const CrackBricksDialog(),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 24),
+                        DailyGiftButton(
+                          onTap: () {
+                            showDialog(
+                              context: context,
+                              builder: (dialogContext) => const DailyGiftDialog(),
                             );
                           },
                         ),

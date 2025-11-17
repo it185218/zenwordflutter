@@ -21,6 +21,11 @@ const PlayerDataSchema = CollectionSchema(
       id: 0,
       name: r'coins',
       type: IsarType.long,
+    ),
+    r'lastDailyGiftEpochDay': PropertySchema(
+      id: 1,
+      name: r'lastDailyGiftEpochDay',
+      type: IsarType.long,
     )
   },
   estimateSize: _playerDataEstimateSize,
@@ -53,6 +58,7 @@ void _playerDataSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeLong(offsets[0], object.coins);
+  writer.writeLong(offsets[1], object.lastDailyGiftEpochDay);
 }
 
 PlayerData _playerDataDeserialize(
@@ -63,6 +69,7 @@ PlayerData _playerDataDeserialize(
 ) {
   final object = PlayerData();
   object.coins = reader.readLong(offsets[0]);
+  object.lastDailyGiftEpochDay = reader.readLongOrNull(offsets[1]);
   object.id = id;
   return object;
 }
@@ -76,6 +83,8 @@ P _playerDataDeserializeProp<P>(
   switch (propertyId) {
     case 0:
       return (reader.readLong(offset)) as P;
+    case 1:
+      return (reader.readLongOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -172,6 +181,80 @@ extension PlayerDataQueryWhere
 
 extension PlayerDataQueryFilter
     on QueryBuilder<PlayerData, PlayerData, QFilterCondition> {
+  QueryBuilder<PlayerData, PlayerData, QAfterFilterCondition>
+      lastDailyGiftEpochDayIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'lastDailyGiftEpochDay',
+      ));
+    });
+  }
+
+  QueryBuilder<PlayerData, PlayerData, QAfterFilterCondition>
+      lastDailyGiftEpochDayIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'lastDailyGiftEpochDay',
+      ));
+    });
+  }
+
+  QueryBuilder<PlayerData, PlayerData, QAfterFilterCondition>
+      lastDailyGiftEpochDayEqualTo(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'lastDailyGiftEpochDay',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<PlayerData, PlayerData, QAfterFilterCondition>
+      lastDailyGiftEpochDayGreaterThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'lastDailyGiftEpochDay',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<PlayerData, PlayerData, QAfterFilterCondition>
+      lastDailyGiftEpochDayLessThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'lastDailyGiftEpochDay',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<PlayerData, PlayerData, QAfterFilterCondition>
+      lastDailyGiftEpochDayBetween(
+    int? lower,
+    int? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'lastDailyGiftEpochDay',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<PlayerData, PlayerData, QAfterFilterCondition> coinsEqualTo(
       int value) {
     return QueryBuilder.apply(this, (query) {
@@ -298,6 +381,20 @@ extension PlayerDataQuerySortBy
       return query.addSortBy(r'coins', Sort.desc);
     });
   }
+
+  QueryBuilder<PlayerData, PlayerData, QAfterSortBy>
+      sortByLastDailyGiftEpochDay() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lastDailyGiftEpochDay', Sort.asc);
+    });
+  }
+
+  QueryBuilder<PlayerData, PlayerData, QAfterSortBy>
+      sortByLastDailyGiftEpochDayDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lastDailyGiftEpochDay', Sort.desc);
+    });
+  }
 }
 
 extension PlayerDataQuerySortThenBy
@@ -311,6 +408,20 @@ extension PlayerDataQuerySortThenBy
   QueryBuilder<PlayerData, PlayerData, QAfterSortBy> thenByCoinsDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'coins', Sort.desc);
+    });
+  }
+
+  QueryBuilder<PlayerData, PlayerData, QAfterSortBy>
+      thenByLastDailyGiftEpochDay() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lastDailyGiftEpochDay', Sort.asc);
+    });
+  }
+
+  QueryBuilder<PlayerData, PlayerData, QAfterSortBy>
+      thenByLastDailyGiftEpochDayDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lastDailyGiftEpochDay', Sort.desc);
     });
   }
 
@@ -334,6 +445,13 @@ extension PlayerDataQueryWhereDistinct
       return query.addDistinctBy(r'coins');
     });
   }
+
+  QueryBuilder<PlayerData, PlayerData, QDistinct>
+      distinctByLastDailyGiftEpochDay() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'lastDailyGiftEpochDay');
+    });
+  }
 }
 
 extension PlayerDataQueryProperty
@@ -347,6 +465,13 @@ extension PlayerDataQueryProperty
   QueryBuilder<PlayerData, int, QQueryOperations> coinsProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'coins');
+    });
+  }
+
+  QueryBuilder<PlayerData, int?, QQueryOperations>
+      lastDailyGiftEpochDayProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'lastDailyGiftEpochDay');
     });
   }
 }

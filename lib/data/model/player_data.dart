@@ -7,4 +7,6 @@ class PlayerData {
   Id id = Isar.autoIncrement;
 
   int coins = 0;
+
+  int? lastDailyGiftEpochDay;
 }
