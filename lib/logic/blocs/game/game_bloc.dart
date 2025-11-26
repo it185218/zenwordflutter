@@ -5,6 +5,7 @@ import 'package:isar/isar.dart';
 import 'package:zenwordflutter/data/model/performance.dart';
 import '../../../core/utils/game_serialization.dart';
 import '../../../core/utils/performance_helper.dart';
+import '../../../data/local/brainmaster_storage.dart';
 import '../../../data/model/global_stats.dart';
 import '../../../data/model/saved_game.dart';
 import 'game_event.dart';
@@ -314,6 +315,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
       emit(newState);
       await _saveGameState(newState);
+      await BrainmasterStorage.instance.incrementWordCount();
 
       // Check for rewards if a new extra word was found
       if (newExtraWordFound) {

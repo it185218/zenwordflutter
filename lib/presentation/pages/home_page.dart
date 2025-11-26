@@ -7,6 +7,8 @@ import '../../logic/blocs/coin/coin_state.dart';
 import '../../logic/blocs/level/level_bloc.dart';
 import '../../logic/blocs/level/level_state.dart';
 import '../widgets/background_scaffold.dart';
+import '../widgets/brainmaster_button.dart';
+import '../widgets/brainmaster_dialog.dart';
 import '../widgets/crack_bricks_dialog.dart';
 import '../widgets/daily_gift_button.dart';
 import '../widgets/daily_gift_dialog.dart';
@@ -99,6 +101,16 @@ class _HomePageState extends State<HomePage> {
                             showDialog(
                               context: context,
                               builder: (dialogContext) => const DailyGiftDialog(),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        BrainmasterButton(
+                          onTap: () {
+                            showDialog(
+                              context: context,
+                              barrierDismissible: true,
+                              builder: (_) => const BrainmasterDialog(),
                             );
                           },
                         ),

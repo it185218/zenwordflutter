@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:isar/isar.dart';
 import 'package:zenwordflutter/data/model/saved_game.dart';
 import '../../core/utils/circular_position.dart';
+import '../../data/local/brainmaster_storage.dart';
 import '../../logic/blocs/coin/coin_bloc.dart';
 import '../../logic/blocs/coin/coin_event.dart';
 import '../../logic/blocs/coin/coin_state.dart';
@@ -63,6 +64,30 @@ class _GamePageState extends State<GamePage> {
         ),
       );
     });
+  }
+
+  Future<void> _handleLetterHintTap(BuildContext context) async {
+    final usedFreeHint = await BrainmasterStorage.instance.consumeHint();
+    if (!mounted) return;
+
+    if (usedFreeHint) {
+      context.read<GameBloc>().add(GameUseHintLetter());
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Χρησιμοποιήθηκε δωρεάν συμβουλή!')),
+      );
+      return;
+    }
+
+    final coinState = context.read<CoinBloc>().state;
+
+    if (coinState.coins >= 80) {
+      context.read<CoinBloc>().add(SpendCoins(80));
+      context.read<GameBloc>().add(GameUseHintLetter());
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Δεν υπάρχουν αρκετά νομίσματα!')),
+      );
+    }
   }
 
   @override
@@ -401,27 +426,7 @@ class _GamePageState extends State<GamePage> {
                                       HintContainer(
                                         icon: Icons.emoji_objects_outlined,
                                         onTap: () {
-                                          final coinState =
-                                              context.read<CoinBloc>().state;
-
-                                          if (coinState.coins > 80) {
-                                            context.read<CoinBloc>().add(
-                                              SpendCoins(80),
-                                            );
-                                            context.read<GameBloc>().add(
-                                              GameUseHintLetter(),
-                                            );
-                                          } else {
-                                            ScaffoldMessenger.of(
-                                              context,
-                                            ).showSnackBar(
-                                              SnackBar(
-                                                content: Text(
-                                                  "Δεν υπάρχουν αρκετά νομίσματα!",
-                                                ),
-                                              ),
-                                            );
-                                          }
+                                          _handleLetterHintTap(context);
                                         },
                                       ),
                                     ],
