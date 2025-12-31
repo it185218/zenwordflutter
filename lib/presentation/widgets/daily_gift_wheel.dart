@@ -19,7 +19,7 @@ class DailyGiftWheel extends StatelessWidget {
           final reward = state.reward!;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('You won $reward coins! 🎉'),
+              content: Text('Κερδίσατε $reward νομίσματα! 🎉'),
               backgroundColor: ColorLibrary.coinContainer,
             ),
           );
@@ -32,17 +32,17 @@ class DailyGiftWheel extends StatelessWidget {
 
         final canSpin = state.canSpin && !state.isSpinning;
         final rewardText = state.reward != null
-            ? 'You received +${state.reward} coins!'
+            ? 'Κερδίσατε +${state.reward} νομίσματα!'
             : canSpin
-            ? 'Tap to spin and claim a random coin reward!'
-            : 'Come back tomorrow for a new gift.';
+            ? 'Πατήστε για να περιστρέψετε και να διεκδικήσετε μια τυχαία ανταμοιβή σε νομίσματα!'
+            : 'Επιστρέψτε αύριο για ένα νέο δώρο.';
 
         return Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const Text(
-              'Daily Gift',
+              'Καθημερινό Δώρο',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: ColorLibrary.dialogText,
@@ -90,7 +90,7 @@ class DailyGiftWheel extends StatelessWidget {
                   AnimatedSwitcher(
                     duration: const Duration(milliseconds: 250),
                     child: Text(
-                      state.isSpinning ? 'The wheel is spinning...' : rewardText,
+                      state.isSpinning ? 'Ο τροχός περιστρέφεται...' : rewardText,
                       key: ValueKey<String>(
                         state.isSpinning
                             ? 'spinning'

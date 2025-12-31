@@ -60,14 +60,6 @@ class _BrainmasterButtonState extends State<BrainmasterButton> {
           ),
         ),
         const SizedBox(height: 6),
-        const Text(
-          'Brainmaster',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
       ],
     );
   }
